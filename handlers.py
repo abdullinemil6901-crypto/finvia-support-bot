@@ -1,14 +1,50 @@
-from aiogram import Router, Bot
+from aiogram import Router, Bot, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from config import ADMIN_IDS, TYPE_LABELS, BOT_TOKEN
 from db import log_event, get_today_stats
 from charts import generate_report_charts
 from schedule_manager import get_current_duty
 
 SUPPORT_CHAT_ID = -5160275115  # Саппортский чат
+TRADER_GROUP_ID = -1001234567890  # ID группы трейдеров (замените на реальный)
 
 router = Router()
+
+# Статусы агентов
+agent_statuses = {}
+
+class ApplicationForm(StatesGroup):
+    waiting_for_type = State()
+    waiting_for_description = State()
+    waiting_for_amount = State()
+
+def get_main_keyboard() -> InlineKeyboardMarkup:
+    buttons = [
+        [InlineKeyboardButton(text="❌ Отмена платежа", callback_data="apply_cancel_payment")],
+        [InlineKeyboardButton(text="🔢 Неверный CVU", callback_data="apply_wrong_cvu")],
+        [InlineKeyboardButton(text="🧾 Нет чека", callback_data="apply_no_receipt")],
+        [InlineKeyboardButton(text="💬 Другое", callback_data="apply_other")],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+def get_confirm_keyboard(event_type: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_{event_type}"),
+            InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_form"),
+        ]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+async def is_trader(bot: Bot, user_id: int) -> bool:
+    try:
+        member = await bot.get_chat_member(TRADER_GROUP_ID, user_id)
+        return member.status in ("member", "administrator", "creator")
+    except Exception:
+        return False
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
