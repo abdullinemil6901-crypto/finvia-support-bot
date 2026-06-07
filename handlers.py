@@ -59,8 +59,67 @@ async def cmd_start(message: Message):
         "• Генерирую отчёты для команды\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "Выберите тип обращения из меню ниже 👇",
-        parse_mode="HTML"
+        parse_mode="HTML",
+        reply_markup=get_main_keyboard()
     )
+
+@router.callback_query(F.data == "apply_cancel_payment")
+async def cb_cancel_payment(callback: CallbackQuery, bot: Bot):
+    log_event("cancel_payment", callback.from_user.id, callback.from_user.username)
+    await callback.message.answer("✅ Обращение «Отмена платежа» зафиксировано.")
+    await notify_support(bot, "cancel_payment", callback.from_user.id, callback.from_user.username)
+    await callback.answer()
+
+@router.callback_query(F.data == "apply_wrong_cvu")
+async def cb_wrong_cvu(callback: CallbackQuery, bot: Bot):
+    log_event("wrong_cvu", callback.from_user.id, callback.from_user.username)
+    await callback.message.answer("✅ Обращение «Неверный CVU» зафиксировано.")
+    await notify_support(bot, "wrong_cvu", callback.from_user.id, callback.from_user.username)
+    await callback.answer()
+
+@router.callback_query(F.data == "apply_no_receipt")
+async def cb_no_receipt(callback: CallbackQuery, bot: Bot):
+    log_event("no_receipt", callback.from_user.id, callback.from_user.username)
+    await callback.message.answer("✅ Обращение «Нет чека» зафиксировано.")
+    await notify_support(bot, "no_receipt", callback.from_user.id, callback.from_user.username)
+    await callback.answer()
+
+@router.callback_query(F.data == "apply_other")
+async def cb_other(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(ApplicationForm.waiting_for_description)
+    await callback.message.answer("📝 Опишите вашу проблему:")
+    await callback.answer()
+
+@router.message(ApplicationForm.waiting_for_description)
+async def process_description(message: Message, state: FSMContext):
+    await state.update_data(description=message.text)
+    await state.set_state(ApplicationForm.waiting_for_amount)
+    await message.answer("💰 Укажите сумму (если применимо, иначе напишите 0):")
+
+@router.message(ApplicationForm.waiting_for_amount)
+async def process_amount(message: Message, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    description = data.get("description", "")
+    amount = message.text
+    log_event("other", message.from_user.id, message.from_user.username)
+    uname = f"@{message.from_user.username}" if message.from_user.username else f"id:{message.from_user.id}"
+    text = (
+        f"📥 <b>Новая заявка</b>\n\n"
+        f"📌 Тип: <b>Другое</b>\n"
+        f"👤 Трейдер: {uname}\n"
+        f"🆔 ID: {message.from_user.id}\n"
+        f"📝 Описание: {description}\n"
+        f"💰 Сумма: {amount}"
+    )
+    await bot.send_message(SUPPORT_CHAT_ID, text, parse_mode="HTML")
+    await message.answer("✅ Ваше обращение зафиксировано. Ожидайте ответа от поддержки.")
+    await state.clear()
+
+@router.callback_query(F.data == "cancel_form")
+async def cb_cancel_form(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.answer("❌ Действие отменено.", reply_markup=get_main_keyboard())
+    await callback.answer()
 
 async def notify_support(bot: Bot, event_type: str, user_id: int, username: str):
     label = TYPE_LABELS.get(event_type, event_type)
