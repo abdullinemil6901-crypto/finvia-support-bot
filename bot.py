@@ -1,32 +1,16 @@
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🚀  bot.py — Точка входа. Запускает polling бота.
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 import asyncio
-import logging
+import os
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+from handlers import menu, actions
 from config import BOT_TOKEN
-from db import init_db
-from handlers import router
-
-# 📋 Логи в консоль
-logging.basicConfig(level=logging.INFO)
-
 
 async def main():
-    # 🗄️ Инициализация базы данных
-    init_db()
-
-    # 🤖 Создаём бота
     bot = Bot(token=BOT_TOKEN)
-
-    # 🚦 Диспетчер с роутером
-    dp = Dispatcher()
-    dp.include_router(router)
-
-    # 📡 Запуск
+    dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(menu.router)
+    dp.include_router(actions.router)
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
