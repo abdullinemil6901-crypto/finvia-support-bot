@@ -1,102 +1,87 @@
-from aiogram import Router, Bot, F
-from aiogram.filters import Command
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from config import ADMIN_IDS, TYPE_LABELS, BOT_TOKEN
+from config import SUPPORT_CHAT_ID, ADMIN_IDS
 from db import log_event, get_today_stats
 from charts import generate_report_charts
 from schedule_manager import get_current_duty
 
-SUPPORT_CHAT_ID = -5160275115  # Саппортский чат
-TRADER_GROUP_ID = -1001234567890  # ID группы трейдеров (замените на реальный)
-
 router = Router()
 
-# Статусы агентов
-agent_statuses = {}
+TYPE_LABELS = {
+    "cancel_payment": "Отмена платежа",
+    "wrong_cvu": "Неверный CVU",
+    "no_receipt": "Нет чека",
+    "other": "Другое",
+}
 
-class ApplicationForm(StatesGroup):
-    waiting_for_type = State()
-    waiting_for_description = State()
-    waiting_for_amount = State()
+class OtherForm(StatesGroup):
+    waiting_description = State()
+    waiting_amount = State()
 
-def get_main_keyboard() -> InlineKeyboardMarkup:
+def get_main_keyboard():
     buttons = [
-        [InlineKeyboardButton(text="❌ Отмена платежа", callback_data="apply_cancel_payment")],
-        [InlineKeyboardButton(text="🔢 Неверный CVU", callback_data="apply_wrong_cvu")],
-        [InlineKeyboardButton(text="🧾 Нет чека", callback_data="apply_no_receipt")],
-        [InlineKeyboardButton(text="💬 Другое", callback_data="apply_other")],
+        [InlineKeyboardButton(text="❌ Отмена платежа", callback_data="type_cancel_payment")],
+        [InlineKeyboardButton(text="🔢 Неверный CVU", callback_data="type_wrong_cvu")],
+        [InlineKeyboardButton(text="🧾 Нет чека", callback_data="type_no_receipt")],
+        [InlineKeyboardButton(text="📝 Другое", callback_data="type_other")],
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def get_confirm_keyboard(event_type: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_{event_type}"),
-            InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_form"),
-        ]
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-async def is_trader(bot: Bot, user_id: int) -> bool:
-    try:
-        member = await bot.get_chat_member(TRADER_GROUP_ID, user_id)
-        return member.status in ("member", "administrator", "creator")
-    except Exception:
-        return False
+def get_cancel_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_form")]
+    ])
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     await message.answer(
-        "🌟 <b>Finvia P2P — Служба поддержки</b>\n\n"
-        "Добро пожаловать! Я ваш персональный ассистент саппорт-команды.\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n"
-        "💼 <b>Что я умею:</b>\n"
-        "• Фиксирую обращения клиентов\n"
-        "• Веду статистику по типам проблем\n"
-        "• Показываю дежурного оператора\n"
-        "• Генерирую отчёты для команды\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "Выберите тип обращения из меню ниже 👇",
-        parse_mode="HTML",
+        "👋 Добро пожаловать в поддержку Finvia!\n\nВыберите тип обращения:",
         reply_markup=get_main_keyboard()
     )
 
-@router.callback_query(F.data == "apply_cancel_payment")
+@router.callback_query(F.data == "type_cancel_payment")
 async def cb_cancel_payment(callback: CallbackQuery, bot: Bot):
     log_event("cancel_payment", callback.from_user.id, callback.from_user.username)
-    await callback.message.answer("✅ Обращение «Отмена платежа» зафиксировано.")
+    await callback.message.answer("✅ Обращение \"Отмена платежа\" зафиксировано. Ожидайте ответа от поддержки.")
     await notify_support(bot, "cancel_payment", callback.from_user.id, callback.from_user.username)
     await callback.answer()
 
-@router.callback_query(F.data == "apply_wrong_cvu")
+@router.callback_query(F.data == "type_wrong_cvu")
 async def cb_wrong_cvu(callback: CallbackQuery, bot: Bot):
     log_event("wrong_cvu", callback.from_user.id, callback.from_user.username)
-    await callback.message.answer("✅ Обращение «Неверный CVU» зафиксировано.")
+    await callback.message.answer("✅ Обращение \"Неверный CVU\" зафиксировано. Ожидайте ответа от поддержки.")
     await notify_support(bot, "wrong_cvu", callback.from_user.id, callback.from_user.username)
     await callback.answer()
 
-@router.callback_query(F.data == "apply_no_receipt")
+@router.callback_query(F.data == "type_no_receipt")
 async def cb_no_receipt(callback: CallbackQuery, bot: Bot):
     log_event("no_receipt", callback.from_user.id, callback.from_user.username)
-    await callback.message.answer("✅ Обращение «Нет чека» зафиксировано.")
+    await callback.message.answer("✅ Обращение \"Нет чека\" зафиксировано. Ожидайте ответа от поддержки.")
     await notify_support(bot, "no_receipt", callback.from_user.id, callback.from_user.username)
     await callback.answer()
 
-@router.callback_query(F.data == "apply_other")
+@router.callback_query(F.data == "type_other")
 async def cb_other(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(ApplicationForm.waiting_for_description)
-    await callback.message.answer("📝 Опишите вашу проблему:")
+    await state.set_state(OtherForm.waiting_description)
+    await callback.message.answer(
+        "📝 Опишите вашу проблему:",
+        reply_markup=get_cancel_keyboard()
+    )
     await callback.answer()
 
-@router.message(ApplicationForm.waiting_for_description)
+@router.message(OtherForm.waiting_description)
 async def process_description(message: Message, state: FSMContext):
     await state.update_data(description=message.text)
-    await state.set_state(ApplicationForm.waiting_for_amount)
-    await message.answer("💰 Укажите сумму (если применимо, иначе напишите 0):")
+    await state.set_state(OtherForm.waiting_amount)
+    await message.answer(
+        "💰 Укажите сумму (или напишите \"нет\", если не применимо):",
+        reply_markup=get_cancel_keyboard()
+    )
 
-@router.message(ApplicationForm.waiting_for_amount)
+@router.message(OtherForm.waiting_amount)
 async def process_amount(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
     description = data.get("description", "")
@@ -131,56 +116,3 @@ async def notify_support(bot: Bot, event_type: str, user_id: int, username: str)
         f"🆔 ID: {user_id}"
     )
     await bot.send_message(SUPPORT_CHAT_ID, text, parse_mode="HTML")
-
-@router.message(Command("cancel_payment"))
-async def cmd_cancel_payment(message: Message, bot: Bot):
-    log_event("cancel_payment", message.from_user.id, message.from_user.username)
-    await message.answer("✅ Обращение «Отмена платежа» зафиксировано.")
-    await notify_support(bot, "cancel_payment", message.from_user.id, message.from_user.username)
-
-@router.message(Command("wrong_cvu"))
-async def cmd_wrong_cvu(message: Message, bot: Bot):
-    log_event("wrong_cvu", message.from_user.id, message.from_user.username)
-    await message.answer("✅ Обращение «Неверный CVU» зафиксировано.")
-    await notify_support(bot, "wrong_cvu", message.from_user.id, message.from_user.username)
-
-@router.message(Command("no_receipt"))
-async def cmd_no_receipt(message: Message, bot: Bot):
-    log_event("no_receipt", message.from_user.id, message.from_user.username)
-    await message.answer("✅ Обращение «Нет чека» зафиксировано.")
-    await notify_support(bot, "no_receipt", message.from_user.id, message.from_user.username)
-
-@router.message(Command("report"))
-async def cmd_report(message: Message):
-    if message.from_user.id not in ADMIN_IDS:
-        await message.answer("⛔ У тебя нет доступа к этой команде.")
-        return
-    stats = get_today_stats()
-    if not stats:
-        await message.answer("За сегодня обращений не было.")
-        return
-    photos = generate_report_charts(stats)
-    for photo in photos:
-        await message.answer_photo(photo)
-
-@router.message(Command("duty"))
-async def cmd_duty(message: Message):
-    duty_info = get_current_duty()
-    if not duty_info:
-        await message.answer("Расписание дежурных не задано.")
-    else:
-        await message.answer(f"👤 Сейчас дежурят: {', '.join(duty_info)}")
-
-@router.message(Command("set_duty"))
-async def cmd_set_duty(message: Message):
-    if message.from_user.id not in ADMIN_IDS:
-        await message.answer("⛔ У тебя нет доступа к этой команде.")
-        return
-    parts = message.text.split()[1:]
-    if len(parts) < 3:
-        await message.answer("Формат: /set_duty YYYY-MM-DD day/night Имя1 Имя2")
-        return
-    date, shift, *names = parts
-    from schedule_manager import set_duty
-    set_duty(date, shift, names)
-    await message.answer(f"✅ Расписание обновлено: {date} {shift} — {', '.join(names)}")
