@@ -1,10 +1,12 @@
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.filters import Command
 from aiogram.types import Message
-from config import ADMIN_IDS, TYPE_LABELS
+from config import ADMIN_IDS, TYPE_LABELS, BOT_TOKEN
 from db import log_event, get_today_stats
 from charts import generate_report_charts
 from schedule_manager import get_current_duty
+
+SUPPORT_CHAT_ID = -5160275115  # Саппортский чат
 
 router = Router()
 
@@ -24,20 +26,34 @@ async def cmd_start(message: Message):
         parse_mode="HTML"
     )
 
+async def notify_support(bot: Bot, event_type: str, user_id: int, username: str):
+    label = TYPE_LABELS.get(event_type, event_type)
+    uname = f"@{username}" if username else f"id:{user_id}"
+    text = (
+        f"📥 <b>Новая заявка</b>\n\n"
+        f"📌 Тип: <b>{label}</b>\n"
+        f"👤 Трейдер: {uname}\n"
+        f"🆔 ID: {user_id}"
+    )
+    await bot.send_message(SUPPORT_CHAT_ID, text, parse_mode="HTML")
+
 @router.message(Command("cancel_payment"))
-async def cmd_cancel_payment(message: Message):
+async def cmd_cancel_payment(message: Message, bot: Bot):
     log_event("cancel_payment", message.from_user.id, message.from_user.username)
     await message.answer("✅ Обращение «Отмена платежа» зафиксировано.")
+    await notify_support(bot, "cancel_payment", message.from_user.id, message.from_user.username)
 
 @router.message(Command("wrong_cvu"))
-async def cmd_wrong_cvu(message: Message):
+async def cmd_wrong_cvu(message: Message, bot: Bot):
     log_event("wrong_cvu", message.from_user.id, message.from_user.username)
     await message.answer("✅ Обращение «Неверный CVU» зафиксировано.")
+    await notify_support(bot, "wrong_cvu", message.from_user.id, message.from_user.username)
 
 @router.message(Command("no_receipt"))
-async def cmd_no_receipt(message: Message):
+async def cmd_no_receipt(message: Message, bot: Bot):
     log_event("no_receipt", message.from_user.id, message.from_user.username)
     await message.answer("✅ Обращение «Нет чека» зафиксировано.")
+    await notify_support(bot, "no_receipt", message.from_user.id, message.from_user.username)
 
 @router.message(Command("report"))
 async def cmd_report(message: Message):
