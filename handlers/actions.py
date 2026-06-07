@@ -9,7 +9,7 @@ from states import (
     VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
     NoTrafficSG, IncreaseLimitsSG
 )
-from config import SUPPORT_CHAT_ID
+SUPPORT_CHAT_ID = -5160275115
 from keyboards import build_main_menu
 
 router = Router()
@@ -54,9 +54,13 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
         f"🔑 Order ID: {order_id}"
     )
 
-    await bot.send_message(chat_id=SUPPORT_CHAT_ID, text=text, parse_mode="HTML")
-    await message.answer("✅ Запрос отправлен в поддержку!", reply_markup=build_main_menu())
-    await state.clear()
+    try:
+        await bot.send_message(chat_id=SUPPORT_CHAT_ID, text=text, parse_mode="HTML")
+        await message.answer("✅ Запрос отправлен в поддержку!", reply_markup=build_main_menu())
+    except Exception as e:
+        await message.answer(f"❌ Ошибка при отправке в поддержку: {e}")
+    finally:
+        await state.clear()
 
 for _sg in [
     CancelPayoutSG, PayoutNotVisibleSG, ExtendTimeSG,
