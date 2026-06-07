@@ -10,8 +10,19 @@ router = Router()
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    commands = "\n".join([f"/{cmd} — {label}" for cmd, label in TYPE_LABELS.items()])
-    await message.answer(f"Привет! Я бот саппорт-команды.\n\nДоступные команды:\n{commands}\n\n/report — отчёт за сегодня\n/duty — кто сейчас дежурит")
+    await message.answer(
+        "🌟 <b>Finvia P2P — Служба поддержки</b>\n\n"
+        "Добро пожаловать! Я ваш персональный ассистент саппорт-команды.\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "💼 <b>Что я умею:</b>\n"
+        "• Фиксирую обращения клиентов\n"
+        "• Веду статистику по типам проблем\n"
+        "• Показываю дежурного оператора\n"
+        "• Генерирую отчёты для команды\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "Выберите тип обращения из меню ниже 👇",
+        parse_mode="HTML"
+    )
 
 @router.message(Command("cancel_payment"))
 async def cmd_cancel_payment(message: Message):
