@@ -132,3 +132,40 @@ def add_support(tg_id: int, username: str, full_name: str):
 def get_all_supports():
     with get_connection() as conn:
         return conn.execute("SELECT * FROM supports").fetchall()
+
+
+def get_trader_tickets(trader_id: int):
+    """Возвращает все тикеты трейдера."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """SELECT id, label, order_id, status, taken_by, created_at, closed_at
+               FROM tickets WHERE trader_id=? ORDER BY created_at DESC""",
+            (trader_id,)
+        ).fetchall()
+        return rows
+
+
+def get_support_personal_stats(support_username: str):
+    """Персональная статистика саппорта."""
+    with get_connection() as conn:
+        total = conn.execute(
+            "SELECT COUNT(*) FROM tickets WHERE taken_by=?", (support_username,)
+        ).fetchone()[0]
+        closed = conn.execute(
+            "SELECT COUNT(*) FROM tickets WHERE taken_by=? AND status='closed'", (support_username,)
+        ).fetchone()[0]
+        in_progress = conn.execute(
+            "SELECT COUNT(*) FROM tickets WHERE taken_by=? AND status='in_progress'", (support_username,)
+        ).fetchone()[0]
+        avg_time = conn.execute(
+            """SELECT AVG((julianday(closed_at) - julianday(taken_at)) * 86400)
+               FROM tickets WHERE taken_by=? AND status='closed'
+               AND taken_at IS NOT NULL AND closed_at IS NOT NULL""",
+            (support_username,)
+        ).fetchone()[0]
+        return {
+            "total": total,
+            "closed": closed,
+            "in_progress": in_progress,
+            "avg_seconds": avg_time
+        }

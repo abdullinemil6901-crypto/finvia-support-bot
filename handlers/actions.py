@@ -1,3 +1,4 @@
+import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
@@ -9,9 +10,11 @@ from states import (
     VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
     NoTrafficSG, IncreaseLimitsSG
 )
-SUPPORT_CHAT_ID = -5160275115
+from config import SUPPORT_CHAT_ID
 from keyboards import build_main_menu
 from database import save_ticket, take_ticket, close_ticket, get_ticket
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 
@@ -37,6 +40,7 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
         return
     support = callback.from_user
     take_ticket(ticket_id, support.username or support.full_name, support.id)
+    logger.info("Ticket %s taken by %s (id=%s)", ticket_id, support.username, support.id)
     new_text = callback.message.text + f"\n\n🔧 Взял в работу: @{support.username or support.full_name}"
     await callback.message.edit_text(
         new_text,
@@ -45,6 +49,14 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
         ])
     )
     await callback.answer("✅ Вы взяли тикет в работу.")
+    trader_id = ticket[1]
+    try:
+        await bot.send_message(
+            chat_id=trader_id,
+            text="🔧 Ваш запрос взят в работу службой поддержки. Ожидайте ответа."
+        )
+    except Exception:
+        pass
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("close_ticket:"))
