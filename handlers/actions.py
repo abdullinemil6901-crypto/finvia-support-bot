@@ -62,6 +62,14 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     new_text = callback.message.text + f"\n\n✅ Завершил: @{support.username or support.full_name}"
     await callback.message.edit_text(new_text, reply_markup=None)
     await callback.answer("🏁 Тикет закрыт.")
+    trader_id = ticket[1]
+    try:
+        await bot.send_message(
+            chat_id=trader_id,
+            text="✅ Ваш запрос был закрыт службой поддержки. Если у вас остались вопросы — создайте новое обращение."
+        )
+    except Exception:
+        pass
 
 # Категории БЕЗ Order ID (трафик, токен)
 NO_ORDER_ID_KEYS = {"apply_no_traffic", "apply_token_issue"}
