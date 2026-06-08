@@ -10,7 +10,7 @@ from states import (
     VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
     NoTrafficSG, IncreaseLimitsSG
 )
-from config import SUPPORT_CHAT_ID
+from config import SUPPORT_CHAT_ID, TRADER_CHAT_ID
 from keyboards import build_main_menu
 from database import save_ticket, take_ticket, close_ticket, get_ticket
 
@@ -50,22 +50,22 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     )
     await callback.answer("✅ Вы взяли тикет в работу.")
     trader_id = ticket[1]
-    trader_username = ticket[2] or ""
     label = ticket[4] or "Обращение"
+    support_name = f"@{support.username}" if support.username else support.full_name
     try:
-        from config import TRADER_CHAT_ID
         await bot.send_message(
             chat_id=TRADER_CHAT_ID,
             text=(
-                f"🔧 Заявка взята в работу\n\n"
-                f"👤 Трейдер: @{trader_username}\n"
+                f"🔧 <b>Заявка взята в работу</b>\n\n"
                 f"📋 Тип: {label}\n"
-                f"🆔 ID трейдера: {trader_id}\n\n"
+                f"👤 Трейдер: @{ticket[2] or trader_id}\n"
+                f"👨‍💼 Саппорт: {support_name}\n\n"
                 f"Ожидайте ответа от поддержки."
-            )
+            ),
+            parse_mode="HTML"
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Не удалось уведомить чат трейдеров %s: %s", TRADER_CHAT_ID, e)
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("close_ticket:"))
@@ -87,19 +87,18 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     trader_username = ticket[2] or ""
     label = ticket[4] or "Обращение"
     try:
-        from config import TRADER_CHAT_ID
         await bot.send_message(
             chat_id=TRADER_CHAT_ID,
             text=(
-                f"✅ Заявка закрыта\n\n"
-                f"👤 Трейдер: @{trader_username}\n"
+                f"✅ <b>Заявка закрыта</b>\n\n"
                 f"📋 Тип: {label}\n"
-                f"🆔 ID трейдера: {trader_id}\n\n"
+                f"👤 Трейдер: @{trader_username or trader_id}\n\n"
                 f"Если остались вопросы — создайте новое обращение."
-            )
+            ),
+            parse_mode="HTML"
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Не удалось уведомить чат трейдеров %s: %s", TRADER_CHAT_ID, e)
 
 # Категории БЕЗ Order ID (трафик, токен)
 NO_ORDER_ID_KEYS = {"apply_no_traffic", "apply_token_issue"}

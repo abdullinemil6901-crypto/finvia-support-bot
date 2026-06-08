@@ -24,9 +24,16 @@ def init_db():
                 taken_by_id INTEGER,
                 taken_at TEXT,
                 closed_at TEXT,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                trader_chat_id INTEGER
             )
         """)
+        # Миграция: добавить колонку trader_chat_id если её нет
+        try:
+            conn.execute("ALTER TABLE tickets ADD COLUMN trader_chat_id INTEGER")
+            conn.commit()
+        except Exception:
+            pass  # Колонка уже существует
         conn.execute("""
             CREATE TABLE IF NOT EXISTS supports (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
