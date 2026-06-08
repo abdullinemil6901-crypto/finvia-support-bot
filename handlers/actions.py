@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram import Bot
 from aiogram.filters import Command
@@ -11,7 +11,7 @@ from states import (
 )
 SUPPORT_CHAT_ID = -5160275115
 from keyboards import build_main_menu
-from database import save_ticket
+from database import save_ticket, take_ticket, close_ticket, get_ticket
 
 router = Router()
 
@@ -88,7 +88,8 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
         await bot.send_message(
             chat_id=SUPPORT_CHAT_ID,
             text=f"#{ticket_id} | {text}",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=build_ticket_keyboard(ticket_id)
         )
         await message.answer("✅ Запрос отправлен в поддержку!")
     except Exception as e:
