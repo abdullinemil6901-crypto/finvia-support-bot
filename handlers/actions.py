@@ -50,10 +50,19 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     )
     await callback.answer("✅ Вы взяли тикет в работу.")
     trader_id = ticket[1]
+    trader_username = ticket[2] or ""
+    label = ticket[4] or "Обращение"
     try:
+        from config import TRADER_CHAT_ID
         await bot.send_message(
-            chat_id=trader_id,
-            text="🔧 Ваш запрос взят в работу службой поддержки. Ожидайте ответа."
+            chat_id=TRADER_CHAT_ID,
+            text=(
+                f"🔧 Заявка взята в работу\n\n"
+                f"👤 Трейдер: @{trader_username}\n"
+                f"📋 Тип: {label}\n"
+                f"🆔 ID трейдера: {trader_id}\n\n"
+                f"Ожидайте ответа от поддержки."
+            )
         )
     except Exception:
         pass
@@ -75,10 +84,19 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     await callback.message.edit_text(new_text, reply_markup=None)
     await callback.answer("🏁 Тикет закрыт.")
     trader_id = ticket[1]
+    trader_username = ticket[2] or ""
+    label = ticket[4] or "Обращение"
     try:
+        from config import TRADER_CHAT_ID
         await bot.send_message(
-            chat_id=trader_id,
-            text="✅ Ваш запрос был закрыт службой поддержки. Если у вас остались вопросы — создайте новое обращение."
+            chat_id=TRADER_CHAT_ID,
+            text=(
+                f"✅ Заявка закрыта\n\n"
+                f"👤 Трейдер: @{trader_username}\n"
+                f"📋 Тип: {label}\n"
+                f"🆔 ID трейдера: {trader_id}\n\n"
+                f"Если остались вопросы — создайте новое обращение."
+            )
         )
     except Exception:
         pass
