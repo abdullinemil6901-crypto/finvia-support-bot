@@ -15,6 +15,54 @@ from database import save_ticket, take_ticket, close_ticket, get_ticket
 
 router = Router()
 
+
+def build_ticket_keyboard(ticket_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Взял в работу", callback_data=f"take_ticket:{ticket_id}"),
+            InlineKeyboardButton(text="🏁 Завершил", callback_data=f"close_ticket:{ticket_id}")
+        ]
+    ])
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("take_ticket:"))
+async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
+    ticket_id = int(callback.data.split(":")[1])
+    ticket = get_ticket(ticket_id)
+    if ticket is None:
+        await callback.answer("❌ Тикет не найден.", show_alert=True)
+        return
+    if ticket[6] != "open":
+        await callback.answer("⚠️ Тикет уже взят или закрыт.", show_alert=True)
+        return
+    support = callback.from_user
+    take_ticket(ticket_id, support.username or support.full_name, support.id)
+    new_text = callback.message.text + f"\n\n🔧 Взял в работу: @{support.username or support.full_name}"
+    await callback.message.edit_text(
+        new_text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🏁 Завершил", callback_data=f"close_ticket:{ticket_id}")]
+        ])
+    )
+    await callback.answer("✅ Вы взяли тикет в работу.")
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("close_ticket:"))
+async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
+    ticket_id = int(callback.data.split(":")[1])
+    ticket = get_ticket(ticket_id)
+    if ticket is None:
+        await callback.answer("❌ Тикет не найден.", show_alert=True)
+        return
+    if ticket[6] == "closed":
+        await callback.answer("⚠️ Тикет уже закрыт.", show_alert=True)
+        return
+    close_ticket(ticket_id)
+    support = callback.from_user
+    new_text = callback.message.text + f"\n\n✅ Завершил: @{support.username or support.full_name}"
+    await callback.message.edit_text(new_text, reply_markup=None)
+    await callback.answer("🏁 Тикет закрыт.")
+
 # Категории БЕЗ Order ID (трафик, токен)
 NO_ORDER_ID_KEYS = {"apply_no_traffic", "apply_token_issue"}
 
