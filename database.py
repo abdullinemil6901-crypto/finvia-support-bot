@@ -56,12 +56,12 @@ def init_db():
         conn.commit()
 
 
-def save_ticket(trader_id: int, trader_username: str, trader_name: str, label: str, order_id: str = None) -> int:
+def save_ticket(trader_id: int, trader_username: str, trader_name: str, label: str, order_id: str = None, trader_chat_id: int = None) -> int:
     with get_connection() as conn:
         cursor = conn.execute(
-            """INSERT INTO tickets (trader_id, trader_username, trader_name, label, order_id, created_at)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (trader_id, trader_username or "", trader_name or "", label, order_id, datetime.now().isoformat())
+            """INSERT INTO tickets (trader_id, trader_username, trader_name, label, order_id, created_at, trader_chat_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (trader_id, trader_username or "", trader_name or "", label, order_id, datetime.now().isoformat(), trader_chat_id)
         )
         conn.commit()
         return cursor.lastrowid
@@ -176,3 +176,24 @@ def get_support_personal_stats(support_username: str):
             "in_progress": in_progress,
             "avg_seconds": avg_time
         }
+
+
+def get_open_tickets():
+    """Возвращает все открытые тикеты (статус 'open') для саппортов."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """SELECT id, trader_id, trader_username, trader_name, label, order_id, created_at, trader_chat_id
+               FROM tickets WHERE status='open' ORDER BY created_at ASC"""
+        ).fetchall()
+        return rows
+
+
+def get_tickets_by_support(support_username: str):
+    """Возвращает все тикеты, взятые конкретным саппортом."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """SELECT id, label, order_id, status, trader_username, trader_name, taken_at, closed_at, created_at
+               FROM tickets WHERE taken_by=? ORDER BY created_at DESC""",
+            (support_username,)
+        ).fetchall()
+        return rows
