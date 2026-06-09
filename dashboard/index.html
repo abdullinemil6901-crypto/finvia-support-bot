@@ -127,6 +127,67 @@
         .page-btn.active { background: var(--gradient-primary); color: white; border: none; }
         .page-num { padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem; }
 
+        /* All Tickets Section */
+        .all-tickets-section {
+            background: var(--bg-card);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 28px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .section-title { font-size: 1.2rem; font-weight: 700; }
+        .section-subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+        .ticket-count {
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.15);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+        .tickets-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .tickets-full-table {
+            min-width: 900px;
+        }
+        .tickets-full-table th {
+            background: rgba(59, 130, 246, 0.08);
+            position: sticky;
+            top: 0;
+        }
+        .tickets-full-table td {
+            white-space: nowrap;
+        }
+        .order-id {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .date-cell {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .trader-name {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .trader-name-main { font-weight: 500; }
+        .trader-name-username { font-size: 0.75rem; color: var(--text-secondary); }
+        .row-clickable { cursor: pointer; }
+        .row-clickable:hover td { background: rgba(59, 130, 246, 0.1); }
+
         /* Team Performance */
         .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
         .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
@@ -319,21 +380,12 @@
                         <div class="chart-title">📋 Последние тикеты</div>
                         <div class="chart-subtitle">Активные обращения</div>
                     </div>
-                    <a class="view-all" onclick="viewAllTickets()">Все тикеты →</a>
+                    <a class="view-all" onclick="scrollToTickets()">Все тикеты →</a>
                 </div>
                 <table>
                     <thead><tr><th>ID</th><th>Категория</th><th>Статус</th><th>Саппорт</th></tr></thead>
                     <tbody id="ticketsTable"><tr><td colspan="4" class="loading">Загрузка...</td></tr></tbody>
                 </table>
-                <!-- Pagination -->
-                <div class="pagination" id="ticketsPagination">
-                    <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
-                    <div class="pagination-controls">
-                        <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
-                        <span class="page-num" id="pageNum">Страница 1</span>
-                        <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -376,6 +428,46 @@
 
             <div class="export-options">
                 <button class="btn btn-primary" onclick="doExport()" style="width:100%;justify-content:center;">Скачать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Tickets Table -->
+    <div class="all-tickets-section">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">📋 Все тикеты</h2>
+                <p class="section-subtitle">Полный список обращений</p>
+            </div>
+            <div class="section-actions">
+                <span class="ticket-count" id="ticketCount">0 тикетов</span>
+            </div>
+        </div>
+        <div class="tickets-table-wrapper">
+            <table class="tickets-full-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Трейдер</th>
+                        <th>Категория</th>
+                        <th>Order ID</th>
+                        <th>Статус</th>
+                        <th>Саппорт</th>
+                        <th>Создано</th>
+                        <th>Взято в работу</th>
+                    </tr>
+                </thead>
+                <tbody id="allTicketsTable">
+                    <tr><td colspan="8" class="loading">Загрузка тикетов...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
+            <div class="pagination-controls">
+                <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
+                <span class="page-num" id="pageNum">Страница 1 из 1</span>
+                <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
             </div>
         </div>
     </div>
@@ -426,7 +518,8 @@
                 if (summary.by_hour?.length) renderHoursChart(summary.by_hour);
 
                 // Пагинация после фильтрации
-                filterTickets();
+                renderSmallTicketsTable();
+                renderTicketsPage();
             } catch (e) { showError('Ошибка: ' + e.message); }
         }
 
@@ -483,21 +576,58 @@
         }
 
         function renderTicketsPage() {
-            const tbody = document.getElementById('ticketsTable');
+            const tbody = document.getElementById('allTicketsTable');
             const start = (currentPage - 1) * perPage;
             const pageTickets = filteredTickets.slice(start, start + perPage);
 
             if (!pageTickets.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">Нет тикетов</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary)">Нет тикетов</td></tr>';
             } else {
                 tbody.innerHTML = pageTickets.map(t => {
+                    const sc = t.status === 'open' ? 'status-open' : t.status === 'in_progress' ? 'status-progress' : 'status-closed';
+                    const st = t.status === 'open' ? 'Открыт' : t.status === 'in_progress' ? 'В работе' : 'Закрыт';
+                    const traderCell = t.trader_name
+                        ? `<div class="trader-name"><span class="trader-name-main">${t.trader_name}</span><span class="trader-name-username">@${t.trader_username || '—'}</span></div>`
+                        : `<span class="trader-name-username">@${t.trader_username || '—'}</span>`;
+                    const createdAt = t.created_at ? formatDate(t.created_at) : '—';
+                    const takenAt = t.taken_at ? formatDate(t.taken_at) : '—';
+                    return `<tr class="row-clickable">
+                        <td><span class="ticket-id">#${t.id}</span></td>
+                        <td>${traderCell}</td>
+                        <td>${t.label || '—'}</td>
+                        <td><span class="order-id">${t.order_id || '—'}</span></td>
+                        <td><span class="status-badge ${sc}">${st}</span></td>
+                        <td>${t.taken_by ? '<span class="support-badge">👤 ' + t.taken_by + '</span>' : '—'}</td>
+                        <td><span class="date-cell">${createdAt}</span></td>
+                        <td><span class="date-cell">${takenAt}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Обновляем счётчик
+            document.getElementById('ticketCount').textContent = `${filteredTickets.length} тикетов`;
+            updatePagination();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderSmallTicketsTable() {
+            const tbody = document.getElementById('ticketsTable');
+            const recent = allTickets.slice(0, 10);
+            if (!recent.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">Нет тикетов</td></tr>';
+            } else {
+                tbody.innerHTML = recent.map(t => {
                     const sc = t.status === 'open' ? 'status-open' : t.status === 'in_progress' ? 'status-progress' : 'status-closed';
                     const st = t.status === 'open' ? 'Открыт' : t.status === 'in_progress' ? 'В работе' : 'Закрыт';
                     return `<tr><td><span class="ticket-id">#${t.id}</span></td><td>${t.label}</td><td><span class="status-badge ${sc}">${st}</span></td><td>${t.taken_by ? '<span class="support-badge">👤 ' + t.taken_by + '</span>' : '—'}</td></tr>`;
                 }).join('');
             }
-
-            updatePagination();
         }
 
         function updatePagination() {
@@ -570,6 +700,10 @@
             filteredTickets = [...allTickets];
             currentPage = 1;
             renderTicketsPage();
+        }
+
+        function scrollToTickets() {
+            document.querySelector('.all-tickets-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function updateCategoryFilter(labels) {
