@@ -38,28 +38,36 @@
         .logo-text h1 { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .logo-text span { font-size: 0.85rem; color: var(--text-secondary); }
         .header-actions { display: flex; gap: 12px; align-items: center; }
-        .live-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); }
-        .live-dot { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; animation: pulse 2s infinite; }
+        .status-badge-header { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); }
+        .status-badge-header.loading { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: var(--accent-amber); }
+        .status-dot { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; }
+        .status-badge-header.loading .status-dot { background: var(--accent-amber); animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
         .notif-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.8rem; cursor: pointer; color: var(--text-secondary); transition: all 0.3s; }
         .notif-btn:hover { border-color: var(--accent-blue); color: var(--text-primary); }
         .notif-btn.active { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: var(--accent-blue); }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         .btn { padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
         .btn-primary { background: var(--gradient-primary); color: white; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.5); }
         .btn-secondary { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); }
         .btn-secondary:hover { border-color: var(--accent-blue); color: var(--text-primary); }
+        .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn.loading { pointer-events: none; }
+        .btn.loading::after { content: ''; width: 16px; height: 16px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; margin-left: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
-        .stat-card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; transition: all 0.3s; position: relative; overflow: hidden; }
+        .stat-card { background: var(--bg-card); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
         .stat-card:hover { transform: translateY(-4px); border-color: rgba(59, 130, 246, 0.3); }
         .stat-card.total::before { background: var(--gradient-primary); }
         .stat-card.open::before { background: linear-gradient(90deg, #f59e0b, #f43f5e); }
         .stat-card.progress::before { background: var(--gradient-success); }
         .stat-card.closed::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
+        .stat-card.active-filter { border-color: var(--accent-blue); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
 
         .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
         .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -75,57 +83,64 @@
         .stat-card.progress .stat-value { color: var(--accent-cyan); }
         .stat-card.closed .stat-value { color: var(--accent-emerald); }
         .stat-footer { margin-top: 12px; font-size: 0.8rem; color: var(--text-secondary); }
+        .stat-card-hint { font-size: 0.7rem; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; }
+        .stat-card:hover .stat-card-hint { opacity: 1; }
 
         /* Filters */
         .filters-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
         .filter-select { padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 0.9rem; cursor: pointer; min-width: 160px; }
         .filter-select:focus { outline: none; border-color: var(--accent-blue); }
-        .search-input { padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 0.9rem; flex: 1; min-width: 200px; }
+        .filter-select.has-value { border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.1); }
+        .search-wrapper { position: relative; flex: 1; min-width: 200px; }
+        .search-input { width: 100%; padding: 10px 40px 10px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 0.9rem; }
         .search-input:focus { outline: none; border-color: var(--accent-blue); }
+        .search-input.has-value { border-color: var(--accent-blue); }
+        .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; display: none; }
+        .search-clear.visible { display: block; }
+        .search-clear:hover { color: var(--text-primary); }
         .date-input { padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 0.85rem; }
         .date-input:focus { outline: none; border-color: var(--accent-blue); }
+        .date-input.has-value { border-color: var(--accent-blue); }
         .filter-label { font-size: 0.8rem; color: var(--text-secondary); margin-right: 4px; }
         .date-range { display: flex; align-items: center; gap: 8px; }
+        .reset-filters-btn { padding: 10px 16px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 10px; color: var(--accent-rose); font-size: 0.85rem; cursor: pointer; display: none; }
+        .reset-filters-btn.visible { display: block; }
+        .reset-filters-btn:hover { background: rgba(244, 63, 94, 0.2); }
+
+        /* Active Filters */
+        .active-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .filter-tag { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px; font-size: 0.8rem; color: var(--accent-blue); }
+        .filter-tag-remove { background: none; border: none; color: inherit; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .filter-tag-remove:hover { color: var(--accent-rose); }
 
         /* Charts Grid */
         .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 28px; }
-        .chart-card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+        .chart-card { background: var(--bg-card); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; cursor: pointer; transition: all 0.3s; }
+        .chart-card:hover { border-color: rgba(59, 130, 246, 0.3); }
+        .chart-card.active-filter { border-color: var(--accent-blue); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
         .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
         .chart-title { font-size: 1rem; font-weight: 600; }
         .chart-subtitle { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+        .chart-hint { font-size: 0.7rem; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; }
+        .chart-card:hover .chart-hint { opacity: 1; }
         .chart-container { height: 240px; position: relative; }
 
-        /* Tables */
-        .tables-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .table-card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .view-all { font-size: 0.85rem; color: var(--accent-blue); cursor: pointer; text-decoration: none; }
-        .view-all:hover { text-decoration: underline; }
+        /* Team Performance */
+        .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+        .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s; }
+        .team-card:hover { border-color: rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
+        .team-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .team-avatar { width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
+        .team-info h4 { font-size: 0.95rem; font-weight: 600; }
+        .team-info span { font-size: 0.8rem; color: var(--text-secondary); }
+        .team-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .team-stat { text-align: center; padding: 12px; background: rgba(59, 130, 246, 0.08); border-radius: 10px; }
+        .team-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-blue); }
+        .team-stat-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; }
+        .team-stat-value.small { font-size: 0.95rem; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px 14px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
-        td { padding: 14px; font-size: 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        tr:hover td { background: rgba(59, 130, 246, 0.05); }
-        tr:last-child td { border-bottom: none; }
-
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .status-open { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
-        .status-progress { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
-        .status-closed { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
-
-        .ticket-id { font-weight: 600; color: var(--accent-blue); }
-        .support-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(139, 92, 246, 0.15); border-radius: 20px; font-size: 0.8rem; }
-        .time-ago { font-size: 0.8rem; color: var(--text-secondary); }
-
-        /* Pagination */
-        .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-        .pagination-info { font-size: 0.85rem; color: var(--text-secondary); }
-        .pagination-controls { display: flex; gap: 8px; }
-        .page-btn { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-        .page-btn:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--text-primary); }
-        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .page-btn.active { background: var(--gradient-primary); color: white; border: none; }
-        .page-num { padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem; }
+        .progress-bar { height: 6px; background: rgba(59, 130, 246, 0.2); border-radius: 3px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: 3px; transition: width 0.5s ease; }
 
         /* All Tickets Section */
         .all-tickets-section {
@@ -159,50 +174,46 @@
             border: 1px solid var(--border);
         }
         .tickets-full-table {
-            min-width: 900px;
+            min-width: 1100px;
         }
         .tickets-full-table th {
             background: rgba(59, 130, 246, 0.08);
             position: sticky;
             top: 0;
-        }
-        .tickets-full-table td {
+            cursor: pointer;
+            user-select: none;
             white-space: nowrap;
         }
-        .order-id {
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        .date-cell {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        .trader-name {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
+        .tickets-full-table th:hover { background: rgba(59, 130, 246, 0.15); }
+        .tickets-full-table th .sort-icon { margin-left: 6px; opacity: 0.3; }
+        .tickets-full-table th.sorted .sort-icon { opacity: 1; color: var(--accent-blue); }
+        .tickets-full-table th.sorted.desc .sort-icon { transform: rotate(180deg); }
+        .tickets-full-table td { white-space: nowrap; }
+        .order-id { font-family: monospace; font-size: 0.85rem; color: var(--text-secondary); }
+        .date-cell { font-size: 0.8rem; color: var(--text-secondary); }
+        .trader-name { display: flex; flex-direction: column; gap: 2px; }
         .trader-name-main { font-weight: 500; }
         .trader-name-username { font-size: 0.75rem; color: var(--text-secondary); }
         .row-clickable { cursor: pointer; }
         .row-clickable:hover td { background: rgba(59, 130, 246, 0.1); }
 
-        /* Team Performance */
-        .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
-        .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-        .team-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        .team-avatar { width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
-        .team-info h4 { font-size: 0.95rem; font-weight: 600; }
-        .team-info span { font-size: 0.8rem; color: var(--text-secondary); }
-        .team-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .team-stat { text-align: center; padding: 12px; background: rgba(59, 130, 246, 0.08); border-radius: 10px; }
-        .team-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-blue); }
-        .team-stat-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; }
-        .team-stat-value.small { font-size: 0.95rem; }
+        /* Status Badge */
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .status-open { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+        .status-progress { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+        .status-closed { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
 
-        .progress-bar { height: 6px; background: rgba(59, 130, 246, 0.2); border-radius: 3px; overflow: hidden; margin-top: 12px; }
-        .progress-fill { height: 100%; background: var(--gradient-primary); border-radius: 3px; transition: width 0.5s ease; }
+        .ticket-id { font-weight: 600; color: var(--accent-blue); }
+        .support-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(139, 92, 246, 0.15); border-radius: 20px; font-size: 0.8rem; }
+
+        /* Pagination */
+        .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .pagination-info { font-size: 0.85rem; color: var(--text-secondary); }
+        .pagination-controls { display: flex; gap: 8px; align-items: center; }
+        .page-btn { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .page-btn:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--text-primary); }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-num { padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem; }
 
         /* Loading & Error */
         .loading { display: flex; justify-content: center; align-items: center; height: 150px; color: var(--text-secondary); }
@@ -211,16 +222,23 @@
         /* Modal */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
         .modal.active { display: flex; }
-        .modal-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-close { width: 36px; height: 36px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 1.2rem; color: var(--text-secondary); }
+        .modal-close:hover { border-color: var(--accent-blue); color: var(--text-primary); }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
         .form-group input, .form-group select { width: 100%; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 0.9rem; }
-        .export-options { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .export-option { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-        .export-option:hover { border-color: var(--accent-blue); }
-        .export-option-icon { font-size: 1.5rem; }
+
+        /* Ticket Detail Modal */
+        .ticket-detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+        .ticket-detail-id { font-size: 1.5rem; font-weight: 700; color: var(--accent-blue); }
+        .ticket-detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        .ticket-detail-field { }
+        .ticket-detail-field-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .ticket-detail-field-value { font-size: 0.95rem; }
+        .ticket-detail-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .ticket-detail-section-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; }
 
         /* Notification Toast */
         .toast { position: fixed; top: 20px; right: 20px; padding: 16px 24px; background: var(--bg-secondary); border: 1px solid var(--accent-emerald); border-radius: 12px; display: none; align-items: center; gap: 12px; z-index: 200; animation: slideIn 0.3s ease; }
@@ -232,7 +250,7 @@
 
         /* Responsive */
         @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .charts-grid, .team-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .stats-grid, .charts-grid, .tables-grid, .team-grid { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 20px; } .filters-bar { flex-direction: column; } }
+        @media (max-width: 768px) { .stats-grid, .charts-grid, .team-grid { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 20px; } .filters-bar { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -256,51 +274,61 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="live-badge"><div class="live-dot"></div>Обновляется автоматически</div>
+                <div class="status-badge-header" id="statusBadge">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Загружено</span>
+                </div>
                 <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
                     <span id="notifIcon">🔕</span>
                     <span id="notifText">Уведомления</span>
                 </button>
-                <button class="btn btn-secondary" onclick="loadAll()">🔄</button>
+                <button class="btn btn-secondary" id="refreshBtn" onclick="loadAll()">🔄 Обновить</button>
                 <button class="btn btn-primary" onclick="openExportModal()">📥 Экспорт</button>
             </div>
         </div>
 
         <div id="error" class="error" style="display:none;"></div>
 
+        <!-- Active Filters -->
+        <div class="active-filters" id="activeFilters"></div>
+
         <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="stat-card total">
+            <div class="stat-card total" onclick="filterByStat('all')">
                 <div class="stat-header">
                     <div class="stat-icon">📊</div>
                 </div>
                 <div class="stat-label">Всего тикетов</div>
                 <div class="stat-value" id="total">—</div>
                 <div class="stat-footer" id="totalTrend">За все время</div>
+                <div class="stat-card-hint">Кликните для фильтра</div>
             </div>
-            <div class="stat-card open">
+            <div class="stat-card open" onclick="filterByStat('open')">
                 <div class="stat-header">
                     <div class="stat-icon">⏳</div>
                 </div>
                 <div class="stat-label">Открытые</div>
                 <div class="stat-value" id="open">—</div>
                 <div class="stat-footer">Требуют внимания</div>
+                <div class="stat-card-hint">Кликните для фильтра</div>
             </div>
-            <div class="stat-card progress">
+            <div class="stat-card progress" onclick="filterByStat('in_progress')">
                 <div class="stat-header">
                     <div class="stat-icon">🔵</div>
                 </div>
                 <div class="stat-label">В работе</div>
                 <div class="stat-value" id="in_progress">—</div>
                 <div class="stat-footer">Активные</div>
+                <div class="stat-card-hint">Кликните для фильтра</div>
             </div>
-            <div class="stat-card closed">
+            <div class="stat-card closed" onclick="filterByStat('closed')">
                 <div class="stat-header">
                     <div class="stat-icon">✅</div>
                 </div>
                 <div class="stat-label">Закрытые</div>
                 <div class="stat-value" id="closed">—</div>
                 <div class="stat-footer" id="closeRate">Завершено</div>
+                <div class="stat-card-hint">Кликните для фильтра</div>
             </div>
         </div>
 
@@ -321,12 +349,16 @@
                 <span class="filter-label">По:</span>
                 <input type="date" class="date-input" id="filterDateTo" onchange="filterTickets()">
             </div>
-            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Поиск по ID, трейдеру, саппорту..." onkeyup="filterTickets()">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Поиск по ID, трейдеру, саппорту..." onkeyup="filterTickets()">
+                <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+            </div>
+            <button class="reset-filters-btn" id="resetFiltersBtn" onclick="resetAllFilters()">Сбросить фильтры</button>
         </div>
 
         <!-- Charts -->
         <div class="charts-grid">
-            <div class="chart-card">
+            <div class="chart-card" id="labelsChartCard" onclick="filterByChart('label')">
                 <div class="chart-header">
                     <div>
                         <div class="chart-title">📈 По категориям</div>
@@ -334,8 +366,9 @@
                     </div>
                 </div>
                 <div class="chart-container"><canvas id="labelsChart"></canvas></div>
+                <div class="chart-hint">Кликните на сегмент для фильтра</div>
             </div>
-            <div class="chart-card">
+            <div class="chart-card" id="daysChartCard" onclick="clearChartFilter('label')">
                 <div class="chart-header">
                     <div>
                         <div class="chart-title">📅 По дням</div>
@@ -343,8 +376,9 @@
                     </div>
                 </div>
                 <div class="chart-container"><canvas id="daysChart"></canvas></div>
+                <div class="chart-hint">Кликните для сброса фильтра</div>
             </div>
-            <div class="chart-card">
+            <div class="chart-card" id="hoursChartCard" onclick="clearChartFilter('label')">
                 <div class="chart-header">
                     <div>
                         <div class="chart-title">🕐 По часам</div>
@@ -352,6 +386,7 @@
                     </div>
                 </div>
                 <div class="chart-container"><canvas id="hoursChart"></canvas></div>
+                <div class="chart-hint">Кликните для сброса фильтра</div>
             </div>
         </div>
 
@@ -360,33 +395,55 @@
             <div class="loading">Загрузка команды...</div>
         </div>
 
-        <!-- Tables -->
-        <div class="tables-grid">
-            <div class="table-card">
-                <div class="table-header">
-                    <div>
-                        <div class="chart-title">👥 Эффективность</div>
-                        <div class="chart-subtitle">Статистика саппортов</div>
-                    </div>
+        <!-- All Tickets Table -->
+        <div class="all-tickets-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">📋 Все тикеты</h2>
+                    <p class="section-subtitle">Кликните на тикет для просмотра деталей</p>
                 </div>
-                <table>
-                    <thead><tr><th>Саппорт</th><th>Всего</th><th>Закрыто</th><th>Ср. время</th></tr></thead>
-                    <tbody id="statsTable"><tr><td colspan="4" class="loading">Загрузка...</td></tr></tbody>
+                <div class="section-actions">
+                    <span class="ticket-count" id="ticketCount">0 тикетов</span>
+                </div>
+            </div>
+            <div class="tickets-table-wrapper">
+                <table class="tickets-full-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('id')">ID <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('trader_username')">Трейдер <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('label')">Категория <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('order_id')">Order ID <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('status')">Статус <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('taken_by')">Саппорт <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('created_at')">Создано <span class="sort-icon">▲</span></th>
+                            <th onclick="sortTable('taken_at')">Взято <span class="sort-icon">▲</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="allTicketsTable">
+                        <tr><td colspan="8" class="loading">Загрузка тикетов...</td></tr>
+                    </tbody>
                 </table>
             </div>
-            <div class="table-card">
-                <div class="table-header">
-                    <div>
-                        <div class="chart-title">📋 Последние тикеты</div>
-                        <div class="chart-subtitle">Активные обращения</div>
-                    </div>
-                    <a class="view-all" onclick="scrollToTickets()">Все тикеты →</a>
+            <div class="pagination">
+                <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
+                    <span class="page-num" id="pageNum">Страница 1 из 1</span>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
                 </div>
-                <table>
-                    <thead><tr><th>ID</th><th>Категория</th><th>Статус</th><th>Саппорт</th></tr></thead>
-                    <tbody id="ticketsTable"><tr><td colspan="4" class="loading">Загрузка...</td></tr></tbody>
-                </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Детали тикета</h3>
+                <button class="modal-close" onclick="closeTicketModal()">×</button>
+            </div>
+            <div id="ticketDetailContent"></div>
         </div>
     </div>
 
@@ -426,48 +483,8 @@
                 </select>
             </div>
 
-            <div class="export-options">
+            <div style="margin-top: 20px;">
                 <button class="btn btn-primary" onclick="doExport()" style="width:100%;justify-content:center;">Скачать</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- All Tickets Table -->
-    <div class="all-tickets-section">
-        <div class="section-header">
-            <div>
-                <h2 class="section-title">📋 Все тикеты</h2>
-                <p class="section-subtitle">Полный список обращений</p>
-            </div>
-            <div class="section-actions">
-                <span class="ticket-count" id="ticketCount">0 тикетов</span>
-            </div>
-        </div>
-        <div class="tickets-table-wrapper">
-            <table class="tickets-full-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Трейдер</th>
-                        <th>Категория</th>
-                        <th>Order ID</th>
-                        <th>Статус</th>
-                        <th>Саппорт</th>
-                        <th>Создано</th>
-                        <th>Взято в работу</th>
-                    </tr>
-                </thead>
-                <tbody id="allTicketsTable">
-                    <tr><td colspan="8" class="loading">Загрузка тикетов...</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination">
-            <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
-            <div class="pagination-controls">
-                <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
-                <span class="page-num" id="pageNum">Страница 1 из 1</span>
-                <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
             </div>
         </div>
     </div>
@@ -481,20 +498,40 @@
         let currentPage = 1;
         const perPage = 20;
         let notificationsEnabled = false;
-        let lastKnownTotal = 0;
         let lastKnownIds = [];
         let labelsChart, daysChart, hoursChart;
+        let lastUpdateTime = null;
+        let sortColumn = 'id';
+        let sortDirection = 'desc';
+        let chartFilter = null;
 
         // Звук уведомления
         const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp+fm5eTiHpot7e2raakkYqAa2txe4SHhYKAf3h4eX6DhIWDf3h4eX6ChYb/AIaFfoCFh36AhoZ9f4aGfX6GhX5+hYV+fYSEfn6FhH99hIR+fYSEf32EhH99g4N+fYODfXyCg318gYN9e4GCfHuBgnx6gYJ7eoGCe3qBgnp5gYJ5eIGCdyBBP3cAAQ==');
 
+        // Обновление статуса
+        function updateStatus(text, loading = false) {
+            const badge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = text;
+            badge.classList.toggle('loading', loading);
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
         async function loadAll() {
             showError('');
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.classList.add('loading');
+            refreshBtn.disabled = true;
+            updateStatus('Загрузка...', true);
+
             try {
                 const [summary, stats, tickets] = await Promise.all([
                     fetch(`${API}/api/summary`).then(r => r.json()),
                     fetch(`${API}/api/stats`).then(r => r.json()),
-                    fetch(`${API}/api/tickets?page=1&per_page=200`).then(r => r.json())
+                    fetch(`${API}/api/tickets?page=1&per_page=500`).then(r => r.json())
                 ]);
 
                 // Проверяем новые тикеты
@@ -509,6 +546,10 @@
                 allTickets = tickets.tickets || [];
                 filteredTickets = [...allTickets];
 
+                // Обновляем время
+                lastUpdateTime = new Date();
+                updateStatus(`Обновлено в ${formatTime(lastUpdateTime)}`);
+
                 renderSummary(summary);
                 renderStats(stats);
                 renderTeam(stats);
@@ -517,10 +558,16 @@
                 if (summary.by_day?.length) renderDaysChart(summary.by_day);
                 if (summary.by_hour?.length) renderHoursChart(summary.by_hour);
 
-                // Пагинация после фильтрации
-                renderSmallTicketsTable();
+                applySort();
                 renderTicketsPage();
-            } catch (e) { showError('Ошибка: ' + e.message); }
+                updateActiveFilters();
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+                updateStatus('Ошибка загрузки');
+            } finally {
+                refreshBtn.classList.remove('loading');
+                refreshBtn.disabled = false;
+            }
         }
 
         function renderSummary(d) {
@@ -558,7 +605,7 @@
                 const initials = s.username?.slice(0, 2).toUpperCase() || '??';
                 const avgTime = s.avg_seconds ? formatDuration(s.avg_seconds) : '—';
                 return `
-                    <div class="team-card">
+                    <div class="team-card" onclick="filterBySupport('${s.username}')">
                         <div class="team-header">
                             <div class="team-avatar">${initials}</div>
                             <div class="team-info"><h4>${s.username}</h4><span>Саппорт #${i + 1}</span></div>
@@ -575,13 +622,55 @@
             }).join('');
         }
 
+        // Сортировка
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            applySort();
+            renderTicketsPage();
+            updateSortIndicators();
+        }
+
+        function applySort() {
+            filteredTickets.sort((a, b) => {
+                let aVal = a[sortColumn] || '';
+                let bVal = b[sortColumn] || '';
+
+                if (sortColumn === 'created_at' || sortColumn === 'taken_at') {
+                    aVal = aVal ? new Date(aVal).getTime() : 0;
+                    bVal = bVal ? new Date(bVal).getTime() : 0;
+                } else {
+                    aVal = String(aVal).toLowerCase();
+                    bVal = String(bVal).toLowerCase();
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('.tickets-full-table th').forEach(th => {
+                th.classList.remove('sorted', 'desc');
+                if (th.onclick && th.onclick.toString().includes(`'${sortColumn}'`)) {
+                    th.classList.add('sorted');
+                    if (sortDirection === 'desc') th.classList.add('desc');
+                }
+            });
+        }
+
         function renderTicketsPage() {
             const tbody = document.getElementById('allTicketsTable');
             const start = (currentPage - 1) * perPage;
             const pageTickets = filteredTickets.slice(start, start + perPage);
 
             if (!pageTickets.length) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary)">Нет тикетов</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:40px;">Нет тикетов по заданным фильтрам</td></tr>';
             } else {
                 tbody.innerHTML = pageTickets.map(t => {
                     const sc = t.status === 'open' ? 'status-open' : t.status === 'in_progress' ? 'status-progress' : 'status-closed';
@@ -591,7 +680,7 @@
                         : `<span class="trader-name-username">@${t.trader_username || '—'}</span>`;
                     const createdAt = t.created_at ? formatDate(t.created_at) : '—';
                     const takenAt = t.taken_at ? formatDate(t.taken_at) : '—';
-                    return `<tr class="row-clickable">
+                    return `<tr class="row-clickable" onclick="openTicketDetail(${t.id})">
                         <td><span class="ticket-id">#${t.id}</span></td>
                         <td>${traderCell}</td>
                         <td>${t.label || '—'}</td>
@@ -604,9 +693,9 @@
                 }).join('');
             }
 
-            // Обновляем счётчик
             document.getElementById('ticketCount').textContent = `${filteredTickets.length} тикетов`;
             updatePagination();
+            updateSortIndicators();
         }
 
         function formatDate(dateStr) {
@@ -614,20 +703,6 @@
             const d = new Date(dateStr);
             return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                 ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function renderSmallTicketsTable() {
-            const tbody = document.getElementById('ticketsTable');
-            const recent = allTickets.slice(0, 10);
-            if (!recent.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">Нет тикетов</td></tr>';
-            } else {
-                tbody.innerHTML = recent.map(t => {
-                    const sc = t.status === 'open' ? 'status-open' : t.status === 'in_progress' ? 'status-progress' : 'status-closed';
-                    const st = t.status === 'open' ? 'Открыт' : t.status === 'in_progress' ? 'В работе' : 'Закрыт';
-                    return `<tr><td><span class="ticket-id">#${t.id}</span></td><td>${t.label}</td><td><span class="status-badge ${sc}">${st}</span></td><td>${t.taken_by ? '<span class="support-badge">👤 ' + t.taken_by + '</span>' : '—'}</td></tr>`;
-                }).join('');
-            }
         }
 
         function updatePagination() {
@@ -652,6 +727,7 @@
             }
         }
 
+        // Фильтры
         function filterTickets() {
             const status = document.getElementById('filterStatus').value;
             const category = document.getElementById('filterCategory').value;
@@ -659,12 +735,21 @@
             const dateFrom = document.getElementById('filterDateFrom').value;
             const dateTo = document.getElementById('filterDateTo').value;
 
-            // Очищаем # из ID для поиска
             const search = searchRaw.replace(/^#/, '');
+
+            // Обновляем стили
+            document.getElementById('searchInput').classList.toggle('has-value', searchRaw.length > 0);
+            document.getElementById('searchClear').classList.toggle('visible', searchRaw.length > 0);
+            document.getElementById('filterStatus').classList.toggle('has-value', status !== '');
+            document.getElementById('filterCategory').classList.toggle('has-value', category !== '');
+            document.getElementById('filterDateFrom').classList.toggle('has-value', dateFrom !== '');
+            document.getElementById('filterDateTo').classList.toggle('has-value', dateTo !== '');
 
             filteredTickets = allTickets.filter(t => {
                 if (status && t.status !== status) return false;
                 if (category && t.label !== category) return false;
+                if (chartFilter?.type === 'label' && t.label !== chartFilter.value) return false;
+                if (chartFilter?.type === 'support' && t.taken_by !== chartFilter.value) return false;
                 if (search) {
                     const ticketId = String(t.id);
                     const match = ticketId === search ||
@@ -688,38 +773,142 @@
             });
 
             currentPage = 1;
+            applySort();
             renderTicketsPage();
+            updateActiveFilters();
         }
 
-        function viewAllTickets() {
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterTickets();
+        }
+
+        function resetAllFilters() {
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterCategory').value = '';
             document.getElementById('searchInput').value = '';
             document.getElementById('filterDateFrom').value = '';
             document.getElementById('filterDateTo').value = '';
-            filteredTickets = [...allTickets];
-            currentPage = 1;
-            renderTicketsPage();
+            chartFilter = null;
+            clearChartFilter();
+            filterTickets();
         }
 
-        function scrollToTickets() {
-            document.querySelector('.all-tickets-section').scrollIntoView({ behavior: 'smooth' });
+        function updateActiveFilters() {
+            const container = document.getElementById('activeFilters');
+            const tags = [];
+
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const search = document.getElementById('searchInput').value;
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+
+            if (status) {
+                const label = status === 'open' ? 'Открытые' : status === 'in_progress' ? 'В работе' : 'Закрытые';
+                tags.push(`<span class="filter-tag">Статус: ${label} <button class="filter-tag-remove" onclick="removeFilter('status')">×</button></span>`);
+            }
+            if (category) {
+                tags.push(`<span class="filter-tag">Категория: ${category} <button class="filter-tag-remove" onclick="removeFilter('category')">×</button></span>`);
+            }
+            if (search) {
+                tags.push(`<span class="filter-tag">Поиск: ${search} <button class="filter-tag-remove" onclick="removeFilter('search')">×</button></span>`);
+            }
+            if (dateFrom) {
+                tags.push(`<span class="filter-tag">С: ${dateFrom} <button class="filter-tag-remove" onclick="removeFilter('dateFrom')">×</button></span>`);
+            }
+            if (dateTo) {
+                tags.push(`<span class="filter-tag">По: ${dateTo} <button class="filter-tag-remove" onclick="removeFilter('dateTo')">×</button></span>`);
+            }
+            if (chartFilter) {
+                tags.push(`<span class="filter-tag">${chartFilter.type === 'label' ? 'Категория' : 'Саппорт'}: ${chartFilter.value} <button class="filter-tag-remove" onclick="removeChartFilter()">×</button></span>`);
+            }
+
+            container.innerHTML = tags.join('');
+
+            // Показываем кнопку сброса если есть фильтры
+            const resetBtn = document.getElementById('resetFiltersBtn');
+            resetBtn.classList.toggle('visible', tags.length > 0);
+        }
+
+        function removeFilter(type) {
+            if (type === 'status') document.getElementById('filterStatus').value = '';
+            if (type === 'category') document.getElementById('filterCategory').value = '';
+            if (type === 'search') document.getElementById('searchInput').value = '';
+            if (type === 'dateFrom') document.getElementById('filterDateFrom').value = '';
+            if (type === 'dateTo') document.getElementById('filterDateTo').value = '';
+            filterTickets();
+        }
+
+        function removeChartFilter() {
+            chartFilter = null;
+            clearChartFilter();
+            filterTickets();
+        }
+
+        // Фильтрация по клику
+        function filterByStat(status) {
+            document.getElementById('filterStatus').value = status;
+            filterTickets();
+        }
+
+        function filterBySupport(username) {
+            chartFilter = { type: 'support', value: username };
+            document.getElementById('daysChartCard').classList.add('active-filter');
+            filterTickets();
+        }
+
+        function filterByChart(type) {
+            // График категорий — включаем интерактивность
+            // При клике на сегмент устанавливаем фильтр категории
+        }
+
+        function clearChartFilter(type) {
+            if (type !== 'label') {
+                document.getElementById('labelsChartCard').classList.remove('active-filter');
+            }
+            document.getElementById('daysChartCard').classList.remove('active-filter');
+            document.getElementById('hoursChartCard').classList.remove('active-filter');
         }
 
         function updateCategoryFilter(labels) {
             const sel = document.getElementById('filterCategory');
             sel.innerHTML = '<option value="">Все категории</option>';
-            labels?.forEach(l => { sel.innerHTML += `<option value="${l.label}">${l.label}</option>`; });
+            labels?.forEach(l => { sel.innerHTML += `<option value="${l.label}">${l.label} (${l.count})</option>`; });
         }
 
+        // Графики с интерактивностью
         function renderLabelsChart(data) {
             const ctx = document.getElementById('labelsChart').getContext('2d');
             if (labelsChart) labelsChart.destroy();
             const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316','#84cc16','#6366f1'];
+
             labelsChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.count), backgroundColor: colors.slice(0, data.length), borderWidth: 0, hoverOffset: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { color: '#64748b', padding: 12, font: { size: 11 } } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = data[index].label;
+                            chartFilter = { type: 'label', value: label };
+                            document.getElementById('filterCategory').value = label;
+                            document.getElementById('labelsChartCard').classList.add('active-filter');
+                            filterTickets();
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#64748b', padding: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.label}: ${context.raw} тикетов`
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -729,7 +918,22 @@
             daysChart = new Chart(ctx, {
                 type: 'bar',
                 data: { labels: data.map(d => d.day.slice(5)), datasets: [{ data: data.map(d => d.count), backgroundColor: 'rgba(59,130,246,0.8)', borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#64748b' }, border: { display: false } }, y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#64748b' }, border: { display: false } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.raw} тикетов`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b' }, border: { display: false } },
+                        y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#64748b' }, border: { display: false } }
+                    }
+                }
             });
         }
 
@@ -742,8 +946,94 @@
             hoursChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: Object.keys(hours).map(h => h + ':00'), datasets: [{ data: Object.values(hours), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 12 }, border: { display: false } }, y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#64748b' }, border: { display: false } } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.raw} тикетов`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 12 }, border: { display: false } },
+                        y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#64748b' }, border: { display: false } }
+                    }
+                }
             });
+        }
+
+        // Детали тикета
+        function openTicketDetail(id) {
+            const ticket = allTickets.find(t => t.id === id);
+            if (!ticket) return;
+
+            const sc = ticket.status === 'open' ? 'status-open' : ticket.status === 'in_progress' ? 'status-progress' : 'status-closed';
+            const st = ticket.status === 'open' ? 'Открыт' : ticket.status === 'in_progress' ? 'В работе' : 'Закрыт';
+
+            const content = document.getElementById('ticketDetailContent');
+            content.innerHTML = `
+                <div class="ticket-detail-header">
+                    <div class="ticket-detail-id">#${ticket.id}</div>
+                    <span class="status-badge ${sc}">${st}</span>
+                </div>
+                <div class="ticket-detail-grid">
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Трейдер</div>
+                        <div class="ticket-detail-field-value">${ticket.trader_name || '—'}</div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);">@${ticket.trader_username || '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Категория</div>
+                        <div class="ticket-detail-field-value">${ticket.label || '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Order ID</div>
+                        <div class="ticket-detail-field-value" style="font-family:monospace;">${ticket.order_id || '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Саппорт</div>
+                        <div class="ticket-detail-field-value">${ticket.taken_by || 'Не назначен'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Создано</div>
+                        <div class="ticket-detail-field-value">${ticket.created_at ? formatDate(ticket.created_at) : '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Взято в работу</div>
+                        <div class="ticket-detail-field-value">${ticket.taken_at ? formatDate(ticket.taken_at) : '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Закрыто</div>
+                        <div class="ticket-detail-field-value">${ticket.closed_at ? formatDate(ticket.closed_at) : '—'}</div>
+                    </div>
+                    <div class="ticket-detail-field">
+                        <div class="ticket-detail-field-label">Время обработки</div>
+                        <div class="ticket-detail-field-value">${calculateProcessingTime(ticket)}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('ticketModal').classList.add('active');
+        }
+
+        function calculateProcessingTime(ticket) {
+            if (!ticket.taken_at) return 'Не взят в работу';
+            const end = ticket.closed_at ? new Date(ticket.closed_at) : new Date();
+            const start = new Date(ticket.taken_at);
+            const diff = Math.round((end - start) / 1000);
+
+            if (diff < 60) return `${diff} сек`;
+            if (diff < 3600) return `${Math.round(diff / 60)} мин`;
+            const hours = Math.floor(diff / 3600);
+            const mins = Math.round((diff % 3600) / 60);
+            return `${hours}ч ${mins}м`;
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketModal').classList.remove('active');
         }
 
         // Уведомления
@@ -757,7 +1047,6 @@
                 btn.classList.add('active');
                 icon.textContent = '🔔';
                 text.textContent = 'Уведомления';
-                // Пробуем запросить разрешение на уведомления
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission();
                 }
@@ -769,7 +1058,6 @@
         }
 
         function showNotification(count) {
-            // Toast
             const toast = document.getElementById('toast');
             const toastText = document.getElementById('toastText');
             const toastCount = document.getElementById('toastCount');
@@ -779,11 +1067,8 @@
             toast.classList.add('show');
 
             setTimeout(() => { toast.classList.remove('show'); }, 5000);
-
-            // Звук
             notificationSound.play().catch(() => {});
 
-            // Браузерное уведомление
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('Support Dashboard', {
                     body: count === 1 ? 'Поступил новый тикет!' : `Поступило ${count} новых тикетов!`,
@@ -797,7 +1082,6 @@
             document.getElementById('exportModal').classList.add('active');
             document.getElementById('exportPeriod').value = 'all';
 
-            // Устанавливаем даты по умолчанию
             const today = new Date();
             const monthAgo = new Date();
             monthAgo.setMonth(monthAgo.getMonth() - 1);
@@ -834,14 +1118,10 @@
                 dateTo = document.getElementById('exportDateTo').value;
             }
 
-            // Собираем тикеты для экспорта
-            let exportTickets = [...allTickets];
+            let exportTickets = [...filteredTickets];
 
             if (dateFrom) {
-                exportTickets = exportTickets.filter(t => {
-                    const d = new Date(t.created_at);
-                    return d >= new Date(dateFrom);
-                });
+                exportTickets = exportTickets.filter(t => new Date(t.created_at) >= new Date(dateFrom));
             }
             if (dateTo) {
                 const toDate = new Date(dateTo);
@@ -873,7 +1153,6 @@
                 t.created_at || ''
             ]);
 
-            // BOM для UTF-8 в Excel
             const BOM = '﻿';
             const csv = BOM + [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
 
@@ -904,7 +1183,7 @@
 
         // Инициализация
         loadAll();
-        setInterval(loadAll, 20000);
+        setInterval(loadAll, 30000);
     </script>
 </body>
 </html>

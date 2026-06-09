@@ -63,16 +63,16 @@ COMMANDS_CONFIG = {
 class TicketResponse(BaseModel):
     id: int
     trader_id: int
-    trader_username: str
-    trader_name: str
-    label: str
-    order_id: Optional[str]
+    trader_username: Optional[str] = ""
+    trader_name: Optional[str] = ""
+    label: Optional[str] = ""
+    order_id: Optional[str] = None
     status: str
-    taken_by: Optional[str]
-    taken_at: Optional[str]
-    closed_at: Optional[str]
+    taken_by: Optional[str] = None
+    taken_at: Optional[str] = None
+    closed_at: Optional[str] = None
     created_at: str
-    trader_chat_id: Optional[int]
+    trader_chat_id: Optional[int] = None
 
 
 class TicketListResponse(BaseModel):
@@ -119,7 +119,7 @@ def get_tickets(
     label: Optional[str] = Query(None, description="Фильтр по категории (label)"),
     trader_id: Optional[int] = Query(None, description="Фильтр по ID трейдера"),
     page: int = Query(1, ge=1, description="Номер страницы"),
-    per_page: int = Query(20, ge=1, le=100, description="Тикетов на странице"),
+    per_page: int = Query(20, ge=1, le=500, description="Тикетов на странице"),
 ):
     """
     Получить тикеты с пагинацией и фильтрами.
