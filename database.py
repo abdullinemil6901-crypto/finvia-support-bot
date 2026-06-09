@@ -211,3 +211,15 @@ def get_support_by_tg_id(tg_id: int):
     with get_connection() as conn:
         row = conn.execute("SELECT * FROM supports WHERE tg_id=?", (tg_id,)).fetchone()
         return row
+
+
+def get_all_tickets():
+    """Получить все тикеты для экспорта."""
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT id, trader_id, trader_username, trader_name, label, order_id,
+                   status, taken_by, taken_at, closed_at, created_at
+            FROM tickets
+            ORDER BY created_at DESC
+        """).fetchall()
+        return rows

@@ -1,6 +1,9 @@
+from datetime import datetime
+from io import BytesIO, StringIO
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 from aiogram.filters import Command
+import csv
 from keyboards import build_main_menu, build_submenu
 from config.menu_config import SUBMENU_BUTTONS
 from config import ADMIN_IDS
@@ -10,7 +13,8 @@ from database import (
     get_all_supports,
     add_support,
     remove_support,
-    get_support_by_tg_id
+    get_support_by_tg_id,
+    get_all_tickets
 )
 
 router = Router()
@@ -162,3 +166,42 @@ async def back_to_main(callback: CallbackQuery):
         reply_markup=build_main_menu()
     )
     await callback.answer()
+
+
+@router.message(Command("export"))
+async def cmd_export(message: Message):
+    """Экспорт тикетов в CSV (только для админов)."""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Команда только для админов.")
+        return
+
+    tickets = get_all_tickets()
+    if not tickets:
+        await message.answer("📭 Нет тикетов для экспорта.")
+        return
+
+    # Генерируем CSV
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow(["ID", "Trader ID", "Username", "Name", "Label", "Order ID",
+                    "Status", "Taken by", "Taken at", "Closed at", "Created at"])
+
+    # Data
+    for t in tickets:
+        writer.writerow([
+            t[0], t[1], t[2] or "", t[3] or "", t[4] or "", t[5] or "",
+            t[6] or "", t[7] or "", t[8] or "", t[9] or "", t[10] or ""
+        ])
+
+    csv_content = output.getvalue()
+
+    # Отправляем файл
+    file = BytesIO(csv_content.encode('utf-8'))
+    file.name = f"tickets_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+    await message.answer_document(
+        file,
+        caption=f"📊 Экспорт тикетов ({len(tickets)} записей)"
+    )
