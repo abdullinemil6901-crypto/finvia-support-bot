@@ -384,6 +384,51 @@ def _row_to_ticket_full(row) -> TicketResponse:
 
 
 # ─────────────────────────────────────────────
+# Эндпоинты — Мониторинг
+# ─────────────────────────────────────────────
+
+@app.get("/health")
+def health_check():
+    """Healthcheck для uptime-мониторинга."""
+    try:
+        # Проверяем подключение к БД
+        with database.get_connection() as conn:
+            conn.execute("SELECT 1")
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "version": "2.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+@app.get("/api/stats_summary")
+def get_stats_summary():
+    """Быстрая сводка для мониторинга."""
+    try:
+        with database.get_connection() as conn:
+            total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
+            open_count = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0]
+            closed = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='closed'").fetchone()[0]
+            in_progress = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='in_progress'").fetchone()[0]
+
+        return {
+            "total": total,
+            "open": open_count,
+            "in_progress": in_progress,
+            "closed": closed,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ─────────────────────────────────────────────
 # Запуск
 # ─────────────────────────────────────────────
 
