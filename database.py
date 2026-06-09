@@ -197,3 +197,17 @@ def get_tickets_by_support(support_username: str):
             (support_username,)
         ).fetchall()
         return rows
+
+
+def remove_support(tg_id: int):
+    """Удалить саппорта по tg_id."""
+    with get_connection() as conn:
+        conn.execute("DELETE FROM supports WHERE tg_id=?", (tg_id,))
+        conn.commit()
+
+
+def get_support_by_tg_id(tg_id: int):
+    """Найти саппорта по tg_id."""
+    with get_connection() as conn:
+        row = conn.execute("SELECT * FROM supports WHERE tg_id=?", (tg_id,)).fetchone()
+        return row

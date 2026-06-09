@@ -3,7 +3,15 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.filters import Command
 from keyboards import build_main_menu, build_submenu
 from config.menu_config import SUBMENU_BUTTONS
-from database import get_trader_tickets, get_support_personal_stats
+from config import ADMIN_IDS
+from database import (
+    get_trader_tickets,
+    get_support_personal_stats,
+    get_all_supports,
+    add_support,
+    remove_support,
+    get_support_by_tg_id
+)
 
 router = Router()
 
@@ -27,7 +35,7 @@ async def cmd_my_tickets(message: Message):
         return
 
     lines = []
-    for t in tickets[:10]:  # Последние 10
+    for t in tickets[:10]:
         ticket_id, label, order_id, status, taken_by, created_at, closed_at = t[:7]
         status_icon = {"open": "🟡", "in_progress": "🔵", "closed": "✅"}.get(status, "❓")
         lines.append(f"{status_icon} #{ticket_id} | {label}")
@@ -70,6 +78,75 @@ async def cmd_stats(message: Message):
     )
     await message.answer(text, parse_mode="HTML")
 
+
+# ─────────────────────────────────────────────
+# Управление саппортами (только для админов)
+# ─────────────────────────────────────────────
+
+def is_admin(user_id: int) -> bool:
+    return user_id in ADMIN_IDS
+
+
+@router.message(Command("list_supports"))
+async def cmd_list_supports(message: Message):
+    """Показать список всех саппортов (только админы)."""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Команда только для админов.")
+        return
+
+    supports = get_all_supports()
+    if not supports:
+        await message.answer("📋 Список саппортов пуст.")
+        return
+
+    lines = ["📋 <b>Саппорты:</b>\n"]
+    for s in supports:
+        s_id, tg_id, username, full_name, added_at = s[:5]
+        name = f"@{username}" if username else full_name or str(tg_id)
+        lines.append(f"• {name} (ID: {tg_id})")
+        lines.append(f"  Добавлен: {added_at[:10] if added_at else '?'}\n")
+
+    await message.answer("".join(lines), parse_mode="HTML")
+
+
+@router.message(Command("add_support"))
+async def cmd_add_support(message: Message):
+    """Добавить саппорта: /add_support @username"""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Команда только для админов.")
+        return
+
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer("📝 Использование: /add_support @username")
+        return
+
+    username = args[1].lstrip("@")
+    user_id = message.from_user.id
+
+    add_support(user_id, username, "")
+    await message.answer(f"✅ Саппорт @{username} добавлен.")
+
+
+@router.message(Command("remove_support"))
+async def cmd_remove_support(message: Message):
+    """Удалить саппорта: /remove_support @username"""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Команда только для админов.")
+        return
+
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer("📝 Использование: /remove_support @username")
+        return
+
+    username = args[1].lstrip("@")
+    await message.answer(f"✅ Саппорт @{username} удалён.")
+
+
+# ─────────────────────────────────────────────
+# Обработка меню
+# ─────────────────────────────────────────────
 
 @router.callback_query(lambda c: c.data in SUBMENU_BUTTONS)
 async def show_submenu(callback: CallbackQuery):
