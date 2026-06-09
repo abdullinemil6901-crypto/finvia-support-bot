@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import signal
+import threading
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
@@ -15,6 +16,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def run_api():
+    """Запускает FastAPI в отдельном потоке."""
+    import uvicorn
+    from api import app
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+
+
 async def main():
     init_db()
     logger.info("База данных инициализирована")
@@ -23,6 +31,11 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(menu.router)
     dp.include_router(actions.router)
+
+    # Запускаем API в отдельном потоке
+    api_thread = threading.Thread(target=run_api, daemon=True)
+    api_thread.start()
+    logger.info("API запущен на порту 8000")
 
     loop = asyncio.get_running_loop()
 
@@ -36,7 +49,6 @@ async def main():
         try:
             loop.add_signal_handler(sig, _shutdown)
         except NotImplementedError:
-            # Windows не поддерживает add_signal_handler для SIGTERM
             pass
 
     logger.info("Бот запущен, начинаем polling")
