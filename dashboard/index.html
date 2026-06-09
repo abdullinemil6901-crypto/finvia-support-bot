@@ -562,7 +562,9 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('filterDateFrom').value = '';
             document.getElementById('filterDateTo').value = '';
-            filterTickets();
+            filteredTickets = [...allTickets];
+            currentPage = 1;
+            renderTicketsPage();
         }
 
         function updateCategoryFilter(labels) {
