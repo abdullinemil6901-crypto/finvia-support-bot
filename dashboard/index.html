@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Bot Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        h1 { color: #38bdf8; margin-bottom: 20px; font-size: 1.8rem; }
+        h2 { color: #94a3b8; margin-bottom: 15px; font-size: 1.2rem; font-weight: 500; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #1e293b; }
+        .header h1 { margin-bottom: 0; }
+        .refresh-btn { background: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .refresh-btn:hover { background: #0ea5e9; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .stat-card .label { color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; }
+        .stat-card .value { font-size: 2.5rem; font-weight: 700; }
+        .stat-card.total .value { color: #38bdf8; }
+        .stat-card.open .value { color: #fbbf24; }
+        .stat-card.progress .value { color: #3b82f6; }
+        .stat-card.closed .value { color: #22c55e; }
+
+        /* Charts */
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .chart-card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; }
+        .chart-container { position: relative; height: 300px; }
+
+        /* Tables */
+        .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; }
+        .table-card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #334155; }
+        th { color: #94a3b8; font-weight: 500; font-size: 0.85rem; }
+        td { font-size: 0.9rem; }
+        tr:hover { background: #334155; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+        .status-open { background: #fbbf2420; color: #fbbf24; }
+        .status-progress { background: #3b82f620; color: #3b82f6; }
+        .status-closed { background: #22c55e20; color: #22c55e; }
+
+        /* Loading */
+        .loading { display: flex; justify-content: center; align-items: center; height: 200px; color: #94a3b8; }
+        .error { background: #ef444420; color: #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid, .tables-grid { grid-template-columns: 1fr; }
+            .stat-card .value { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Support Bot Dashboard</h1>
+            <button class="refresh-btn" onclick="loadAll()">🔄 Обновить</button>
+        </div>
+
+        <div id="error" class="error" style="display:none;"></div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="label">Всего тикетов</div>
+                <div class="value" id="total">—</div>
+            </div>
+            <div class="stat-card open">
+                <div class="label">Открытые</div>
+                <div class="value" id="open">—</div>
+            </div>
+            <div class="stat-card progress">
+                <div class="label">В работе</div>
+                <div class="value" id="in_progress">—</div>
+            </div>
+            <div class="stat-card closed">
+                <div class="label">Закрытые</div>
+                <div class="value" id="closed">—</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2>📈 По категориям</h2>
+                <div class="chart-container">
+                    <canvas id="labelsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h2>📅 По дням (7 дней)</h2>
+                <div class="chart-container">
+                    <canvas id="daysChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h2>🕐 По часам (24 часа)</h2>
+                <div class="chart-container">
+                    <canvas id="hoursChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="tables-grid">
+            <div class="table-card">
+                <h2>👥 Статистика саппортов</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Саппорт</th>
+                            <th>Всего</th>
+                            <th>Закрыто</th>
+                            <th>В работе</th>
+                            <th>Ср. время</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTable">
+                        <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-card">
+                <h2>📋 Последние тикеты</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Категория</th>
+                            <th>Трейдер</th>
+                            <th>Статус</th>
+                            <th>Саппорт</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsTable">
+                        <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://finvia-support-bot-production.up.railway.app';
+
+        let labelsChart, daysChart, hoursChart;
+
+        async function loadAll() {
+            showError('');
+            try {
+                await Promise.all([
+                    loadSummary(),
+                    loadStats(),
+                    loadTickets()
+                ]);
+            } catch (e) {
+                showError('Ошибка загрузки: ' + e.message);
+            }
+        }
+
+        async function loadSummary() {
+            const res = await fetch(`${API_URL}/api/summary`);
+            const data = await res.json();
+
+            document.getElementById('total').textContent = data.total || 0;
+            document.getElementById('open').textContent = data.open || 0;
+            document.getElementById('in_progress').textContent = data.in_progress || 0;
+            document.getElementById('closed').textContent = data.closed || 0;
+
+            // Labels Chart
+            if (data.by_label && data.by_label.length > 0) {
+                renderLabelsChart(data.by_label);
+            }
+
+            // Days Chart
+            if (data.by_day && data.by_day.length > 0) {
+                renderDaysChart(data.by_day);
+            }
+
+            // Hours Chart
+            if (data.by_hour && data.by_hour.length > 0) {
+                renderHoursChart(data.by_hour);
+            }
+        }
+
+        async function loadStats() {
+            const res = await fetch(`${API_URL}/api/stats`);
+            const data = await res.json();
+
+            const tbody = document.getElementById('statsTable');
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="5">Нет данных</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(s => `
+                <tr>
+                    <td>${s.username}</td>
+                    <td>${s.total}</td>
+                    <td>${s.closed}</td>
+                    <td>${s.in_progress}</td>
+                    <td>${s.avg_seconds ? (s.avg_seconds / 60).toFixed(1) + ' мин' : '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadTickets() {
+            const res = await fetch(`${API_URL}/api/tickets?page=1&per_page=20`);
+            const data = await res.json();
+
+            const tbody = document.getElementById('ticketsTable');
+            if (!data.tickets || !data.tickets.length) {
+                tbody.innerHTML = '<tr><td colspan="5">Нет тикетов</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.tickets.map(t => {
+                const statusClass = t.status === 'open' ? 'status-open' : t.status === 'in_progress' ? 'status-progress' : 'status-closed';
+                const statusText = t.status === 'open' ? 'Открыт' : t.status === 'in_progress' ? 'В работе' : 'Закрыт';
+                return `
+                    <tr>
+                        <td>#${t.id}</td>
+                        <td>${t.label}</td>
+                        <td>${t.trader_username || t.trader_id}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${t.taken_by || '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderLabelsChart(data) {
+            const ctx = document.getElementById('labelsChart').getContext('2d');
+            if (labelsChart) labelsChart.destroy();
+
+            const colors = ['#38bdf8', '#22c55e', '#fbbf24', '#ef4444', '#a855f7', '#ec4899', '#f97316', '#14b8a6', '#6366f1', '#84cc16'];
+
+            labelsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: colors.slice(0, data.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function renderDaysChart(data) {
+            const ctx = document.getElementById('daysChart').getContext('2d');
+            if (daysChart) daysChart.destroy();
+
+            daysChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.day),
+                    datasets: [{
+                        label: 'Тикеты',
+                        data: data.map(d => d.count),
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function renderHoursChart(data) {
+            const ctx = document.getElementById('hoursChart').getContext('2d');
+            if (hoursChart) hoursChart.destroy();
+
+            // Fill missing hours
+            const hours = {};
+            for (let i = 0; i < 24; i++) hours[i] = 0;
+            data.forEach(d => { if (d.hour) hours[d.hour] = d.count; });
+
+            hoursChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(hours).map(h => h + ':00'),
+                    datasets: [{
+                        label: 'Тикеты',
+                        data: Object.values(hours),
+                        borderColor: '#22c55e',
+                        backgroundColor: '#22c55e20',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } },
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error');
+            el.textContent = msg;
+            el.style.display = msg ? 'block' : 'none';
+        }
+
+        // Load on start
+        loadAll();
+        setInterval(loadAll, 30000); // Auto-refresh every 30s
+    </script>
+</body>
+</html>
