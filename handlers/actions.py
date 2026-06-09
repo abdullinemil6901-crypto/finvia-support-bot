@@ -5,6 +5,9 @@ Support Bot — Actions Handlers
 """
 
 import logging
+import html
+import re
+from functools import wraps
 from aiogram import Router, Bot
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
@@ -16,6 +19,105 @@ from commands_config import COMMANDS, STATE_CLASSES, get_label, needs_order_id
 logger = logging.getLogger(__name__)
 
 router = Router()
+
+# ─────────────────────────────────────────────
+# КОНСТАНТЫ ВАЛИДАЦИИ
+# ─────────────────────────────────────────────
+MAX_ORDER_ID_LENGTH = 64
+MAX_DESCRIPTION_LENGTH = 1000
+MIN_ORDER_ID_LENGTH = 3
+MAX_TICKETS_PER_MINUTE = 5  # Защита от спама
+
+
+# ─────────────────────────────────────────────
+# ФУНКЦИИ ВАЛИДАЦИИ
+# ─────────────────────────────────────────────
+
+def validate_order_id(order_id: str) -> tuple[bool, str]:
+    """
+    Валидация Order ID.
+    Returns: (is_valid, error_message)
+    """
+    order_id = order_id.strip()
+
+    if not order_id:
+        return False, "Order ID не может быть пустым"
+
+    if len(order_id) < MIN_ORDER_ID_LENGTH:
+        return False, f"Order ID слишком короткий (мин. {MIN_ORDER_ID_LENGTH} симв.)"
+
+    if len(order_id) > MAX_ORDER_ID_LENGTH:
+        return False, f"Order ID слишком длинный (макс. {MAX_ORDER_ID_LENGTH} симв.)"
+
+    # Только буквы, цифры, дефис, подчёркивание
+    if not re.match(r'^[a-zA-Z0-9_\-]+$', order_id):
+        return False, "Order ID содержит недопустимые символы"
+
+    return True, ""
+
+
+def validate_description(description: str) -> tuple[bool, str]:
+    """
+    Валидация описания проблемы.
+    Returns: (is_valid, error_message)
+    """
+    description = description.strip()
+
+    if not description:
+        return False, "Описание не может быть пустым"
+
+    if len(description) < 5:
+        return False, "Описание слишком короткое (мин. 5 симв.)"
+
+    if len(description) > MAX_DESCRIPTION_LENGTH:
+        return False, f"Описание слишком длинное (макс. {MAX_DESCRIPTION_LENGTH} симв.)"
+
+    return True, ""
+
+
+def escape_html(text: str) -> str:
+    """Безопасный escape HTML-символов."""
+    return html.escape(text, quote=False)
+
+
+def safe_username(username: str) -> str:
+    """Безопасное имя пользователя для отображения."""
+    if not username:
+        return "unknown"
+    safe = re.sub(r'[<>"\'`]', '', username)
+    return safe[:50]
+
+
+# ─────────────────────────────────────────────
+# RETRY ЛОГИКА (без внешних зависимостей)
+# ─────────────────────────────────────────────
+
+async def send_with_retry(bot: Bot, chat_id: int, text: str, retries: int = 3, delay: float = 0.5, parse_mode: str = "HTML", reply_markup=None):
+    """
+    Отправка сообщения с retry.
+    retries - количество попыток
+    delay - задержка между попытками (exponential backoff)
+    """
+    import asyncio
+
+    for attempt in range(retries):
+        try:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=text,
+                parse_mode=parse_mode,
+                reply_markup=reply_markup
+            )
+            return True
+        except Exception as e:
+            if attempt < retries - 1:
+                wait_time = delay * (2 ** attempt)  # exponential backoff
+                logger.warning(f"Попытка {attempt + 1} не удалась: {e}. Retry через {wait_time:.1f}s")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error(f"Все {retries} попыток не удались: {e}")
+                return False
+    return False
 
 
 def build_ticket_keyboard(ticket_id: int) -> InlineKeyboardMarkup:
@@ -144,47 +246,74 @@ async def apply_start(callback: CallbackQuery, state: FSMContext):
 
 
 async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
-    """Обработка ввода Order ID или описания."""
+    """Обработка ввода Order ID или описания с валидацией."""
     data = await state.get_data()
     label = data.get("label", "Обращение")
     needs_oid = data.get("needs_order_id", True)
     trader = message.from_user
     user_input = message.text.strip()
 
+    # ─── ВАЛИДАЦИЯ ───
     if needs_oid:
+        is_valid, error_msg = validate_order_id(user_input)
+        if not is_valid:
+            await message.answer(f"❌ {error_msg}\n\nПопробуйте ещё раз:")
+            return
         order_id = user_input
+    else:
+        is_valid, error_msg = validate_description(user_input)
+        if not is_valid:
+            await message.answer(f"❌ {error_msg}\n\nПопробуйте ещё раз:")
+            return
+        order_id = None
+    # ─────────────────
+
+    # Безопасное имя пользователя
+    trader_name_safe = safe_username(trader.full_name) if trader.full_name else ""
+    username_safe = safe_username(trader.username) if trader.username else ""
+
+    if needs_oid:
         text = (
-            f"{label}\n\n"
-            f"👤 Трейдер: @{trader.username or trader.full_name}\n"
+            f"{escape_html(label)}\n\n"
+            f"👤 Трейдер: @{escape_html(username_safe) if username_safe else escape_html(trader_name_safe)}\n"
             f"🆔 ID: {trader.id}\n"
-            f"🔑 Order ID: {order_id}"
+            f"🔑 Order ID: {escape_html(order_id)}"
         )
     else:
-        order_id = None
         text = (
-            f"{label}\n\n"
-            f"👤 Трейдер: @{trader.username or trader.full_name}\n"
+            f"{escape_html(label)}\n\n"
+            f"👤 Трейдер: @{escape_html(username_safe) if username_safe else escape_html(trader_name_safe)}\n"
             f"🆔 ID: {trader.id}\n"
-            f"📝 Описание: {user_input}"
+            f"📝 Описание: {escape_html(user_input)}"
         )
 
     try:
         ticket_id = save_ticket(
             trader_id=trader.id,
-            trader_username=trader.username or "",
-            trader_name=trader.full_name or "",
-            label=label,
-            order_id=order_id
+            trader_username=username_safe,
+            trader_name=trader_name_safe,
+            label=escape_html(label),
+            order_id=escape_html(order_id) if order_id else None
         )
-        await bot.send_message(
-            chat_id=SUPPORT_CHAT_ID,
-            text=f"#{ticket_id} | {text}",
+        ticket_message = f"#{ticket_id} | {text}"
+
+        # Отправка в чат поддержки с retry
+        success = await send_with_retry(
+            bot, SUPPORT_CHAT_ID, ticket_message,
+            retries=3, delay=0.5,
             parse_mode="HTML",
             reply_markup=build_ticket_keyboard(ticket_id)
         )
-        await message.answer("✅ Запрос отправлен в поддержку!")
+
+        if success:
+            await message.answer("✅ Запрос отправлен в поддержку!")
+        else:
+            logger.error("Не удалось отправить тикет после всех retry")
+            await message.answer("❌ Ошибка при отправке. Попробуйте позже.")
+
     except Exception as e:
-        await message.answer(f"❌ Ошибка при отправке в поддержку: {e}")
+        logger.error("Ошибка при отправке тикета: %s", e)
+        await message.answer("❌ Ошибка при отправке в поддержку. Попробуйте позже.")
     finally:
         await state.clear()
 
