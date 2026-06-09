@@ -379,14 +379,14 @@ def _row_to_ticket_full(row) -> TicketResponse:
         trader_id=row[1],
         trader_username=row[2] or "",
         trader_name=row[3] or "",
-        label=row[4],
+        label=row[4] or "",
         order_id=row[5],
         status=row[6],
         taken_by=row[7],
-        taken_at=row[8],
-        closed_at=row[9],
-        created_at=row[10],
-        trader_chat_id=row[11] if len(row) > 11 else None
+        taken_at=row[9] if len(row) > 9 else None,
+        closed_at=row[10] if len(row) > 10 else None,
+        created_at=row[11] if len(row) > 11 else "",
+        trader_chat_id=row[12] if len(row) > 12 else None
     )
 
 
