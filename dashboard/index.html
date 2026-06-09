@@ -525,15 +525,20 @@
         function filterTickets() {
             const status = document.getElementById('filterStatus').value;
             const category = document.getElementById('filterCategory').value;
-            const search = document.getElementById('searchInput').value.toLowerCase();
+            const searchRaw = document.getElementById('searchInput').value.toLowerCase().trim();
             const dateFrom = document.getElementById('filterDateFrom').value;
             const dateTo = document.getElementById('filterDateTo').value;
+
+            // Очищаем # из ID для поиска
+            const search = searchRaw.replace(/^#/, '');
 
             filteredTickets = allTickets.filter(t => {
                 if (status && t.status !== status) return false;
                 if (category && t.label !== category) return false;
                 if (search) {
-                    const match = String(t.id).includes(search) ||
+                    const ticketId = String(t.id);
+                    const match = ticketId === search ||
+                        ticketId.includes(search) ||
                         (t.trader_username || '').toLowerCase().includes(search) ||
                         (t.trader_name || '').toLowerCase().includes(search) ||
                         (t.taken_by || '').toLowerCase().includes(search) ||
