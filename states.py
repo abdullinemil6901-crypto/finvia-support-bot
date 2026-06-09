@@ -1,53 +1,21 @@
-from aiogram.fsm.state import State, StatesGroup
+"""
+Support Bot — FSM States
+Импортирует сгенерированные StateGroup из commands_config.py
+для обратной совместимости с существующим кодом.
+"""
 
-class CancelPayoutSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
+from commands_config import (
+    CancelPayoutSG, PayoutNotVisibleSG, ExtendTimeSG,
+    NoReceiptSG, WrongReceiptSG, WrongCVUSG, WrongRequisiteSG,
+    VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
+    NoTrafficSG, IncreaseLimitsSG,
+    ALL_STATE_CLASSES
+)
 
-class PayoutNotVisibleSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class ExtendTimeSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class NoReceiptSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class WrongReceiptSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class WrongCVUSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class WrongRequisiteSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class VerifyRequisitesSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class TechIssueSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class TokenIssueSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class AppealSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class NoTrafficSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
-
-class IncreaseLimitsSG(StatesGroup):
-    waiting_for_order_id = State()
-    waiting_for_comment = State()
+__all__ = [
+    "CancelPayoutSG", "PayoutNotVisibleSG", "ExtendTimeSG",
+    "NoReceiptSG", "WrongReceiptSG", "WrongCVUSG", "WrongRequisiteSG",
+    "VerifyRequisitesSG", "TechIssueSG", "TokenIssueSG", "AppealSG",
+    "NoTrafficSG", "IncreaseLimitsSG",
+    "ALL_STATE_CLASSES"
+]

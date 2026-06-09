@@ -1,18 +1,17 @@
+"""
+Support Bot — Actions Handlers
+Использует commands_config.py для масштабируемости.
+Добавление новой команды = редактирование ОДНОГО файла commands_config.py
+"""
+
 import logging
-from aiogram import Router, F
+from aiogram import Router, Bot
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
-from aiogram import Bot
-from aiogram.filters import Command
-from states import (
-    CancelPayoutSG, PayoutNotVisibleSG, ExtendTimeSG,
-    NoReceiptSG, WrongReceiptSG, WrongCVUSG, WrongRequisiteSG,
-    VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
-    NoTrafficSG, IncreaseLimitsSG
-)
 from config import SUPPORT_CHAT_ID, TRADER_CHAT_ID
 from keyboards import build_main_menu
 from database import save_ticket, take_ticket, close_ticket, get_ticket
+from commands_config import COMMANDS, STATE_CLASSES, get_label, needs_order_id
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,10 @@ def build_ticket_keyboard(ticket_id: int) -> InlineKeyboardMarkup:
     ])
 
 
+# ─────────────────────────────────────────────
+# Хендлеры для взятия/закрытия тикетов
+# ─────────────────────────────────────────────
+
 @router.callback_query(lambda c: c.data and c.data.startswith("take_ticket:"))
 async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     ticket_id = int(callback.data.split(":")[1])
@@ -38,9 +41,11 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     if ticket[6] != "open":
         await callback.answer("⚠️ Тикет уже взят или закрыт.", show_alert=True)
         return
+
     support = callback.from_user
     take_ticket(ticket_id, support.username or support.full_name, support.id)
     logger.info("Ticket %s taken by %s (id=%s)", ticket_id, support.username, support.id)
+
     new_text = callback.message.text + f"\n\n🔧 Взял в работу: @{support.username or support.full_name}"
     await callback.message.edit_text(
         new_text,
@@ -49,6 +54,8 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
         ])
     )
     await callback.answer("✅ Вы взяли тикет в работу.")
+
+    # Уведомление в чат трейдеров
     trader_id = ticket[1]
     label = ticket[4] or "Обращение"
     support_name = f"@{support.username}" if support.username else support.full_name
@@ -65,7 +72,7 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
             parse_mode="HTML"
         )
     except Exception as e:
-        logger.warning("Не удалось уведомить чат трейдеров %s: %s", TRADER_CHAT_ID, e)
+        logger.warning("Не удалось уведомить чат трейдеров: %s", e)
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("close_ticket:"))
@@ -78,11 +85,14 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     if ticket[6] == "closed":
         await callback.answer("⚠️ Тикет уже закрыт.", show_alert=True)
         return
+
     close_ticket(ticket_id)
     support = callback.from_user
     new_text = callback.message.text + f"\n\n✅ Завершил: @{support.username or support.full_name}"
     await callback.message.edit_text(new_text, reply_markup=None)
     await callback.answer("🏁 Тикет закрыт.")
+
+    # Уведомление в чат трейдеров
     trader_id = ticket[1]
     trader_username = ticket[2] or ""
     label = ticket[4] or "Обращение"
@@ -98,33 +108,25 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
             parse_mode="HTML"
         )
     except Exception as e:
-        logger.warning("Не удалось уведомить чат трейдеров %s: %s", TRADER_CHAT_ID, e)
-
-# Категории БЕЗ Order ID (трафик, токен)
-NO_ORDER_ID_KEYS = {"apply_no_traffic", "apply_token_issue"}
-
-APPLY_HANDLERS = {
-    "apply_cancel_payout":       (CancelPayoutSG,       "🚫 Отмена выплаты",                True),
-    "apply_payout_not_visible":  (PayoutNotVisibleSG,   "👁 Выплата не видна на токене",    True),
-    "apply_extend_time":         (ExtendTimeSG,         "⏱ Продлить время ордера",          True),
-    "apply_no_receipt":          (NoReceiptSG,          "🧾 Нет чека / не прогрузился",     True),
-    "apply_wrong_receipt":       (WrongReceiptSG,       "📎 Неверный чек прикреплён",       True),
-    "apply_wrong_cvu":           (WrongCVUSG,           "❌ Неверный CVU / не наш реквизит", True),
-    "apply_wrong_requisite":     (WrongRequisiteSG,     "🚷 Не наш реквизит",               True),
-    "apply_verify_requisites":   (VerifyRequisitesSG,   "⚙️ Техническая проблема / верификация реквизитов", True),
-    "apply_tech_issue":          (TechIssueSG,          "⚙️ Технический сбой",              True),
-    "apply_token_issue":         (TokenIssueSG,         "🔧 Токен не работает",             False),
-    "apply_appeal":              (AppealSG,             "⚖️ Апелляция",                     True),
-    "apply_no_traffic":          (NoTrafficSG,          "📡 Нет трафика / ордеров",         False),
-    "apply_increase_limits":     (IncreaseLimitsSG,     "📈 Увеличить лимиты",              True),
-}
+        logger.warning("Не удалось уведомить чат трейдеров: %s", e)
 
 
-@router.callback_query(lambda c: c.data in APPLY_HANDLERS)
+# ─────────────────────────────────────────────
+# Хендлеры для создания тикетов (FSM)
+# Генерируются автоматически из COMMANDS
+# ─────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data in COMMANDS)
 async def apply_start(callback: CallbackQuery, state: FSMContext):
-    sg_class, label, needs_order_id = APPLY_HANDLERS[callback.data]
-    await state.update_data(label=label, needs_order_id=needs_order_id)
-    if needs_order_id:
+    """Обработка выбора категории обращения."""
+    cmd_key = callback.data
+    config = COMMANDS[cmd_key]
+    label = config["label"]
+    needs_oid = config["needs_order_id"]
+
+    await state.update_data(label=label, needs_order_id=needs_oid, cmd_key=cmd_key)
+
+    if needs_oid:
         await callback.message.edit_text(
             f"{label}\n\n🔑 Пришлите <b>ID сделки</b>:",
             parse_mode="HTML"
@@ -134,18 +136,22 @@ async def apply_start(callback: CallbackQuery, state: FSMContext):
             f"{label}\n\n📝 Опишите проблему:",
             parse_mode="HTML"
         )
+
+    # Устанавливаем состояние из сгенерированного StateGroup
+    sg_class = STATE_CLASSES[cmd_key]
     await state.set_state(sg_class.waiting_for_order_id)
     await callback.answer()
 
 
 async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
+    """Обработка ввода Order ID или описания."""
     data = await state.get_data()
     label = data.get("label", "Обращение")
-    needs_order_id = data.get("needs_order_id", True)
+    needs_oid = data.get("needs_order_id", True)
     trader = message.from_user
     user_input = message.text.strip()
 
-    if needs_order_id:
+    if needs_oid:
         order_id = user_input
         text = (
             f"{label}\n\n"
@@ -183,10 +189,9 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
         await state.clear()
 
 
-for _sg in [
-    CancelPayoutSG, PayoutNotVisibleSG, ExtendTimeSG,
-    NoReceiptSG, WrongReceiptSG, WrongCVUSG, WrongRequisiteSG,
-    VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
-    NoTrafficSG, IncreaseLimitsSG
-]:
+# ─────────────────────────────────────────────
+# АВТОРЕГИСТРАЦИЯ всех FSM состояний
+# ─────────────────────────────────────────────
+
+for _sg in STATE_CLASSES.values():
     router.message(_sg.waiting_for_order_id)(_send_to_support)

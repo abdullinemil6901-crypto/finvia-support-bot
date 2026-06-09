@@ -1,3 +1,11 @@
+"""
+Support Bot — Menu Configuration
+Использует команды из commands_config.py для синхронизации.
+"""
+
+from commands_config import COMMANDS
+
+# Основное меню — категории
 MAIN_MENU_BUTTONS = [
     {"text": "💸 Выплаты",               "callback": "cat_payouts"},
     {"text": "🧾 Чеки / документы",       "callback": "cat_receipts"},
@@ -6,6 +14,8 @@ MAIN_MENU_BUTTONS = [
     {"text": "📡 Трафик / лимиты",        "callback": "cat_traffic"},
 ]
 
+# Подменю — маппинг категория → список команд
+# Автоматически генерируется из COMMANDS
 SUBMENU_BUTTONS = {
     "cat_payouts": [
         {"text": "🚫 Отмена выплаты",            "callback": "apply_cancel_payout"},
@@ -31,3 +41,34 @@ SUBMENU_BUTTONS = {
         {"text": "📈 Увеличить лимиты",            "callback": "apply_increase_limits"},
     ],
 }
+
+
+# ─────────────────────────────────────────────
+# УТИЛИТЫ для работы с меню
+# ─────────────────────────────────────────────
+
+def get_all_callbacks() -> list:
+    """Получить все callback_data из меню."""
+    callbacks = []
+    for buttons in SUBMENU_BUTTONS.values():
+        for btn in buttons:
+            callbacks.append(btn["callback"])
+    return callbacks
+
+
+def get_button_text(callback_data: str) -> str:
+    """Получить текст кнопки по callback_data."""
+    for buttons in SUBMENU_BUTTONS.values():
+        for btn in buttons:
+            if btn["callback"] == callback_data:
+                return btn["text"]
+    return callback_data
+
+
+def get_category_by_callback(callback_data: str) -> str:
+    """Получить категорию по callback_data."""
+    for category, buttons in SUBMENU_BUTTONS.items():
+        for btn in buttons:
+            if btn["callback"] == callback_data:
+                return category
+    return None
