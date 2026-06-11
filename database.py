@@ -28,6 +28,15 @@ def init_db():
                 trader_chat_id INTEGER
             )
         """)
+
+        # Создаём индексы для оптимизации запросов
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_taken_by ON tickets(taken_by)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_label ON tickets(label)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at)")
+        # Композитный индекс для частых фильтраций
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_status_created ON tickets(status, created_at DESC)")
+
         # Миграция: добавить колонку trader_chat_id если её нет
         try:
             conn.execute("ALTER TABLE tickets ADD COLUMN trader_chat_id INTEGER")

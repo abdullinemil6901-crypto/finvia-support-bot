@@ -10,9 +10,15 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from functools import lru_cache
 import os
+import time
 import database
 import schedule_manager
+
+# Простое кэширование в памяти
+_summary_cache = {"data": None, "timestamp": 0}
+CACHE_TTL = 30  # секунды
 
 app = FastAPI(
     title="Support Bot API",
@@ -303,7 +309,14 @@ def set_duty(req: SetDutyRequest):
 
 @app.get("/api/summary")
 def get_summary():
-    """Сводка для главной страницы дашборда."""
+    """Сводка для главной страницы дашборда. Кэшируется на 30 сек."""
+    global _summary_cache
+
+    # Проверяем кэш
+    now = time.time()
+    if _summary_cache["data"] and (now - _summary_cache["timestamp"]) < CACHE_TTL:
+        return _summary_cache["data"]
+
     with database.get_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
         open_count = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0]
@@ -338,7 +351,7 @@ def get_summary():
 
     duty = schedule_manager.get_current_duty()
 
-    return {
+    result = {
         "total": total,
         "open": open_count,
         "in_progress": in_progress,
@@ -348,6 +361,10 @@ def get_summary():
         "by_day": [{"day": row[0], "count": row[1]} for row in by_day],
         "current_duty": ", ".join(duty) if duty else None
     }
+
+    # Сохраняем в кэш
+    _summary_cache = {"data": result, "timestamp": now}
+    return result
 
 
 # ─────────────────────────────────────────────

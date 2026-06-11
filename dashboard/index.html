@@ -152,6 +152,62 @@
             padding: 24px;
             margin-top: 28px;
         }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .tab-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .tab-btn:not(.active) .tab-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+        }
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -395,42 +451,83 @@
             <div class="loading">Загрузка команды...</div>
         </div>
 
-        <!-- All Tickets Table -->
+        <!-- All Tickets Section -->
         <div class="all-tickets-section">
             <div class="section-header">
                 <div>
-                    <h2 class="section-title">📋 Все тикеты</h2>
-                    <p class="section-subtitle">Кликните на тикет для просмотра деталей</p>
+                    <h2 class="section-title">📋 Управление тикетами</h2>
+                    <p class="section-subtitle">Выберите раздел для просмотра данных</p>
                 </div>
                 <div class="section-actions">
                     <span class="ticket-count" id="ticketCount">0 тикетов</span>
                 </div>
             </div>
-            <div class="tickets-table-wrapper">
-                <table class="tickets-full-table">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable('id')">ID <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('trader_username')">Трейдер <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('label')">Категория <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('order_id')">Order ID <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('status')">Статус <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('taken_by')">Саппорт <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('created_at')">Создано <span class="sort-icon">▲</span></th>
-                            <th onclick="sortTable('taken_at')">Взято <span class="sort-icon">▲</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="allTicketsTable">
-                        <tr><td colspan="8" class="loading">Загрузка тикетов...</td></tr>
-                    </tbody>
-                </table>
+
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <button type="button" class="tab-btn active" onclick="switchTab('all')" id="tabAll">
+                    Все тикеты<span class="tab-badge" id="tabBadgeAll">0</span>
+                </button>
+                <button type="button" class="tab-btn" onclick="switchTab('by-label')" id="tabByLabel">
+                    По категориям<span class="tab-badge" id="tabBadgeLabel">0</span>
+                </button>
+                <button type="button" class="tab-btn" onclick="switchTab('by-day')" id="tabByDay">
+                    По дням
+                </button>
+                <button type="button" class="tab-btn" onclick="switchTab('by-hour')" id="tabByHour">
+                    По часам
+                </button>
             </div>
-            <div class="pagination">
-                <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
-                <div class="pagination-controls">
-                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
-                    <span class="page-num" id="pageNum">Страница 1 из 1</span>
-                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
+
+            <!-- Tab: All Tickets -->
+            <div class="tab-content active" id="contentAll">
+                <div class="tickets-table-wrapper">
+                    <table class="tickets-full-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('id')">ID <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('trader_username')">Трейдер <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('label')">Категория <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('order_id')">Order ID <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('status')">Статус <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('taken_by')">Саппорт <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('created_at')">Создано <span class="sort-icon">▲</span></th>
+                                <th onclick="sortTable('taken_at')">Взято <span class="sort-icon">▲</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allTicketsTable">
+                            <tr><td colspan="8" class="loading">Загрузка тикетов...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">Показано 0 из 0</div>
+                    <div class="pagination-controls">
+                        <button type="button" class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
+                        <span class="page-num" id="pageNum">Страница 1 из 1</span>
+                        <button type="button" class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: By Label -->
+            <div class="tab-content" id="contentByLabel">
+                <div id="labelStatsContent">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <!-- Tab: By Day -->
+            <div class="tab-content" id="contentByDay">
+                <div id="dayStatsContent">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <!-- Tab: By Hour -->
+            <div class="tab-content" id="contentByHour">
+                <div id="hourStatsContent">
+                    <div class="loading">Загрузка...</div>
                 </div>
             </div>
         </div>
@@ -504,6 +601,8 @@
         let sortColumn = 'id';
         let sortDirection = 'desc';
         let chartFilter = null;
+        let currentTab = 'all';
+        let summaryData = null;
 
         // Звук уведомления
         const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp+fm5eTiHpot7e2raakkYqAa2txe4SHhYKAf3h4eX6DhIWDf3h4eX6ChYb/AIaFfoCFh36AhoZ9f4aGfX6GhX5+hYV+fYSEfn6FhH99hIR+fYSEf32EhH99g4N+fYODfXyCg318gYN9e4GCfHuBgnx6gYJ7eoGCe3qBgnp5gYJ5eIGCdyBBP3cAAQ==');
@@ -551,6 +650,7 @@
                 updateStatus(`Обновлено в ${formatTime(lastUpdateTime)}`);
 
                 renderSummary(summary);
+                summaryData = summary;
                 renderStats(stats);
                 renderTeam(stats);
                 updateCategoryFilter(summary.by_label);
@@ -1180,6 +1280,116 @@
             el.textContent = msg;
             el.style.display = msg ? 'block' : 'none';
         }
+
+        // Переключение вкладок
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Обновляем кнопки
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1).replace(/-/g, '')).classList.add('active');
+
+            // Обновляем контент
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById('content' + tab.charAt(0).toUpperCase() + tab.slice(1).replace(/-/g, '')).classList.add('active');
+
+            // Загружаем данные для вкладки
+            if (tab === 'by-label') renderLabelStats();
+            else if (tab === 'by-day') renderDayStats();
+            else if (tab === 'by-hour') renderHourStats();
+        }
+
+        function renderLabelStats() {
+            const container = document.getElementById('labelStatsContent');
+            if (!summaryData?.by_label?.length) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:40px;">Нет данных</div>';
+                return;
+            }
+
+            const total = summaryData.by_label.reduce((sum, l) => sum + l.count, 0);
+            container.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px;">
+                    ${summaryData.by_label.map(l => `
+                        <div class="stat-card" style="cursor:pointer;" onclick="filterByLabel('${l.label}')">
+                            <div class="stat-label">${l.label}</div>
+                            <div class="stat-value" style="color:var(--accent-blue);font-size:1.8rem;">${l.count}</div>
+                            <div class="stat-footer">${total > 0 ? Math.round(l.count / total * 100) : 0}% от общего</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderDayStats() {
+            const container = document.getElementById('dayStatsContent');
+            if (!summaryData?.by_day?.length) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:40px;">Нет данных</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-top:16px;">
+                    ${summaryData.by_day.map(d => `
+                        <div class="stat-card" style="text-align:center;">
+                            <div class="stat-label">${formatDateShort(d.day)}</div>
+                            <div class="stat-value" style="color:var(--accent-blue);font-size:1.8rem;">${d.count}</div>
+                            <div class="stat-footer">тикетов</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderHourStats() {
+            const container = document.getElementById('hourStatsContent');
+            if (!summaryData?.by_hour?.length) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:40px;">Нет данных</div>';
+                return;
+            }
+
+            const hours = {};
+            for (let i = 0; i < 24; i++) hours[i] = 0;
+            summaryData.by_hour.forEach(h => { if (h.hour) hours[h.hour] = h.count; });
+
+            container.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px;margin-top:16px;">
+                    ${Object.entries(hours).map(([h, count]) => `
+                        <div class="stat-card" style="text-align:center;padding:16px;">
+                            <div class="stat-label" style="font-size:0.75rem;">${h}:00</div>
+                            <div class="stat-value" style="color:${count > 0 ? 'var(--accent-blue)' : 'var(--text-secondary)'};font-size:1.4rem;">${count}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function formatDateShort(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+        }
+
+        function filterByLabel(label) {
+            document.getElementById('filterCategory').value = label;
+            chartFilter = { type: 'label', value: label };
+            switchTab('all');
+            filterTickets();
+        }
+
+        // Обновляем badge счётчики при загрузке
+        function updateTabBadges() {
+            if (summaryData) {
+                document.getElementById('tabBadgeAll').textContent = summaryData.total || 0;
+                document.getElementById('tabBadgeLabel').textContent = summaryData.by_label?.length || 0;
+            }
+        }
+
+        // Перехватываем renderSummary для обновления badge
+        const originalRenderSummary = renderSummary;
+        renderSummary = function(d) {
+            originalRenderSummary(d);
+            updateTabBadges();
+        };
 
         // Инициализация
         loadAll();
