@@ -205,6 +205,18 @@ def get_ticket(ticket_id: int):
     return _row_to_ticket(_row_to_dict(row))
 
 
+@app.post("/api/tickets/{ticket_id}/take")
+def take_ticket_api(ticket_id: int, support_username: str = "dashboard_user"):
+    database.take_ticket(ticket_id, support_username, 0)
+    return {"success": True, "status": "in_progress"}
+
+
+@app.post("/api/tickets/{ticket_id}/close")
+def close_ticket_api(ticket_id: int):
+    database.close_ticket(ticket_id)
+    return {"success": True, "status": "closed"}
+
+
 # ─────────────────────────────────────────────
 # Эндпоинты — Статистика
 # ─────────────────────────────────────────────
