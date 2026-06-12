@@ -199,6 +199,18 @@ def get_ticket(ticket_id: int):
 # Эндпоинты — Статистика
 # ─────────────────────────────────────────────
 
+@app.get("/api/supports")
+def get_supports():
+    """Получить список всех саппортов."""
+    with database.get_connection() as conn:
+        rows = conn.execute("""
+            SELECT DISTINCT taken_by FROM tickets
+            WHERE taken_by IS NOT NULL AND taken_by != ''
+            ORDER BY taken_by
+        """).fetchall()
+        return [{"username": row[0]} for row in rows]
+
+
 @app.get("/api/stats", response_model=list[SupportStats])
 def get_stats():
     """Статистика по всем саппортам."""
@@ -283,14 +295,21 @@ def get_commands():
 @app.get("/api/duty", response_model=DutyResponse)
 def get_duty():
     """Получить текущего дежурного (день/ночь)."""
-    now = datetime.now()
-    hour = now.hour
-    shift = "day" if 9 <= hour < 21 else "night"
-    duty = schedule_manager.get_current_duty()
+    duty_info = schedule_manager.get_duty_info()
     return DutyResponse(
-        support_username=", ".join(duty) if duty else None,
-        shift=shift
+        support_username=", ".join(duty_info["names"]) if duty_info["names"] else None,
+        shift=duty_info["shift"]
     )
+
+
+@app.get("/api/schedule")
+def get_schedule():
+    """Получить расписание на текущую неделю."""
+    week = schedule_manager.get_week_schedule()
+    return {
+        "week": week,
+        "today": datetime.now().strftime("%Y-%m-%d"),
+    }
 
 
 @app.post("/api/duty")

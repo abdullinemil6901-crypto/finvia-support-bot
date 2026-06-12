@@ -169,10 +169,13 @@
         .search-bar {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
         .search-input {
-            width: 100%;
+            flex: 1;
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--text);
@@ -189,6 +192,67 @@
 
         .search-input::placeholder {
             color: var(--text-muted);
+        }
+
+        .filter-select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            border-color: var(--accent);
+        }
+
+        .filter-select option {
+            background: var(--card);
+        }
+
+        /* Support Stats */
+        .support-stats {
+            display: none;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .support-stats.visible {
+            display: block;
+        }
+
+        .support-stats-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .support-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .support-stat {
+            text-align: center;
+        }
+
+        .support-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .support-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         /* Tickets Table */
@@ -345,6 +409,94 @@
             margin-top: 4px;
         }
 
+        .duty-shift {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .shift-day {
+            background: rgba(234, 179, 8, 0.15);
+            color: var(--yellow);
+        }
+
+        .shift-night {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        /* Schedule */
+        .schedule-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .schedule-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .schedule-day {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+        }
+
+        .schedule-day.today {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--accent);
+        }
+
+        .schedule-day-name {
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .schedule-day-date {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .schedule-day.today .schedule-day-date {
+            color: var(--accent);
+        }
+
+        .schedule-duty {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .schedule-duty .day-label,
+        .schedule-duty .night-label {
+            display: block;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        .schedule-duty .day-label {
+            background: rgba(234, 179, 8, 0.1);
+            color: var(--yellow);
+        }
+
+        .schedule-duty .night-label {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+        }
+
         /* Loading */
         .loading {
             display: flex;
@@ -425,6 +577,30 @@
             </div>
             <div class="search-bar">
                 <input type="text" class="search-input" id="searchInput" placeholder="Поиск по ID, трейдеру..." oninput="handleSearch()">
+                <select class="filter-select" id="supportFilter" onchange="filterBySupport()" title="Фильтр по саппорту">
+                    <option value="">Все саппорты</option>
+                </select>
+            </div>
+            <div class="support-stats" id="supportStats">
+                <div class="support-stats-title" id="supportStatsTitle">Статистика саппорта</div>
+                <div class="support-stats-grid">
+                    <div class="support-stat">
+                        <div class="support-stat-value" id="supportTotal">—</div>
+                        <div class="support-stat-label">Всего</div>
+                    </div>
+                    <div class="support-stat">
+                        <div class="support-stat-value" id="supportClosed">—</div>
+                        <div class="support-stat-label">Закрыто</div>
+                    </div>
+                    <div class="support-stat">
+                        <div class="support-stat-value" id="supportProgress">—</div>
+                        <div class="support-stat-label">В работе</div>
+                    </div>
+                    <div class="support-stat">
+                        <div class="support-stat-value" id="supportAvgTime">—</div>
+                        <div class="support-stat-label">Ср. время</div>
+                    </div>
+                </div>
             </div>
             <div class="tickets-list" id="ticketsList">
                 <div class="loading">Загрузка...</div>
@@ -456,6 +632,13 @@
                 <div class="duty-label">Дежурный</div>
                 <div class="duty-name" id="dutyName">—</div>
                 <div class="duty-time" id="dutyTime">—</div>
+                <div class="duty-shift" id="dutyShift"></div>
+            </div>
+            <div class="schedule-card">
+                <div class="schedule-title">Расписание на неделю</div>
+                <div class="schedule-grid" id="scheduleGrid">
+                    <div class="loading">Загрузка...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -466,9 +649,12 @@
         // State
         let tickets = [];
         let summary = null;
+        let supports = [];
+        let supportStats = {};
         let currentPage = 1;
         const perPage = 15;
         let currentStatus = '';
+        let currentSupport = '';
         let searchTimeout = null;
         let categoryChart = null;
         let daysChart = null;
@@ -480,18 +666,26 @@
             showError('');
 
             try {
-                const [summaryData, ticketsData] = await Promise.all([
+                const [summaryData, ticketsData, scheduleData, statsData, supportsData] = await Promise.all([
                     fetch(`${API}/api/summary`).then(r => r.json()),
-                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.json())
+                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.json()),
+                    fetch(`${API}/api/schedule`).then(r => r.json()),
+                    fetch(`${API}/api/stats`).then(r => r.json()),
+                    fetch(`${API}/api/supports`).then(r => r.json())
                 ]);
 
                 summary = summaryData;
                 tickets = ticketsData.tickets || [];
+                supports = supportsData || [];
+                supportStats = {};
+                statsData.forEach(s => { supportStats[s.username] = s; });
 
                 renderStats(summary);
                 renderChart(summary);
                 renderTickets();
                 updateDuty(summary);
+                renderSchedule(scheduleData);
+                renderSupportFilter();
             } catch (e) {
                 showError('Ошибка загрузки: ' + e.message);
             } finally {
@@ -581,6 +775,11 @@
                 filtered = filtered.filter(t => t.status === currentStatus);
             }
 
+            // Filter by support
+            if (currentSupport) {
+                filtered = filtered.filter(t => t.taken_by === currentSupport);
+            }
+
             // Filter by search
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (search) {
@@ -634,10 +833,54 @@
         // Update duty
         function updateDuty(data) {
             const duty = data.current_duty;
-            document.getElementById('dutyName').textContent = duty || 'Не назначен';
-            document.getElementById('dutyTime').textContent = new Date().toLocaleTimeString('ru', {
-                hour: '2-digit', minute: '2-digit'
-            }) + ' МСК';
+            const dutyName = document.getElementById('dutyName');
+            const dutyTime = document.getElementById('dutyTime');
+            const dutyShift = document.getElementById('dutyShift');
+
+            if (duty) {
+                dutyName.textContent = duty;
+                dutyTime.textContent = new Date().toLocaleTimeString('ru', {
+                    hour: '2-digit', minute: '2-digit'
+                }) + ' МСК';
+
+                // Определяем текущую смену
+                const hour = new Date().getHours();
+                const isDay = 9 <= hour && hour < 21;
+                dutyShift.textContent = isDay ? '🌅 Дневная смена' : '🌙 Ночная смена';
+                dutyShift.className = 'duty-shift ' + (isDay ? 'shift-day' : 'shift-night');
+            } else {
+                dutyName.textContent = 'Не назначен';
+                dutyTime.textContent = '—';
+                dutyShift.textContent = 'Нет дежурных';
+                dutyShift.className = 'duty-shift';
+            }
+        }
+
+        // Render schedule
+        function renderSchedule(data) {
+            const grid = document.getElementById('scheduleGrid');
+            const week = data.week || [];
+
+            if (!week.length) {
+                grid.innerHTML = '<div class="loading">Нет данных</div>';
+                return;
+            }
+
+            grid.innerHTML = week.map(day => {
+                const isToday = day.is_today;
+                const dayNames = { Mon: 'Пн', Tue: 'Вт', Wed: 'Ср', Thu: 'Чт', Fri: 'Пт', Sat: 'Сб', Sun: 'Вс' };
+                const dayName = dayNames[day.day_name] || day.day_name;
+
+                return `<div class="schedule-day ${isToday ? 'today' : ''}">
+                    <div class="schedule-day-name">${dayName}</div>
+                    <div class="schedule-day-date">${day.day_label}</div>
+                    <div class="schedule-duty">
+                        ${day.day && day.day.length ? `<span class="day-label">☀️ ${day.day.join(', ')}</span>` : ''}
+                        ${day.night && day.night.length ? `<span class="night-label">🌙 ${day.night.join(', ')}</span>` : ''}
+                        ${(!day.day?.length && !day.night?.length) ? '<span style="color:#333">—</span>' : ''}
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         // Filter by status
@@ -654,6 +897,44 @@
             renderTickets();
         }
 
+        // Filter by support
+        function filterBySupport() {
+            const select = document.getElementById('supportFilter');
+            currentSupport = select.value;
+            currentPage = 1;
+
+            // Update support stats visibility
+            const statsBlock = document.getElementById('supportStats');
+            if (currentSupport) {
+                statsBlock.classList.add('visible');
+                const stats = supportStats[currentSupport];
+                if (stats) {
+                    document.getElementById('supportStatsTitle').textContent = `Статистика: @${currentSupport}`;
+                    document.getElementById('supportTotal').textContent = stats.total || 0;
+                    document.getElementById('supportClosed').textContent = stats.closed || 0;
+                    document.getElementById('supportProgress').textContent = stats.in_progress || 0;
+                    const avgTime = stats.avg_seconds;
+                    document.getElementById('supportAvgTime').textContent = avgTime ? `${Math.round(avgTime / 60)} мин` : '—';
+                }
+            } else {
+                statsBlock.classList.remove('visible');
+            }
+
+            renderTickets();
+        }
+
+        // Render support filter dropdown
+        function renderSupportFilter() {
+            const select = document.getElementById('supportFilter');
+            select.innerHTML = '<option value="">Все саппорты</option>';
+            supports.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.username;
+                option.textContent = `@${s.username}`;
+                select.appendChild(option);
+            });
+        }
+
         // Search
         function handleSearch() {
             clearTimeout(searchTimeout);
@@ -668,6 +949,9 @@
             let filtered = tickets;
             if (currentStatus) {
                 filtered = filtered.filter(t => t.status === currentStatus);
+            }
+            if (currentSupport) {
+                filtered = filtered.filter(t => t.taken_by === currentSupport);
             }
 
             const totalPages = Math.ceil(filtered.length / perPage) || 1;
