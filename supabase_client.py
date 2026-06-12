@@ -89,20 +89,22 @@ def save_ticket(
     return result["id"]
 
 
-def take_ticket(ticket_id: int, support_username: str, support_id: int):
-    _patch("/tickets", {
+def take_ticket(ticket_id: int, support_username: str, support_id: int) -> dict:
+    result = _patch(f"/tickets?id=eq.{ticket_id}", {
         "status": "in_progress",
         "taken_by": support_username,
         "taken_by_id": support_id,
         "taken_at": datetime.now().isoformat()
-    }, params={"id": f"eq.{ticket_id}"})
+    })
+    return result[0] if isinstance(result, list) else result
 
 
-def close_ticket(ticket_id: int):
-    _patch("/tickets", {
+def close_ticket(ticket_id: int) -> dict:
+    result = _patch(f"/tickets?id=eq.{ticket_id}", {
         "status": "closed",
         "closed_at": datetime.now().isoformat()
-    }, params={"id": f"eq.{ticket_id}"})
+    })
+    return result[0] if isinstance(result, list) else result
 
 
 def get_ticket(ticket_id: int):

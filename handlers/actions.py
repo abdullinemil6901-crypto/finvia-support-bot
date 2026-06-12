@@ -181,24 +181,26 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     )
     await callback.answer("✅ Вы взяли тикет в работу.")
 
-    # Уведомление в чат трейдеров
+    # Уведомление трейдеру в личку
     trader_id = ticket.get("trader_id")
+    trader_chat_id = ticket.get("trader_chat_id")
     label = ticket.get("label") or "Обращение"
     support_name = f"@{support.username}" if support.username else support.full_name
-    try:
-        await bot.send_message(
-            chat_id=TRADER_CHAT_ID,
-            text=(
-                f"🔧 <b>Заявка взята в работу</b>\n\n"
-                f"📋 Тип: {label}\n"
-                f"👤 Трейдер: @{ticket.get('trader_username') or trader_id}\n"
-                f"👨‍💼 Саппорт: {support_name}\n\n"
-                f"Ожидайте ответа от поддержки."
-            ),
-            parse_mode="HTML"
-        )
-    except Exception as e:
-        logger.warning("Не удалось уведомить чат трейдеров: %s", e)
+
+    if trader_chat_id:
+        try:
+            await bot.send_message(
+                chat_id=trader_chat_id,
+                text=(
+                    f"🔧 <b>Ваша заявка #{ticket_id} взята в работу</b>\n\n"
+                    f"📋 Тип: {label}\n"
+                    f"👨‍💼 Саппорт: {support_name}\n\n"
+                    f"Ожидайте ответа в поддержке."
+                ),
+                parse_mode="HTML"
+            )
+        except Exception as e:
+            logger.warning("Не удалось уведомить трейдера %s: %s", trader_chat_id, e)
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("close_ticket:"))
@@ -218,20 +220,26 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     await callback.message.edit_text(new_text, reply_markup=None)
     await callback.answer("🏁 Тикет закрыт.")
 
-    # Уведомление в чат трейдеров
+    # Уведомление трейдеру в личку
     trader_id = ticket.get("trader_id")
+    trader_chat_id = ticket.get("trader_chat_id")
     trader_username = ticket.get("trader_username") or ""
     label = ticket.get("label") or "Обращение"
-    try:
-        await bot.send_message(
-            chat_id=TRADER_CHAT_ID,
-            text=(
-                f"✅ <b>Заявка закрыта</b>\n\n"
-                f"📋 Тип: {label}\n"
-                f"👤 Трейдер: @{trader_username or trader_id}\n\n"
-                f"Если остались вопросы — создайте новое обращение."
-            ),
-            parse_mode="HTML"
+
+    if trader_chat_id:
+        try:
+            await bot.send_message(
+                chat_id=trader_chat_id,
+                text=(
+                    f"✅ <b>Ваша заявка #{ticket_id} закрыта</b>\n\n"
+                    f"📋 Тип: {label}\n"
+                    f"👨‍💼 Саппорт: @{support.username or support.full_name}\n\n"
+                    f"Если остались вопросы — создайте новое обращение."
+                ),
+                parse_mode="HTML"
+            )
+        except Exception as e:
+            logger.warning("Не удалось уведомить трейдера %s: %s", trader_chat_id, e)
         )
     except Exception as e:
         logger.warning("Не удалось уведомить чат трейдеров: %s", e)
@@ -323,7 +331,8 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
             trader_name=trader_name_safe,
             label=escape_html(label),
             order_id=escape_html(order_id) if order_id else None,
-            team_name=team_name
+            team_name=team_name,
+            trader_chat_id=message.chat.id
         )
         ticket_message = f"#{ticket_id} | {text}"
 
