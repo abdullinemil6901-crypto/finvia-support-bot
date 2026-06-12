@@ -46,7 +46,12 @@ def _post(endpoint: str, data: dict) -> dict:
 
 
 def _patch(endpoint: str, data: dict, params: dict = None) -> dict:
-    resp = requests.patch(f"{BASE_URL}{endpoint}", headers={**HEADERS, "Prefer": "return=representation"}, json=data, params=params)
+    resp = requests.patch(
+        f"{BASE_URL}{endpoint}",
+        headers={**HEADERS, "Prefer": "return=representation"},
+        json=data,
+        params=params
+    )
     resp.raise_for_status()
     return resp.json()
 
@@ -85,19 +90,19 @@ def save_ticket(
 
 
 def take_ticket(ticket_id: int, support_username: str, support_id: int):
-    _patch("/tickets?id=eq.{ticket_id}", {
+    _patch("/tickets", {
         "status": "in_progress",
         "taken_by": support_username,
         "taken_by_id": support_id,
         "taken_at": datetime.now().isoformat()
-    })
+    }, params={"id": f"eq.{ticket_id}"})
 
 
 def close_ticket(ticket_id: int):
-    _patch(f"/tickets?id=eq.{ticket_id}", {
+    _patch("/tickets", {
         "status": "closed",
         "closed_at": datetime.now().isoformat()
-    })
+    }, params={"id": f"eq.{ticket_id}"})
 
 
 def get_ticket(ticket_id: int):
