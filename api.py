@@ -11,6 +11,9 @@ USE_SUPABASE = bool(os.getenv("SUPABASE_API_KEY") and os.getenv("SUPABASE_PROJEC
 # Авторизация
 API_SECRET_KEY = os.getenv("API_SECRET_KEY", "dev-only-key")
 
+# Telegram
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+
 from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,8 +22,25 @@ from typing import Optional
 from datetime import datetime, timedelta
 import time
 import pytz
+import requests
 import schedule_manager
 import database
+
+
+def send_telegram_message(chat_id: int, text: str, parse_mode: str = "HTML"):
+    """Отправляет сообщение в Telegram."""
+    if not BOT_TOKEN:
+        return False
+    try:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        response = requests.post(url, json={
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": parse_mode
+        }, timeout=10)
+        return response.ok
+    except Exception:
+        return False
 
 
 def verify_api_key(authorization: Optional[str] = Header(None)):
@@ -208,12 +228,32 @@ def get_ticket(ticket_id: int):
 @app.post("/api/tickets/{ticket_id}/take")
 def take_ticket_api(ticket_id: int, support_username: str = "dashboard_user"):
     database.take_ticket(ticket_id, support_username, 0)
+
+    # Получаем тикет для отправки уведомления
+    ticket = database.get_ticket(ticket_id)
+    if ticket and ticket.get("trader_chat_id"):
+        label = ticket.get("label") or "Обращение"
+        send_telegram_message(
+            ticket["trader_chat_id"],
+            f"🔧 <b>Ваша заявка #{ticket_id} взята в работу</b>\n\n📋 Тип: {label}\n👨‍💼 Саппорт: @{support_username}\n\nОжидайте ответа в поддержке."
+        )
+
     return {"success": True, "status": "in_progress"}
 
 
 @app.post("/api/tickets/{ticket_id}/close")
-def close_ticket_api(ticket_id: int):
+def close_ticket_api(ticket_id: int, support_username: str = "dashboard_user"):
     database.close_ticket(ticket_id)
+
+    # Получаем тикет для отправки уведомления
+    ticket = database.get_ticket(ticket_id)
+    if ticket and ticket.get("trader_chat_id"):
+        label = ticket.get("label") or "Обращение"
+        send_telegram_message(
+            ticket["trader_chat_id"],
+            f"✅ <b>Ваша заявка #{ticket_id} закрыта</b>\n\n📋 Тип: {label}\n👨‍💼 Саппорт: @{support_username}\n\nЕсли остались вопросы — создайте новое обращение."
+        )
+
     return {"success": True, "status": "closed"}
 
 
