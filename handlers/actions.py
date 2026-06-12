@@ -241,9 +241,6 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
         except Exception as e:
             logger.warning("Не удалось уведомить трейдера %s: %s", trader_chat_id, e)
 
-    except Exception as e:
-        logger.warning("Ошибка при обработке close_ticket: %s", e)
-
 
 # ─────────────────────────────────────────────
 # Хендлеры для создания тикетов (FSM)
