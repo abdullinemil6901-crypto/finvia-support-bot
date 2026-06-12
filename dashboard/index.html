@@ -124,7 +124,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 20px var(--accent-glow);
         }
 
@@ -133,10 +133,39 @@
             box-shadow: 0 8px 30px var(--accent-glow);
         }
 
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
         .refresh-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .export-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .export-btn:hover {
+            border-color: var(--green);
+            color: var(--green);
+            transform: translateY(-2px);
+        }
+
+        .export-btn:active {
+            transform: translateY(0);
         }
 
         /* Stats Grid */
@@ -402,7 +431,25 @@
 
         .ticket-item {
             border-bottom: 1px solid var(--border);
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ticket-item:hover::before {
+            opacity: 0.7;
         }
 
         .ticket-item:last-child {
@@ -464,24 +511,44 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            position: relative;
         }
 
         .status-open {
-            background: var(--yellow-glow);
-            color: var(--yellow);
-            border: 1px solid rgba(234, 179, 8, 0.3);
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(251, 191, 36, 0.15));
+            color: #fbbf24;
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            box-shadow: 0 2px 12px rgba(234, 179, 8, 0.2);
         }
 
         .status-progress {
-            background: var(--cyan-glow);
-            color: var(--cyan);
-            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(34, 211, 238, 0.15));
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            box-shadow: 0 2px 12px rgba(6, 182, 212, 0.2);
         }
 
         .status-closed {
-            background: var(--green-glow);
-            color: var(--green);
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(52, 211, 153, 0.15));
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+        }
+
+        .status-open .status-dot,
+        .status-progress .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            display: inline-block;
+            margin-right: 4px;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
         }
 
         .ticket-arrow {
@@ -520,17 +587,26 @@
         .ticket-details-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 12px;
             padding: 16px;
-            background: rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
             border-radius: 12px;
             margin-top: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
         }
 
         .detail-item {
             display: flex;
             flex-direction: column;
             gap: 4px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .detail-item:hover {
+            background: rgba(0,0,0,0.3);
         }
 
         .detail-label {
@@ -566,33 +642,49 @@
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
+            transition: all 0.2s ease;
+            border: none;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .ticket-action-btn:hover {
-            border-color: var(--accent);
-            background: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .ticket-action-btn:active {
+            transform: translateY(0);
         }
 
         .ticket-action-btn.take {
-            border-color: var(--cyan);
-            color: var(--cyan);
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
         }
 
         .ticket-action-btn.take:hover {
-            background: var(--cyan-glow);
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
         }
 
         .ticket-action-btn.close {
-            border-color: var(--green);
-            color: var(--green);
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35);
         }
 
         .ticket-action-btn.close:hover {
-            background: var(--green-glow);
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+        }
+
+        .ticket-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         /* Pagination */
@@ -1110,8 +1202,11 @@
                 <div class="live-dot"></div>
                 <span>Обновляется автоматически</span>
             </div>
-            <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+            <button class="refresh-btn" id="refreshBtn" onclick="resetAndReload()">
                 <span>↻</span> Обновить
+            </button>
+            <button class="export-btn" onclick="exportCSV()">
+                📥 CSV
             </button>
         </div>
     </div>
@@ -1283,6 +1378,37 @@
         let expandedTicketId = null;
         let weekOffset = 0;
 
+        function changeWeek(dir) {
+            weekOffset += dir;
+            loadSchedule();
+        }
+
+        async function loadSchedule() {
+            try {
+                const response = await fetch(`${API}/api/schedule?offset=${weekOffset}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderSchedule(data);
+
+                    // Update week label
+                    const weekLabel = weekOffset === 0 ? 'Расписание на неделю' :
+                                     weekOffset === 1 ? 'Следующая неделя' :
+                                     weekOffset === -1 ? 'Прошлая неделя' :
+                                     `Неделя ${weekOffset > 0 ? '+' : ''}${weekOffset}`;
+                    document.querySelector('.schedule-title').textContent = weekLabel;
+                }
+            } catch (e) {
+                console.error('Error loading schedule:', e);
+            }
+        }
+
+        function resetAndReload() {
+            weekOffset = 0;
+            currentPage = 1;
+            expandedTicketId = null;
+            loadData();
+        }
+
         // Load all data
         async function loadData() {
             const btn = document.getElementById('refreshBtn');
@@ -1310,7 +1436,7 @@
                 renderChart(summary);
                 renderTickets();
                 updateDuty(summary);
-                renderSchedule(scheduleData);
+                await loadSchedule(); // Листание недель
                 renderSupportFilter();
                 renderTeamFilter();
 
@@ -1549,7 +1675,7 @@
                                 ${t.team_name ? `<span class="ticket-team">📢 ${escapeHtml(t.team_name)}</span>` : ''}
                             </div>
                             <div class="ticket-meta">
-                                <span class="ticket-status ${statusClass}">${statusText}</span>
+                                <span class="ticket-status ${statusClass}">${t.status === 'open' || t.status === 'in_progress' ? '<span class="status-dot"></span>' : ''}${statusText}</span>
                                 <span class="ticket-arrow">▼</span>
                             </div>
                         </div>
@@ -1757,9 +1883,11 @@
             }
         }
 
-        function changeWeek(dir) {
-            weekOffset += dir;
-            // TODO: implement week navigation
+        function resetAndReload() {
+            weekOffset = 0;
+            currentPage = 1;
+            expandedTicketId = null;
+            loadData();
         }
 
         // Filter by status
@@ -1888,13 +2016,164 @@
 
         // Actions
         async function takeTicket(id) {
-            // TODO: implement via API
-            alert(`Взять тикет #${id} в работу`);
+            const btn = event.target.closest('.ticket-action-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳';
+
+            try {
+                const response = await fetch(`${API}/api/tickets/${id}/take`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    // Update local state
+                    const ticket = tickets.find(t => t.id === id);
+                    if (ticket) {
+                        ticket.status = 'in_progress';
+                        ticket.taken_at = new Date().toISOString();
+                    }
+                    expandedTicketId = null;
+                    renderTickets();
+                    showToast(`Тикет #${id} взят в работу`);
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    showError(data.error || 'Ошибка взятия тикета');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (e) {
+                showError('Ошибка сети: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
 
         async function closeTicket(id) {
-            // TODO: implement via API
-            alert(`Закрыть тикет #${id}`);
+            const btn = event.target.closest('.ticket-action-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳';
+
+            try {
+                const response = await fetch(`${API}/api/tickets/${id}/close`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    // Update local state
+                    const ticket = tickets.find(t => t.id === id);
+                    if (ticket) {
+                        ticket.status = 'closed';
+                        ticket.closed_at = new Date().toISOString();
+                    }
+                    expandedTicketId = null;
+                    renderTickets();
+                    showToast(`Тикет #${id} закрыт`);
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    showError(data.error || 'Ошибка закрытия тикета');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (e) {
+                showError('Ошибка сети: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span>✓</span> ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: linear-gradient(135deg, #22c55e, #4ade80);
+                color: #fff;
+                padding: 14px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+                z-index: 9999;
+                animation: toastIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Add toast animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes toastIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes toastOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(20px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // CSV Export
+        function exportCSV() {
+            const headers = ['ID', 'Команда', 'Категория', 'Трейдер', 'Username', 'Order ID', 'Статус', 'Саппорт', 'Создан', 'Взят', 'Закрыт', 'Время обработки'];
+            const rows = tickets.map(t => {
+                const createdAt = t.created_at ? new Date(t.created_at).toLocaleString('ru') : '';
+                const takenAt = t.taken_at ? new Date(t.taken_at).toLocaleString('ru') : '';
+                const closedAt = t.closed_at ? new Date(t.closed_at).toLocaleString('ru') : '';
+                const processingTime = t.taken_at && t.closed_at ?
+                    Math.round((new Date(t.closed_at) - new Date(t.taken_at)) / 60000) + ' мин' : '';
+
+                return [
+                    t.id,
+                    t.team_name || '',
+                    t.label || '',
+                    t.trader_name || '',
+                    t.trader_username || '',
+                    t.order_id || '',
+                    t.status,
+                    t.taken_by || '',
+                    createdAt,
+                    takenAt,
+                    closedAt,
+                    processingTime
+                ];
+            });
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => {
+                    const str = String(cell);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                }).join(','))
+                .join('\n');
+
+            const BOM = '﻿';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `tickets_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Экспорт завершён');
         }
 
         // Close modal on outside click

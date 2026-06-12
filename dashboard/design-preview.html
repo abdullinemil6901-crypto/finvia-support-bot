@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Варианты дизайна — Support Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .variants {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .variant {
+            background: #13131d;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .variant h2 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .variant-name {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* ========== VARIANT A: MINIMAL ========== */
+        .variant-a .variant-name {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+        .ticket-minimal {
+            background: #1a1a28;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .ticket-minimal:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateX(4px);
+        }
+        .ticket-minimal .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .ticket-minimal .id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .ticket-minimal .title {
+            font-weight: 500;
+        }
+        .ticket-minimal .status {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(234, 179, 8, 0.15);
+            color: #eab308;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .ticket-minimal .meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .ticket-minimal .meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ========== VARIANT B: PROGRESS ========== */
+        .variant-b .variant-name {
+            background: rgba(6, 182, 212, 0.2);
+            color: #22d3ee;
+        }
+        .ticket-progress {
+            background: #1a1a28;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
+        }
+        .ticket-progress:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 8px 32px rgba(6, 182, 212, 0.1);
+        }
+        .ticket-progress .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .ticket-progress .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ticket-progress .id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #06b6d4;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .ticket-progress .title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .ticket-progress .badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a78bfa;
+            font-weight: 600;
+        }
+        .ticket-progress .timer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #eab308;
+            margin-bottom: 10px;
+        }
+        .ticket-progress .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .ticket-progress .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4, #22d3ee);
+            border-radius: 2px;
+            width: 35%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .ticket-progress .footer {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        /* ========== VARIANT C: CYBERPUNK ========== */
+        .variant-c .variant-name {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+        }
+        .ticket-cyber {
+            background: linear-gradient(135deg, #1a1a28 0%, #2d1f3d 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .ticket-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ec4899, #a855f7, #6366f1);
+        }
+        .ticket-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 30px rgba(236, 72, 153, 0.2),
+                0 0 60px rgba(168, 85, 247, 0.1);
+            border-color: rgba(236, 72, 153, 0.6);
+        }
+        .ticket-cyber .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .ticket-cyber .id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #f472b6;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+        }
+        .ticket-cyber .status {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+            border: 1px solid rgba(236, 72, 153, 0.4);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+        }
+        .ticket-cyber .title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ticket-cyber .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .ticket-cyber .grid-item {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .ticket-cyber .grid-label {
+            font-size: 0.65rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+        .ticket-cyber .grid-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e0e7ff;
+        }
+        .ticket-cyber .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .ticket-cyber .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .ticket-cyber .btn-take {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .ticket-cyber .btn-take:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+        .ticket-cyber .btn-close {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .ticket-cyber .btn-close:hover {
+            background: rgba(34, 197, 94, 0.25);
+        }
+
+        /* ========== VARIANT D: PROFESSIONAL ========== */
+        .variant-d .variant-name {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .ticket-prof {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            color: #1f2937;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        .ticket-prof:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .ticket-prof .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .ticket-prof .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ticket-prof .id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #6366f1;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .ticket-prof .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .ticket-prof .title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #111827;
+        }
+        .ticket-prof .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 16px 0;
+        }
+        .ticket-prof .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .ticket-prof .grid-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ticket-prof .grid-label {
+            font-size: 0.7rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .ticket-prof .grid-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .ticket-prof .actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .ticket-prof .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .ticket-prof .btn-take {
+            background: #1f2937;
+            color: #fff;
+        }
+        .ticket-prof .btn-take:hover {
+            background: #111827;
+        }
+        .ticket-prof .btn-close {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .ticket-prof .btn-close:hover {
+            background: #e5e7eb;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 40px;
+        }
+        .nav button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .nav button:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Варианты дизайна карточек тикетов</h1>
+
+    <div class="variants">
+        <!-- VARIANT A: MINIMAL -->
+        <div class="variant variant-a">
+            <h2>A. Минималистичный</h2>
+            <span class="variant-name">Простой и чистый</span>
+
+            <div class="ticket-minimal">
+                <div class="header">
+                    <span class="id">#0042</span>
+                    <span class="title">🚫 Отмена выплаты</span>
+                    <span class="status">Открыт</span>
+                </div>
+                <div class="meta">
+                    <span>📢 309 арс</span>
+                    <span>👤 @trader</span>
+                    <span>🔑 ORD-123</span>
+                </div>
+            </div>
+
+            <div class="ticket-minimal">
+                <div class="header">
+                    <span class="id">#0041</span>
+                    <span class="title">🧾 Нет чека</span>
+                    <span class="status" style="background: rgba(6,182,212,0.15); color: #06b6d4;">В работе</span>
+                </div>
+                <div class="meta">
+                    <span>📢 281 арс</span>
+                    <span>👤 @user2</span>
+                    <span>🔑 ORD-456</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT B: PROGRESS -->
+        <div class="variant variant-b">
+            <h2>B. С прогресс-баром</h2>
+            <span class="variant-name">Больше контекста</span>
+
+            <div class="ticket-progress">
+                <div class="header">
+                    <div class="left">
+                        <span class="id">#0042</span>
+                        <span class="badge">309 арс</span>
+                    </div>
+                    <span class="status" style="background: rgba(234,179,8,0.15); color: #eab308;">NEW</span>
+                </div>
+                <div class="title">🚫 Отмена выплаты</div>
+                <div class="timer">⏱ В работе уже <strong>3 мин</strong></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="footer">
+                    <span>👤 @trader</span>
+                    <span>🔑 ORD-12345</span>
+                    <span>👨‍💻 —</span>
+                </div>
+            </div>
+
+            <div class="ticket-progress">
+                <div class="header">
+                    <div class="left">
+                        <span class="id">#0039</span>
+                        <span class="badge">281 арс</span>
+                    </div>
+                    <span class="status" style="background: rgba(6,182,212,0.15); color: #06b6d4;">IN PROGRESS</span>
+                </div>
+                <div class="title">👁 Выплата не видна</div>
+                <div class="timer">⏱ В работе уже <strong>8 мин</strong></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%; background: linear-gradient(90deg, #06b6d4, #4ade80);"></div>
+                </div>
+                <div class="footer">
+                    <span>👤 @user2</span>
+                    <span>🔑 ORD-789</span>
+                    <span>👨‍💻 @support</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT C: CYBERPUNK -->
+        <div class="variant variant-c">
+            <h2>C. Киберпанк / Неон</h2>
+            <span class="variant-name">Яркий и современный</span>
+
+            <div class="ticket-cyber">
+                <div class="header">
+                    <span class="id">#0042</span>
+                    <span class="status">◉ OPEN</span>
+                </div>
+                <div class="title">🚫 Отмена выплаты</div>
+                <div class="grid">
+                    <div class="grid-item">
+                        <div class="grid-label">Команда</div>
+                        <div class="grid-value">309 арс</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-label">Трейдер</div>
+                        <div class="grid-value">@trader</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-label">Ордер</div>
+                        <div class="grid-value">ORD-123</div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-take">◉ ВЗЯТЬ</button>
+                    <button class="btn btn-close">✓ ЗАКРЫТЬ</button>
+                </div>
+            </div>
+
+            <div class="ticket-cyber" style="border-color: rgba(34, 197, 94, 0.3);">
+                <div class="header">
+                    <span class="id" style="color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);">#0038</span>
+                    <span class="status" style="background: rgba(34,197,94,0.2); color: #4ade80; border-color: rgba(34,197,94,0.4);">✓ CLOSED</span>
+                </div>
+                <div class="title">🧾 Нет чека</div>
+                <div class="grid">
+                    <div class="grid-item">
+                        <div class="grid-label">Команда</div>
+                        <div class="grid-value">281 арс</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-label">Трейдер</div>
+                        <div class="grid-value">@user2</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-label">Ордер</div>
+                        <div class="grid-value">ORD-456</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT D: PROFESSIONAL -->
+        <div class="variant variant-d">
+            <h2>D. Профессиональный (Light)</h2>
+            <span class="variant-name">Для корпоративного стиля</span>
+
+            <div class="ticket-prof">
+                <div class="header">
+                    <div class="left">
+                        <span class="id">#0042</span>
+                        <span class="badge">Открыт</span>
+                    </div>
+                    <span class="title">🚫 Отмена выплаты</span>
+                </div>
+                <div class="divider"></div>
+                <div class="grid">
+                    <div class="grid-item">
+                        <span class="grid-label">Команда</span>
+                        <span class="grid-value">309 арс</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Трейдер</span>
+                        <span class="grid-value">@trader</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Ордер</span>
+                        <span class="grid-value">ORD-123</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Создан</span>
+                        <span class="grid-value">3 мин назад</span>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-take">🔧 Взять в работу</button>
+                    <button class="btn btn-close">✅ Завершить</button>
+                </div>
+            </div>
+
+            <div class="ticket-prof">
+                <div class="header">
+                    <div class="left">
+                        <span class="id">#0039</span>
+                        <span class="badge" style="background: #dbeafe; color: #2563eb;">В работе</span>
+                    </div>
+                    <span class="title">👁 Выплата не видна</span>
+                </div>
+                <div class="divider"></div>
+                <div class="grid">
+                    <div class="grid-item">
+                        <span class="grid-label">Команда</span>
+                        <span class="grid-value">281 арс</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Трейдер</span>
+                        <span class="grid-value">@user2</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Ордер</span>
+                        <span class="grid-value">ORD-789</span>
+                    </div>
+                    <div class="grid-item">
+                        <span class="grid-label">Саппорт</span>
+                        <span class="grid-value">@support</span>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-close" style="background: #166534; color: #fff;">✅ Завершить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <button onclick="alert('Это демо! Выберите вариант и мы реализуем его.')">✓ Выбрать вариант</button>
+    </div>
+</body>
+</html>

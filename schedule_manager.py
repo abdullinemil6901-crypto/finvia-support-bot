@@ -62,12 +62,13 @@ def get_duty_info() -> dict:
     }
 
 
-def get_week_schedule() -> list:
+def get_week_schedule(week_offset: int = 0) -> list:
     """
     Returns schedule for current week (Mon-Sun).
+    week_offset: 0 = текущая неделя, 1 = следующая, -1 = предыдущая
     """
     now = datetime.now(MSK)
-    start_of_week = now - timedelta(days=now.weekday())
+    start_of_week = now - timedelta(days=now.weekday()) + timedelta(weeks=week_offset)
     schedule = load_schedule()
     week_schedule = []
 

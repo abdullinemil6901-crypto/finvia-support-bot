@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Ticket Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 15px -3px rgba(0, 0, 0, 0.08),
+        0 20px 25px -5px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 10px 15px -3px rgba(99, 102, 241, 0.1),
+        0 20px 25px -5px rgba(99, 102, 241, 0.1),
+        0 25px 50px -12px rgba(99, 102, 241, 0.15);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card:focus-within {
+      outline: none;
+      box-shadow:
+        0 0 0 3px rgba(99, 102, 241, 0.2),
+        0 10px 15px -3px rgba(99, 102, 241, 0.1),
+        0 20px 25px -5px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Glassmorphism overlay */
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0) 50%
+      );
+      pointer-events: none;
+      border-radius: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticket-id {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+    }
+
+    .status-badge.new {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.25);
+    }
+
+    .status-badge.new .status-dot {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-badge.in-progress {
+      background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+      color: #0e7490;
+      box-shadow: 0 2px 8px rgba(34, 211, 238, 0.25);
+    }
+
+    .status-badge.closed {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #047857;
+      box-shadow: 0 2px 8px rgba(52, 211, 153, 0.25);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+      }
+    }
+
+    .card-body {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticket-type {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      margin-bottom: 1rem;
+    }
+
+    .ticket-type-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .ticket-type-info {
+      flex: 1;
+    }
+
+    .ticket-type-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+
+    .team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.6875rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+    }
+
+    .ticket-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .detail-item {
+      background: #f8fafc;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .detail-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .detail-value.muted {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .timer-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+      padding: 0.875rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    .timer-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timer-icon {
+      font-size: 1rem;
+    }
+
+    .timer-label {
+      font-size: 0.6875rem;
+      color: #7c3aed;
+      font-weight: 500;
+    }
+
+    .timer-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #6d28d9;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-unit {
+      font-size: 0.6875rem;
+      color: #7c3aed;
+      font-weight: 500;
+      margin-left: 0.25rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.625rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .card-footer {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .created-at {
+      font-size: 0.6875rem;
+      color: #94a3b8;
+    }
+
+    .created-icon {
+      opacity: 0.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+
+      .ticket-details {
+        grid-template-columns: 1fr;
+      }
+
+      .card-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article class="card" role="article" aria-label="Тикет #0042">
+    <header class="card-header">
+      <span class="ticket-id">#0042</span>
+      <span class="status-badge new">
+        <span class="status-dot"></span>
+        Новый
+      </span>
+    </header>
+
+    <div class="card-body">
+      <div class="ticket-type">
+        <div class="ticket-type-icon">&#x1F4B3;</div>
+        <div class="ticket-type-info">
+          <div class="ticket-type-name">Проблема с оплатой</div>
+          <span class="team-badge">
+            <span>&#x1F465;</span> Команда Финансы
+          </span>
+        </div>
+      </div>
+
+      <div class="ticket-details">
+        <div class="detail-item">
+          <div class="detail-label">Трейдер</div>
+          <div class="detail-value">@trader_ivanov</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">ID заказа</div>
+          <div class="detail-value muted">ORD-2024-8842</div>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="timer-info">
+          <span class="timer-icon">&#x23F1;</span>
+          <span class="timer-label">Время с создания</span>
+        </div>
+        <div>
+          <span class="timer-value">42</span>
+          <span class="timer-unit">мин</span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn btn-primary" type="button">
+          <span>&#x1F4BC;</span>
+          Взять в работу
+        </button>
+        <button class="btn btn-secondary" type="button">
+          <span>&#x2705;</span>
+          Завершить
+        </button>
+      </div>
+    </div>
+
+    <footer class="card-footer">
+      <span class="created-icon">&#x1F4C5;</span>
+      <time class="created-at" datetime="2024-01-15T14:32:00">
+        Создан: 15 января 2024, 14:32
+      </time>
+    </footer>
+  </article>
+
+  <script>
+    // Interactive timer update
+    const timerValue = document.querySelector('.timer-value');
+    let minutes = 42;
+
+    setInterval(() => {
+      minutes++;
+      timerValue.textContent = minutes;
+    }, 60000);
+
+    // Button interactions
+    document.querySelector('.btn-primary').addEventListener('click', function() {
+      const badge = document.querySelector('.status-badge');
+      badge.className = 'status-badge in-progress';
+      badge.innerHTML = '<span class="status-dot"></span>В работе';
+    });
+
+    document.querySelector('.btn-secondary').addEventListener('click', function() {
+      const badge = document.querySelector('.status-badge');
+      badge.className = 'status-badge closed';
+      badge.innerHTML = '<span class="status-dot"></span>Закрыт';
+    });
+  </script>
+</body>
+</html>
