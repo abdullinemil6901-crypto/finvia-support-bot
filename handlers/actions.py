@@ -164,7 +164,7 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     if ticket is None:
         await callback.answer("❌ Тикет не найден.", show_alert=True)
         return
-    if ticket[6] != "open":
+    if ticket.get("status") != "open":
         await callback.answer("⚠️ Тикет уже взят или закрыт.", show_alert=True)
         return
 
@@ -182,8 +182,8 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
     await callback.answer("✅ Вы взяли тикет в работу.")
 
     # Уведомление в чат трейдеров
-    trader_id = ticket[1]
-    label = ticket[4] or "Обращение"
+    trader_id = ticket.get("trader_id")
+    label = ticket.get("label") or "Обращение"
     support_name = f"@{support.username}" if support.username else support.full_name
     try:
         await bot.send_message(
@@ -191,7 +191,7 @@ async def handle_take_ticket(callback: CallbackQuery, bot: Bot):
             text=(
                 f"🔧 <b>Заявка взята в работу</b>\n\n"
                 f"📋 Тип: {label}\n"
-                f"👤 Трейдер: @{ticket[2] or trader_id}\n"
+                f"👤 Трейдер: @{ticket.get('trader_username') or trader_id}\n"
                 f"👨‍💼 Саппорт: {support_name}\n\n"
                 f"Ожидайте ответа от поддержки."
             ),
@@ -208,7 +208,7 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     if ticket is None:
         await callback.answer("❌ Тикет не найден.", show_alert=True)
         return
-    if ticket[6] == "closed":
+    if ticket.get("status") == "closed":
         await callback.answer("⚠️ Тикет уже закрыт.", show_alert=True)
         return
 
@@ -219,9 +219,9 @@ async def handle_close_ticket(callback: CallbackQuery, bot: Bot):
     await callback.answer("🏁 Тикет закрыт.")
 
     # Уведомление в чат трейдеров
-    trader_id = ticket[1]
-    trader_username = ticket[2] or ""
-    label = ticket[4] or "Обращение"
+    trader_id = ticket.get("trader_id")
+    trader_username = ticket.get("trader_username") or ""
+    label = ticket.get("label") or "Обращение"
     try:
         await bot.send_message(
             chat_id=TRADER_CHAT_ID,
