@@ -207,6 +207,31 @@ ADMIN_IDS = [8480479055]     # ID админов
 
 ---
 
+## Supabase
+
+**Project ID:** `jhoxrxdehjypcpdwuzjs`
+
+**Dashboard:** <https://supabase.com/dashboard/project/jhoxrxdehjypcpdwuzjs>
+
+### MCP Server
+
+Подключён через Claude MCP:
+
+```bash
+claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp?project_ref=jhoxrxdehjypcpdwuzjs"
+```
+
+Файл: `.mcp.json`
+
+### Миграция SQLite → Supabase (TODO)
+
+- [ ] Создать таблицы в Supabase
+- [ ] Перенести данные из `support_bot.db`
+- [ ] Обновить `database.py` для работы с Supabase
+- [ ] Протестировать бота с новой БД
+
+---
+
 ## Зависимости
 
 ```
@@ -216,6 +241,7 @@ pytz
 fastapi
 uvicorn[standard]
 pydantic
+psycopg2-binary  # для PostgreSQL
 ```
 
 ---
