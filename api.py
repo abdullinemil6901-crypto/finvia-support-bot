@@ -315,20 +315,33 @@ def get_summary():
     if USE_SUPABASE:
         summary = get_tickets_summary()
         labels = get_label_stats()
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT TO_CHAR(created_at AT TIME ZONE 'Europe/Moscow', 'HH24') as hour, COUNT(*) as cnt
-                FROM tickets WHERE created_at >= NOW() - INTERVAL '1 day'
-                GROUP BY hour ORDER BY hour
-            """)
-            by_hour = [(r["hour"], r["cnt"]) for r in cur.fetchall()]
-            cur.execute("""
-                SELECT TO_CHAR(created_at AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD') as day, COUNT(*) as cnt
-                FROM tickets WHERE created_at >= NOW() - INTERVAL '7 days'
-                GROUP BY day ORDER BY day
-            """)
-            by_day = [(r["day"], r["cnt"]) for r in cur.fetchall()]
+
+        # Получаем все тикеты для анализа
+        all_tickets = _get("/tickets?select=created_at")
+        from datetime import datetime, timedelta
+        import pytz
+        MSK = pytz.timezone("Europe/Moscow")
+        now = datetime.now(MSK)
+        day_ago = now - timedelta(days=1)
+        week_ago = now - timedelta(days=7)
+
+        by_hour = {}
+        by_day = {}
+        for t in all_tickets:
+            try:
+                created = datetime.fromisoformat(t["created_at"].replace("Z", "+00:00"))
+                created_msk = created.astimezone(MSK)
+                if created_msk >= day_ago:
+                    hour_key = created_msk.strftime("%H")
+                    by_hour[hour_key] = by_hour.get(hour_key, 0) + 1
+                if created_msk >= week_ago:
+                    day_key = created_msk.strftime("%Y-%m-%d")
+                    by_day[day_key] = by_day.get(day_key, 0) + 1
+            except:
+                pass
+
+        by_hour = [(f"{h:02d}", by_hour.get(h, 0)) for h in range(24)]
+        by_day = sorted(by_day.items())
     else:
         with get_connection() as conn:
             total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]

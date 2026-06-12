@@ -31,7 +31,11 @@ def _get(endpoint: str, params: dict = None) -> list:
 def _post(endpoint: str, data: dict) -> dict:
     resp = requests.post(f"{BASE_URL}{endpoint}", headers=HEADERS, json=data)
     resp.raise_for_status()
-    return resp.json()
+    result = resp.json()
+    # Supabase возвращает массив для INSERT
+    if isinstance(result, list):
+        return result[0] if result else {}
+    return result
 
 
 def _patch(endpoint: str, data: dict, params: dict = None) -> dict:
