@@ -7,6 +7,13 @@ import requests
 from datetime import datetime
 import pytz
 
+# Загружаем .env если есть
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Настройки — из переменных окружения (.env)
 PROJECT_REF = os.getenv("SUPABASE_PROJECT_REF", "")
 API_KEY = os.getenv("SUPABASE_API_KEY", "")
