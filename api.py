@@ -196,14 +196,9 @@ def get_ticket(ticket_id: int):
 @app.get("/api/supports")
 def get_supports():
     if USE_SUPABASE:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT DISTINCT taken_by FROM tickets
-                WHERE taken_by IS NOT NULL AND taken_by != ''
-                ORDER BY taken_by
-            """)
-            return [{"username": r["taken_by"]} for r in cur.fetchall()]
+        from supabase_client import get_all_supports
+        supports = get_all_supports()
+        return [{"username": s.get("username", "")} for s in supports]
     else:
         with get_connection() as conn:
             rows = conn.execute("""
