@@ -1,8 +1,19 @@
 """
 Support Bot — REST API v2
 Эндпоинты для админ-дашборда.
-Масштабируемая архитектура для 20+ команд.
+Работает с SQLite (fallback) и Supabase (если задан DATABASE_URL).
 """
+import os
+
+USE_SUPABASE = bool(os.getenv("DATABASE_URL") or os.getenv("DB_HOST"))
+
+if USE_SUPABASE:
+    from supabase_client import (
+        get_connection, get_all_tickets_raw, get_tickets_summary,
+        get_support_stats, get_label_stats
+    )
+else:
+    from database import get_connection
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,15 +21,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from functools import lru_cache
-import os
 import time
-import database
 import schedule_manager
+import database
 
-# Простое кэширование в памяти
-_summary_cache = {"data": None, "timestamp": 0}
-CACHE_TTL = 30  # секунды
+CACHE_TTL = 30
 
 app = FastAPI(
     title="Support Bot API",
@@ -34,17 +41,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount dashboard static files
 dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard")
 if os.path.exists(dashboard_path):
     app.mount("/dashboard", StaticFiles(directory=dashboard_path, html=True), name="dashboard")
 
+_summary_cache = {"data": None, "timestamp": 0}
 
-# ─────────────────────────────────────────────
-# КОНФИГУРАЦИЯ КОМАНД — масштабируемость
-# ─────────────────────────────────────────────
-
-# Все команды/категории в одном месте — легко добавить 20+ команд
 COMMANDS_CONFIG = {
     "apply_cancel_payout":       {"label": "🚫 Отмена выплаты",                "needs_order_id": True},
     "apply_payout_not_visible":  {"label": "👁 Выплата не видна на токене",    "needs_order_id": True},
@@ -61,10 +63,6 @@ COMMANDS_CONFIG = {
     "apply_increase_limits":     {"label": "📈 Увеличить лимиты",              "needs_order_id": True},
 }
 
-
-# ─────────────────────────────────────────────
-# Pydantic модели
-# ─────────────────────────────────────────────
 
 class TicketResponse(BaseModel):
     id: int
@@ -115,84 +113,75 @@ class SetDutyRequest(BaseModel):
 
 
 # ─────────────────────────────────────────────
-# Эндпоинты — Тикеты (с пагинацией и фильтрами)
+# Эндпоинты — Тикеты
 # ─────────────────────────────────────────────
 
 @app.get("/api/tickets", response_model=TicketListResponse)
 def get_tickets(
-    status: Optional[str] = Query(None, description="Фильтр по статусу: open, in_progress, closed"),
-    support: Optional[str] = Query(None, description="Фильтр по саппорту (username)"),
-    label: Optional[str] = Query(None, description="Фильтр по категории (label)"),
-    trader_id: Optional[int] = Query(None, description="Фильтр по ID трейдера"),
-    page: int = Query(1, ge=1, description="Номер страницы"),
-    per_page: int = Query(20, ge=1, le=500, description="Тикетов на странице"),
+    status: Optional[str] = Query(None),
+    support: Optional[str] = Query(None),
+    label: Optional[str] = Query(None),
+    trader_id: Optional[int] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=500),
 ):
-    """
-    Получить тикеты с пагинацией и фильтрами.
-    - /api/tickets — все тикеты (пагинация)
-    - /api/tickets?status=open — только открытые
-    - /api/tickets?support=username — тикеты саппорта
-    - /api/tickets?label=xxx — по категории
-    - /api/tickets?trader_id=123 — по трейдеру
-    """
     offset = (page - 1) * per_page
-    conditions = []
-    params = []
 
-    if status:
-        conditions.append("status = ?")
-        params.append(status)
-    if support:
-        conditions.append("taken_by = ?")
-        params.append(support)
-    if label:
-        conditions.append("label = ?")
-        params.append(label)
-    if trader_id:
-        conditions.append("trader_id = ?")
-        params.append(trader_id)
+    if USE_SUPABASE:
+        rows, total = get_all_tickets_raw(
+            limit=per_page, offset=offset,
+            status=status, taken_by=support, label=label, trader_id=trader_id
+        )
+    else:
+        conn = get_connection()
+        conditions = []
+        params = []
+        if status:
+            conditions.append("status = ?")
+            params.append(status)
+        if support:
+            conditions.append("taken_by = ?")
+            params.append(support)
+        if label:
+            conditions.append("label = ?")
+            params.append(label)
+        if trader_id:
+            conditions.append("trader_id = ?")
+            params.append(trader_id)
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-    where_clause = " AND ".join(conditions) if conditions else "1=1"
+        with conn:
+            total = conn.execute(f"SELECT COUNT(*) FROM tickets WHERE {where_clause}", params).fetchone()[0]
+            rows_raw = conn.execute(
+                f"SELECT * FROM tickets WHERE {where_clause} ORDER BY created_at DESC LIMIT ? OFFSET ?",
+                params + [per_page, offset]
+            ).fetchall()
+        rows = [_row_to_dict(row) for row in rows_raw]
 
-    with database.get_connection() as conn:
-        # Получаем общее количество
-        total = conn.execute(
-            f"SELECT COUNT(*) FROM tickets WHERE {where_clause}",
-            params
-        ).fetchone()[0]
-
-        # Получаем тикеты для текущей страницы
-        rows = conn.execute(
-            f"SELECT * FROM tickets WHERE {where_clause} ORDER BY created_at DESC LIMIT ? OFFSET ?",
-            params + [per_page, offset]
-        ).fetchall()
-
-    tickets = [_row_to_ticket_full(row) for row in rows]
+    tickets = [_row_to_ticket(r) for r in rows]
     total_pages = (total + per_page - 1) // per_page if total > 0 else 1
 
     return TicketListResponse(
-        tickets=tickets,
-        total=total,
-        page=page,
-        per_page=per_page,
-        total_pages=total_pages
+        tickets=tickets, total=total, page=page, per_page=per_page, total_pages=total_pages
     )
 
 
 @app.get("/api/tickets/open", response_model=list[TicketResponse])
 def get_open_tickets():
-    """Получить все открытые тикеты (для саппортов)."""
     rows = database.get_open_tickets()
-    return [_row_to_ticket(row) for row in rows]
+    if USE_SUPABASE:
+        return [_row_to_ticket(r) for r in rows]
+    return [_row_to_ticket(_row_to_dict(r)) for r in rows]
 
 
 @app.get("/api/tickets/{ticket_id}", response_model=TicketResponse)
 def get_ticket(ticket_id: int):
-    """Получить один тикет по ID."""
     row = database.get_ticket(ticket_id)
     if not row:
         raise HTTPException(status_code=404, detail="Тикет не найден")
-    return _row_to_ticket_full(row)
+    if USE_SUPABASE:
+        return _row_to_ticket(row)
+    return _row_to_ticket(_row_to_dict(row))
 
 
 # ─────────────────────────────────────────────
@@ -201,89 +190,78 @@ def get_ticket(ticket_id: int):
 
 @app.get("/api/supports")
 def get_supports():
-    """Получить список всех саппортов."""
-    with database.get_connection() as conn:
-        rows = conn.execute("""
-            SELECT DISTINCT taken_by FROM tickets
-            WHERE taken_by IS NOT NULL AND taken_by != ''
-            ORDER BY taken_by
-        """).fetchall()
-        return [{"username": row[0]} for row in rows]
+    if USE_SUPABASE:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT DISTINCT taken_by FROM tickets
+                WHERE taken_by IS NOT NULL AND taken_by != ''
+                ORDER BY taken_by
+            """)
+            return [{"username": r["taken_by"]} for r in cur.fetchall()]
+    else:
+        with get_connection() as conn:
+            rows = conn.execute("""
+                SELECT DISTINCT taken_by FROM tickets
+                WHERE taken_by IS NOT NULL AND taken_by != ''
+                ORDER BY taken_by
+            """).fetchall()
+            return [{"username": row[0]} for row in rows]
 
 
 @app.get("/api/stats", response_model=list[SupportStats])
 def get_stats():
-    """Статистика по всем саппортам."""
-    with database.get_connection() as conn:
-        rows = conn.execute("""
-            SELECT
-                taken_by as username,
-                COUNT(*) as total,
-                SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) as closed,
-                SUM(CASE WHEN status='in_progress' THEN 1 ELSE 0 END) as in_progress,
-                AVG(
-                    CASE
-                        WHEN status='closed' AND taken_at IS NOT NULL AND closed_at IS NOT NULL
-                        THEN (julianday(closed_at) - julianday(taken_at)) * 86400
-                        ELSE NULL
-                    END
-                ) as avg_seconds
-            FROM tickets
-            WHERE taken_by IS NOT NULL
-            GROUP BY taken_by
-            ORDER BY total DESC
-        """).fetchall()
-        return [
-            SupportStats(
-                username=row[0] or "unknown",
-                total=row[1] or 0,
-                closed=row[2] or 0,
-                in_progress=row[3] or 0,
-                avg_seconds=row[4]
-            )
-            for row in rows
-        ]
+    if USE_SUPABASE:
+        rows = get_support_stats()
+        return [SupportStats(
+            username=r.get("username") or "unknown",
+            total=r.get("total") or 0,
+            closed=r.get("closed") or 0,
+            in_progress=0,
+            avg_seconds=r.get("avg_seconds")
+        ) for r in rows]
+    else:
+        with get_connection() as conn:
+            rows = conn.execute("""
+                SELECT taken_by, COUNT(*) as total,
+                       SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) as closed,
+                       SUM(CASE WHEN status='in_progress' THEN 1 ELSE 0 END) as in_progress,
+                       AVG(CASE WHEN status='closed' AND taken_at IS NOT NULL AND closed_at IS NOT NULL
+                                THEN (julianday(closed_at) - julianday(taken_at)) * 86400 END) as avg_seconds
+                FROM tickets WHERE taken_by IS NOT NULL GROUP BY taken_by ORDER BY total DESC
+            """).fetchall()
+            return [SupportStats(
+                username=row[0] or "unknown", total=row[1] or 0, closed=row[2] or 0,
+                in_progress=row[3] or 0, avg_seconds=row[4]
+            ) for row in rows]
 
 
 @app.get("/api/stats/{username}", response_model=SupportStats)
-def get_support_stats(username: str):
-    """Личная статистика конкретного саппорта."""
+def get_support_stats_endpoint(username: str):
     stats = database.get_support_personal_stats(username)
     return SupportStats(
-        username=username,
-        total=stats["total"],
-        closed=stats["closed"],
-        in_progress=stats["in_progress"],
-        avg_seconds=stats["avg_seconds"]
+        username=username, total=stats["total"], closed=stats["closed"],
+        in_progress=stats.get("in_progress", 0), avg_seconds=stats["avg_seconds"]
     )
 
 
-# ─────────────────────────────────────────────
-# Эндпоинты — Команды (для дашборда)
-# ─────────────────────────────────────────────
-
 @app.get("/api/commands", response_model=list[CommandInfo])
 def get_commands():
-    """Список всех доступных команд с количеством тикетов."""
-    with database.get_connection() as conn:
-        # Получаем количество тикетов по каждой категории
-        counts = conn.execute("""
-            SELECT label, COUNT(*) as cnt
-            FROM tickets
-            GROUP BY label
-        """).fetchall()
-        count_map = {row[0]: row[1] for row in counts}
+    if USE_SUPABASE:
+        rows = get_label_stats()
+        count_map = {r[0]: r[1] for r in rows}
+    else:
+        with get_connection() as conn:
+            rows = conn.execute("SELECT label, COUNT(*) as cnt FROM tickets GROUP BY label").fetchall()
+            count_map = {row[0]: row[1] for row in rows}
 
     result = []
     for key, config in COMMANDS_CONFIG.items():
         result.append(CommandInfo(
-            key=key,
-            label=config["label"],
+            key=key, label=config["label"],
             needs_order_id=config["needs_order_id"],
             ticket_count=count_map.get(config["label"], 0)
         ))
-
-    # Сортируем по количеству тикетов (популярные первые)
     result.sort(key=lambda x: x.ticket_count, reverse=True)
     return result
 
@@ -294,7 +272,6 @@ def get_commands():
 
 @app.get("/api/duty", response_model=DutyResponse)
 def get_duty():
-    """Получить текущего дежурного (день/ночь)."""
     duty_info = schedule_manager.get_duty_info()
     return DutyResponse(
         support_username=", ".join(duty_info["names"]) if duty_info["names"] else None,
@@ -304,176 +281,155 @@ def get_duty():
 
 @app.get("/api/schedule")
 def get_schedule():
-    """Получить расписание на текущую неделю."""
     week = schedule_manager.get_week_schedule()
-    return {
-        "week": week,
-        "today": datetime.now().strftime("%Y-%m-%d"),
-    }
+    return {"week": week, "today": datetime.now().strftime("%Y-%m-%d")}
 
 
 @app.post("/api/duty")
-def set_duty(req: SetDutyRequest):
-    """Назначить дежурного на смену."""
+def set_duty_endpoint(req: SetDutyRequest):
     now = datetime.now()
     date_str = now.strftime("%Y-%m-%d")
     shift = req.shift or ("day" if 9 <= now.hour < 21 else "night")
-    schedule_manager.set_duty(date_str, shift, [req.support_username])
+
+    if USE_SUPABASE:
+        from supabase_client import set_duty as sb_set_duty
+        sb_set_duty(date_str, shift, [req.support_username])
+    else:
+        schedule_manager.set_duty(date_str, shift, [req.support_username])
+
     return {"success": True, "support_username": req.support_username, "shift": shift}
 
 
 # ─────────────────────────────────────────────
-# Эндпоинты — Сводка (для главной дашборда)
+# Эндпоинты — Сводка
 # ─────────────────────────────────────────────
 
 @app.get("/api/summary")
 def get_summary():
-    """Сводка для главной страницы дашборда. Кэшируется на 30 сек."""
     global _summary_cache
-
-    # Проверяем кэш
     now = time.time()
+
     if _summary_cache["data"] and (now - _summary_cache["timestamp"]) < CACHE_TTL:
         return _summary_cache["data"]
 
-    with database.get_connection() as conn:
-        total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
-        open_count = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0]
-        in_progress = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='in_progress'").fetchone()[0]
-        closed = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='closed'").fetchone()[0]
+    if USE_SUPABASE:
+        summary = get_tickets_summary()
+        labels = get_label_stats()
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT TO_CHAR(created_at AT TIME ZONE 'Europe/Moscow', 'HH24') as hour, COUNT(*) as cnt
+                FROM tickets WHERE created_at >= NOW() - INTERVAL '1 day'
+                GROUP BY hour ORDER BY hour
+            """)
+            by_hour = [(r["hour"], r["cnt"]) for r in cur.fetchall()]
+            cur.execute("""
+                SELECT TO_CHAR(created_at AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD') as day, COUNT(*) as cnt
+                FROM tickets WHERE created_at >= NOW() - INTERVAL '7 days'
+                GROUP BY day ORDER BY day
+            """)
+            by_day = [(r["day"], r["cnt"]) for r in cur.fetchall()]
+    else:
+        with get_connection() as conn:
+            total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
+            open_count = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0]
+            in_progress = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='in_progress'").fetchone()[0]
+            closed = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='closed'").fetchone()[0]
+            summary = {"total": total, "open": open_count, "in_progress": in_progress, "closed": closed, "today": 0}
 
-        # Тикеты по категориям
-        by_label = conn.execute("""
-            SELECT label, COUNT(*) as cnt
-            FROM tickets
-            GROUP BY label
-            ORDER BY cnt DESC
-        """).fetchall()
-
-        # Тикеты по часам (последние 24 часа)
-        by_hour = conn.execute("""
-            SELECT strftime('%H', created_at) as hour, COUNT(*) as cnt
-            FROM tickets
-            WHERE created_at >= datetime('now', '-1 day')
-            GROUP BY hour
-            ORDER BY hour
-        """).fetchall()
-
-        # Тикеты по дням (последние 7 дней)
-        by_day = conn.execute("""
-            SELECT strftime('%Y-%m-%d', created_at) as day, COUNT(*) as cnt
-            FROM tickets
-            WHERE created_at >= datetime('now', '-7 days')
-            GROUP BY day
-            ORDER BY day
-        """).fetchall()
+            labels = conn.execute("SELECT label, COUNT(*) as cnt FROM tickets GROUP BY label ORDER BY cnt DESC").fetchall()
+            by_hour = conn.execute("""
+                SELECT strftime('%H', created_at) as hour, COUNT(*) as cnt
+                FROM tickets WHERE created_at >= datetime('now', '-1 day') GROUP BY hour ORDER BY hour
+            """).fetchall()
+            by_day = conn.execute("""
+                SELECT strftime('%Y-%m-%d', created_at) as day, COUNT(*) as cnt
+                FROM tickets WHERE created_at >= datetime('now', '-7 days') GROUP BY day ORDER BY day
+            """).fetchall()
 
     duty = schedule_manager.get_current_duty()
 
     result = {
-        "total": total,
-        "open": open_count,
-        "in_progress": in_progress,
-        "closed": closed,
-        "by_label": [{"label": row[0], "count": row[1]} for row in by_label],
-        "by_hour": [{"hour": row[0], "count": row[1]} for row in by_hour],
-        "by_day": [{"day": row[0], "count": row[1]} for row in by_day],
+        "total": summary.get("total", 0),
+        "open": summary.get("open", 0),
+        "in_progress": summary.get("in_progress", 0),
+        "closed": summary.get("closed", 0),
+        "by_label": [{"label": r[0], "count": r[1]} for r in labels],
+        "by_hour": [{"hour": str(r[0]).zfill(2), "count": r[1]} for r in by_hour],
+        "by_day": [{"day": str(r[0]), "count": r[1]} for r in by_day],
         "current_duty": ", ".join(duty) if duty else None
     }
 
-    # Сохраняем в кэш
     _summary_cache = {"data": result, "timestamp": now}
     return result
+
+
+# ─────────────────────────────────────────────
+# Мониторинг
+# ─────────────────────────────────────────────
+
+@app.get("/health")
+def health_check():
+    try:
+        if USE_SUPABASE:
+            conn = get_connection()
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+        else:
+            with get_connection() as conn:
+                conn.execute("SELECT 1")
+        return {"status": "healthy", "timestamp": datetime.now().isoformat(), "version": "2.0.0", "db": "supabase" if USE_SUPABASE else "sqlite"}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e), "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/api/stats_summary")
+def get_stats_summary():
+    try:
+        if USE_SUPABASE:
+            s = get_tickets_summary()
+            return {**s, "timestamp": datetime.now().isoformat()}
+        else:
+            with get_connection() as conn:
+                return {
+                    "total": conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0],
+                    "open": conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0],
+                    "in_progress": conn.execute("SELECT COUNT(*) FROM tickets WHERE status='in_progress'").fetchone()[0],
+                    "closed": conn.execute("SELECT COUNT(*) FROM tickets WHERE status='closed'").fetchone()[0],
+                    "timestamp": datetime.now().isoformat()
+                }
+    except Exception as e:
+        return {"error": str(e)}
 
 
 # ─────────────────────────────────────────────
 # Вспомогательные функции
 # ─────────────────────────────────────────────
 
-def _row_to_ticket(row, is_open: bool = False) -> TicketResponse:
-    """Конвертирует row из get_open_tickets() в TicketResponse."""
+def _row_to_dict(row) -> dict:
+    """Конвертирует sqlite3.Row в dict."""
+    if isinstance(row, dict):
+        return row
+    return dict(row)
+
+
+def _row_to_ticket(row: dict) -> TicketResponse:
+    """Конвертирует dict в TicketResponse."""
     return TicketResponse(
-        id=row[0],
-        trader_id=row[1],
-        trader_username=row[2] or "",
-        trader_name=row[3] or "",
-        label=row[4],
-        order_id=row[5],
-        status="open",
-        taken_by=None,
-        taken_at=None,
-        closed_at=None,
-        created_at=row[6],
-        trader_chat_id=row[7] if len(row) > 7 else None
+        id=row.get("id") or row[0],
+        trader_id=row.get("trader_id") or row[1],
+        trader_username=row.get("trader_username") or row[2] or "",
+        trader_name=row.get("trader_name") or row[3] or "",
+        label=row.get("label") or row[4] or "",
+        order_id=row.get("order_id") or row[5],
+        status=row.get("status") or row[6] or "open",
+        taken_by=row.get("taken_by") or row.get("taken_by"),
+        taken_at=str(row.get("taken_at")) if row.get("taken_at") else None,
+        closed_at=str(row.get("closed_at")) if row.get("closed_at") else None,
+        created_at=str(row.get("created_at")) if row.get("created_at") else (row[11] if len(row) > 11 else ""),
+        trader_chat_id=row.get("trader_chat_id")
     )
 
-
-def _row_to_ticket_full(row) -> TicketResponse:
-    """Конвертирует row из SELECT * в TicketResponse."""
-    return TicketResponse(
-        id=row[0],
-        trader_id=row[1],
-        trader_username=row[2] or "",
-        trader_name=row[3] or "",
-        label=row[4] or "",
-        order_id=row[5],
-        status=row[6],
-        taken_by=row[7],
-        taken_at=row[9] if len(row) > 9 else None,
-        closed_at=row[10] if len(row) > 10 else None,
-        created_at=row[11] if len(row) > 11 else "",
-        trader_chat_id=row[12] if len(row) > 12 else None
-    )
-
-
-# ─────────────────────────────────────────────
-# Эндпоинты — Мониторинг
-# ─────────────────────────────────────────────
-
-@app.get("/health")
-def health_check():
-    """Healthcheck для uptime-мониторинга."""
-    try:
-        # Проверяем подключение к БД
-        with database.get_connection() as conn:
-            conn.execute("SELECT 1")
-        return {
-            "status": "healthy",
-            "timestamp": datetime.now().isoformat(),
-            "version": "2.0.0"
-        }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }
-
-
-@app.get("/api/stats_summary")
-def get_stats_summary():
-    """Быстрая сводка для мониторинга."""
-    try:
-        with database.get_connection() as conn:
-            total = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
-            open_count = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='open'").fetchone()[0]
-            closed = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='closed'").fetchone()[0]
-            in_progress = conn.execute("SELECT COUNT(*) FROM tickets WHERE status='in_progress'").fetchone()[0]
-
-        return {
-            "total": total,
-            "open": open_count,
-            "in_progress": in_progress,
-            "closed": closed,
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-
-# ─────────────────────────────────────────────
-# Запуск
-# ─────────────────────────────────────────────
 
 if __name__ == "__main__":
     import uvicorn

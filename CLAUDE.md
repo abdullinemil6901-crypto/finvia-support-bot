@@ -213,22 +213,55 @@ ADMIN_IDS = [8480479055]     # ID админов
 
 **Dashboard:** <https://supabase.com/dashboard/project/jhoxrxdehjypcpdwuzjs>
 
-### MCP Server
+### Подключение
 
-Подключён через Claude MCP:
-
+MCP Server подключён:
 ```bash
 claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp?project_ref=jhoxrxdehjypcpdwuzjs"
 ```
 
-Файл: `.mcp.json`
+Настройки через переменные окружения:
+```bash
+DATABASE_URL=postgresql://postgres:password@host:5432/postgres
+# или отдельные компоненты:
+DB_HOST=aws-0.eu-central-1.pooler.supabase.com
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=your_password
+```
 
-### Миграция SQLite → Supabase (TODO)
+### Миграция ✅ Завершена 2026-06-12
 
-- [ ] Создать таблицы в Supabase
-- [ ] Перенести данные из `support_bot.db`
-- [ ] Обновить `database.py` для работы с Supabase
-- [ ] Протестировать бота с новой БД
+- [x] Создать таблицы в Supabase — `migrations/001_init_supabase.sql`
+- [x] Создать supabase_client.py — psycopg2 клиент
+- [x] Обновить database.py — автопереключение SQLite/Supabase
+- [x] Обновить db.py — автопереключение SQLite/Supabase
+- [x] Обновить api.py — работа с обеими БД
+
+### Структура БД в Supabase
+
+| Таблица | Описание |
+|---------|---------|
+| `tickets` | Тикеты трейдеров |
+| `supports` | Список саппортов |
+| `schedules` | График дежурств |
+| `duty_schedule` | Упрощённое расписание |
+| `events` | События для статистики |
+
+### Views для аналитики
+
+- `v_today_stats` — статистика за сегодня
+- `v_support_stats` — статистика по саппортам
+
+### Запуск с Supabase
+
+```bash
+export DATABASE_URL="postgresql://..."
+python bot.py
+```
+
+Без переменных окружения — автоматически использует SQLite.
 
 ---
 
