@@ -1,0 +1,6 @@
+[lint]
+select = ["E", "F", "W"]  # Errors, pyflakes, warnings
+ignore = ["E402"]  # Module level import not at top (needed for conditional imports)
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports OK in __init__

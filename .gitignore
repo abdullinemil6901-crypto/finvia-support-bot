@@ -7,3 +7,7 @@ __pycache__/
 test_api.py
 test_conn.py
 .mcp.json
+__pycache__/
+.pytest_cache/
+.coverage
+*.pyc
