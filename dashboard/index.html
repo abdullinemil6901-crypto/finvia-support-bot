@@ -603,6 +603,9 @@
         let chartFilter = null;
         let currentTab = 'all';
         let summaryData = null;
+        // Для пагинации с сервера
+        let serverTotal = 0;
+        let serverTotalPages = 1;
 
         // Звук уведомления
         const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp+fm5eTiHpot7e2raakkYqAa2txe4SHhYKAf3h4eX6DhIWDf3h4eX6ChYb/AIaFfoCFh36AhoZ9f4aGfX6GhX5+hYV+fYSEfn6FhH99hIR+fYSEf32EhH99g4N+fYODfXyCg318gYN9e4GCfHuBgnx6gYJ7eoGCe3qBgnp5gYJ5eIGCdyBBP3cAAQ==');
@@ -619,6 +622,25 @@
             return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
+        function buildTicketsUrl() {
+            // Строим URL с фильтрами для сервера
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+
+            let params = new URLSearchParams();
+            params.append('page', currentPage);
+            params.append('per_page', '20');
+
+            if (status) params.append('status', status);
+            if (category) params.append('label', category);
+            // Даты пока фильтруем на клиенте (для простоты)
+            // Если нужно на сервере — добавить в API
+
+            return `${API}/api/tickets?${params.toString()}`;
+        }
+
         async function loadAll() {
             showError('');
             const refreshBtn = document.getElementById('refreshBtn');
@@ -630,7 +652,7 @@
                 const [summary, stats, tickets] = await Promise.all([
                     fetch(`${API}/api/summary`).then(r => r.json()),
                     fetch(`${API}/api/stats`).then(r => r.json()),
-                    fetch(`${API}/api/tickets?page=1&per_page=500`).then(r => r.json())
+                    fetch(buildTicketsUrl()).then(r => r.json())
                 ]);
 
                 // Проверяем новые тикеты
@@ -644,6 +666,9 @@
                 lastKnownIds = newIds;
                 allTickets = tickets.tickets || [];
                 filteredTickets = [...allTickets];
+                // Сохраняем данные пагинации с сервера
+                serverTotal = tickets.total || 0;
+                serverTotalPages = tickets.total_pages || 1;
 
                 // Обновляем время
                 lastUpdateTime = new Date();
@@ -793,7 +818,15 @@
                 }).join('');
             }
 
-            document.getElementById('ticketCount').textContent = `${filteredTickets.length} тикетов`;
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const usingServerFilter = status || category;
+
+            if (usingServerFilter) {
+                document.getElementById('ticketCount').textContent = `${serverTotal} тикетов`;
+            } else {
+                document.getElementById('ticketCount').textContent = `${filteredTickets.length} тикетов`;
+            }
             updatePagination();
             updateSortIndicators();
         }
@@ -806,8 +839,20 @@
         }
 
         function updatePagination() {
-            const total = filteredTickets.length;
-            const totalPages = Math.ceil(total / perPage) || 1;
+            // Проверяем какой режим: серверная фильтрация или локальная
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const usingServerFilter = status || category;
+
+            let total, totalPages;
+            if (usingServerFilter) {
+                total = serverTotal;
+                totalPages = serverTotalPages;
+            } else {
+                total = filteredTickets.length;
+                totalPages = Math.ceil(total / perPage) || 1;
+            }
+
             const start = (currentPage - 1) * perPage + 1;
             const end = Math.min(currentPage * perPage, total);
 
@@ -819,11 +864,21 @@
         }
 
         function changePage(direction) {
-            const totalPages = Math.ceil(filteredTickets.length / perPage) || 1;
+            const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
+            const usingServerFilter = status || category;
+
+            let totalPages;
+            if (usingServerFilter) {
+                totalPages = serverTotalPages;
+            } else {
+                totalPages = Math.ceil(filteredTickets.length / perPage) || 1;
+            }
+
             const newPage = currentPage + direction;
             if (newPage >= 1 && newPage <= totalPages) {
                 currentPage = newPage;
-                renderTicketsPage();
+                loadAll(); // Загружаем с сервера
             }
         }
 
@@ -845,9 +900,16 @@
             document.getElementById('filterDateFrom').classList.toggle('has-value', dateFrom !== '');
             document.getElementById('filterDateTo').classList.toggle('has-value', dateTo !== '');
 
+            // Для статуса и категории — загружаем с сервера
+            // Для поиска и дат — фильтруем локально
+            if (status || category) {
+                currentPage = 1;
+                loadAll(); // Перезагружаем с сервера
+                return;
+            }
+
+            // Без фильтров — локальная фильтрация
             filteredTickets = allTickets.filter(t => {
-                if (status && t.status !== status) return false;
-                if (category && t.label !== category) return false;
                 if (chartFilter?.type === 'label' && t.label !== chartFilter.value) return false;
                 if (chartFilter?.type === 'support' && t.taken_by !== chartFilter.value) return false;
                 if (search) {
