@@ -9,7 +9,7 @@ import pytz
 
 MSK = pytz.timezone("Europe/Moscow")
 
-USE_SUPABASE = bool(os.getenv("DATABASE_URL") or os.getenv("DB_HOST"))
+USE_SUPABASE = bool(os.getenv("SUPABASE_API_KEY") and os.getenv("SUPABASE_PROJECT_REF"))
 
 if USE_SUPABASE:
     from supabase_client import log_event, get_today_stats

@@ -7,10 +7,14 @@ import os
 
 USE_SUPABASE = bool(os.getenv("SUPABASE_API_KEY") and os.getenv("SUPABASE_PROJECT_REF"))
 
+# Единое определение USE_SUPABASE для всех модулей
+import database
+import db as events_db
+
 if USE_SUPABASE:
     from supabase_client import (
         get_connection, get_all_tickets_raw, get_tickets_summary,
-        get_support_stats, get_label_stats
+        get_support_stats, get_label_stats, _get
     )
 else:
     from database import get_connection
@@ -20,8 +24,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
+import pytz
 import schedule_manager
 import database
 
@@ -307,9 +312,9 @@ def set_duty_endpoint(req: SetDutyRequest):
 @app.get("/api/summary")
 def get_summary():
     global _summary_cache
-    now = time.time()
+    cache_now = time.time()
 
-    if _summary_cache["data"] and (now - _summary_cache["timestamp"]) < CACHE_TTL:
+    if _summary_cache["data"] and (cache_now - _summary_cache["timestamp"]) < CACHE_TTL:
         return _summary_cache["data"]
 
     if USE_SUPABASE:
@@ -318,8 +323,6 @@ def get_summary():
 
         # Получаем все тикеты для анализа
         all_tickets = _get("/tickets?select=created_at")
-        from datetime import datetime, timedelta
-        import pytz
         MSK = pytz.timezone("Europe/Moscow")
         now = datetime.now(MSK)
         day_ago = now - timedelta(days=1)
@@ -373,7 +376,7 @@ def get_summary():
         "current_duty": ", ".join(duty) if duty else None
     }
 
-    _summary_cache = {"data": result, "timestamp": now}
+    _summary_cache = {"data": result, "timestamp": cache_now}
     return result
 
 

@@ -4,18 +4,7 @@ Support Bot — FSM States
 для обратной совместимости с существующим кодом.
 """
 
-from commands_config import (
-    CancelPayoutSG, PayoutNotVisibleSG, ExtendTimeSG,
-    NoReceiptSG, WrongReceiptSG, WrongCVUSG, WrongRequisiteSG,
-    VerifyRequisitesSG, TechIssueSG, TokenIssueSG, AppealSG,
-    NoTrafficSG, IncreaseLimitsSG,
-    ALL_STATE_CLASSES
-)
+from commands_config import ALL_STATE_CLASSES
 
-__all__ = [
-    "CancelPayoutSG", "PayoutNotVisibleSG", "ExtendTimeSG",
-    "NoReceiptSG", "WrongReceiptSG", "WrongCVUSG", "WrongRequisiteSG",
-    "VerifyRequisitesSG", "TechIssueSG", "TokenIssueSG", "AppealSG",
-    "NoTrafficSG", "IncreaseLimitsSG",
-    "ALL_STATE_CLASSES"
-]
+# Экспортируем для обратной совместимости
+__all__ = ["ALL_STATE_CLASSES"]

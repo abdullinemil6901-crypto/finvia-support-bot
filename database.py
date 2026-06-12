@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 
 # Если есть DATABASE_URL — используем Supabase
-USE_SUPABASE = bool(os.getenv("DATABASE_URL") or os.getenv("SUPABASE_API_KEY") or os.getenv("SUPABASE_PROJECT_REF"))
+USE_SUPABASE = bool(os.getenv("SUPABASE_API_KEY") and os.getenv("SUPABASE_PROJECT_REF"))
 
 if USE_SUPABASE:
     from supabase_client import (
