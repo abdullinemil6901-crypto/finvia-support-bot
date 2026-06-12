@@ -416,17 +416,17 @@ def _row_to_dict(row) -> dict:
 def _row_to_ticket(row: dict) -> TicketResponse:
     """Конвертирует dict в TicketResponse."""
     return TicketResponse(
-        id=row.get("id") or row[0],
-        trader_id=row.get("trader_id") or row[1],
-        trader_username=row.get("trader_username") or row[2] or "",
-        trader_name=row.get("trader_name") or row[3] or "",
-        label=row.get("label") or row[4] or "",
-        order_id=row.get("order_id") or row[5],
-        status=row.get("status") or row[6] or "open",
-        taken_by=row.get("taken_by") or row.get("taken_by"),
+        id=row.get("id"),
+        trader_id=row.get("trader_id"),
+        trader_username=row.get("trader_username") or "",
+        trader_name=row.get("trader_name") or "",
+        label=row.get("label") or "",
+        order_id=row.get("order_id"),
+        status=row.get("status") or "open",
+        taken_by=row.get("taken_by"),
         taken_at=str(row.get("taken_at")) if row.get("taken_at") else None,
         closed_at=str(row.get("closed_at")) if row.get("closed_at") else None,
-        created_at=str(row.get("created_at")) if row.get("created_at") else (row[11] if len(row) > 11 else ""),
+        created_at=str(row.get("created_at")) if row.get("created_at") else "",
         trader_chat_id=row.get("trader_chat_id")
     )
 

@@ -236,7 +236,9 @@ def get_tickets_summary() -> dict:
 
 
 def get_support_stats() -> list:
-    tickets = _get("/tickets?taken_by=is.not.null&select=taken_by,status,taken_at,closed_at")
+    tickets = _get("/tickets?select=taken_by,status,taken_at,closed_at")
+    # Фильтруем на стороне клиента
+    tickets = [t for t in tickets if t.get("taken_by")]
     from collections import defaultdict
     from statistics import mean
 
