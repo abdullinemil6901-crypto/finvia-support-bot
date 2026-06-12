@@ -441,6 +441,16 @@
             font-weight: 500;
         }
 
+        .ticket-team {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent-light);
+            border-radius: 6px;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
         .ticket-meta {
             display: flex;
             align-items: center;
@@ -1143,6 +1153,9 @@
                 <select class="filter-select" id="supportFilter" onchange="filterBySupport()">
                     <option value="">Все саппорты</option>
                 </select>
+                <select class="filter-select" id="teamFilter" onchange="filterByTeam()">
+                    <option value="">Все команды</option>
+                </select>
             </div>
             <div class="support-stats" id="supportStats">
                 <div class="support-stats-header">
@@ -1263,6 +1276,7 @@
         const perPage = 15;
         let currentStatus = '';
         let currentSupport = '';
+        let currentTeam = '';
         let searchTimeout = null;
         let categoryChart = null;
         let daysChart = null;
@@ -1276,12 +1290,13 @@
             showError('');
 
             try {
-                const [summaryData, ticketsData, scheduleData, statsData, supportsData] = await Promise.all([
+                const [summaryData, ticketsData, scheduleData, statsData, supportsData, chatsData] = await Promise.all([
                     fetch(`${API}/api/summary`).then(r => r.ok ? r.json() : Promise.reject(new Error('Summary failed'))),
                     fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.ok ? r.json() : Promise.reject(new Error('Tickets failed'))),
                     fetch(`${API}/api/schedule`).then(r => r.ok ? r.json() : Promise.reject(new Error('Schedule failed'))),
                     fetch(`${API}/api/stats`).then(r => r.ok ? r.json() : Promise.reject(new Error('Stats failed'))),
-                    fetch(`${API}/api/supports`).then(r => r.ok ? r.json() : Promise.reject(new Error('Supports failed')))
+                    fetch(`${API}/api/supports`).then(r => r.ok ? r.json() : Promise.reject(new Error('Supports failed'))),
+                    fetch(`${API}/api/chats`).then(r => r.ok ? r.json() : Promise.reject(new Error('Chats failed'))).catch(() => [])
                 ]);
 
                 summary = summaryData;
@@ -1289,6 +1304,7 @@
                 supports = supportsData || [];
                 supportStats = {};
                 statsData.forEach(s => { supportStats[s.username] = s; });
+                window.allChats = chatsData || [];
 
                 renderStats(summary);
                 renderChart(summary);
@@ -1296,6 +1312,7 @@
                 updateDuty(summary);
                 renderSchedule(scheduleData);
                 renderSupportFilter();
+                renderTeamFilter();
 
                 // Auto-refresh every 30 seconds
                 clearTimeout(window.autoRefresh);
@@ -1488,6 +1505,10 @@
                 filtered = filtered.filter(t => t.taken_by === currentSupport);
             }
 
+            if (currentTeam) {
+                filtered = filtered.filter(t => t.team_name === currentTeam);
+            }
+
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (search) {
                 filtered = filtered.filter(t =>
@@ -1525,6 +1546,7 @@
                             <div class="ticket-header-left">
                                 <span class="ticket-number">#${String(t.id).padStart(4, '0')}</span>
                                 <span class="ticket-title">${escapeHtml(t.label || 'Без категории')}</span>
+                                ${t.team_name ? `<span class="ticket-team">📢 ${escapeHtml(t.team_name)}</span>` : ''}
                             </div>
                             <div class="ticket-meta">
                                 <span class="ticket-status ${statusClass}">${statusText}</span>
@@ -1533,6 +1555,10 @@
                         </div>
                         <div class="ticket-details">
                             <div class="ticket-details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Команда</span>
+                                    <span class="detail-value">${t.team_name ? escapeHtml(t.team_name) : '—'}</span>
+                                </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Трейдер</span>
                                     <span class="detail-value">@${escapeHtml(t.trader_username || '—')}</span>
@@ -1565,6 +1591,7 @@
                                     <span class="detail-label">Взят</span>
                                     <span class="detail-value">${takenAt}</span>
                                 </div>
+                            </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Закрыт</span>
                                     <span class="detail-value">${closedAt}</span>
@@ -1792,6 +1819,28 @@
             });
         }
 
+        // Render team filter
+        function renderTeamFilter() {
+            const select = document.getElementById('teamFilter');
+            select.innerHTML = '<option value="">Все команды</option>';
+            const chats = window.allChats || [];
+            chats.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.team_name || c.chat_id;
+                option.textContent = c.team_name || `Чат ${c.chat_id}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Filter by team
+        function filterByTeam() {
+            const select = document.getElementById('teamFilter');
+            currentTeam = select.value;
+            currentPage = 1;
+            expandedTicketId = null;
+            renderTickets();
+        }
+
         // Search
         function handleSearch() {
             clearTimeout(searchTimeout);
@@ -1807,6 +1856,7 @@
             let filtered = tickets;
             if (currentStatus) filtered = filtered.filter(t => t.status === currentStatus);
             if (currentSupport) filtered = filtered.filter(t => t.taken_by === currentSupport);
+            if (currentTeam) filtered = filtered.filter(t => t.team_name === currentTeam);
 
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (search) {

@@ -75,18 +75,18 @@ def init_db():
 
 
 def save_ticket(trader_id: int, trader_username: str, trader_name: str, label: str,
-                order_id: str = None, trader_chat_id: int = None) -> int:
+                order_id: str = None, trader_chat_id: int = None, team_name: str = None) -> int:
     """Сохранить тикет."""
     if USE_SUPABASE:
         from supabase_client import save_ticket as sb_save
-        return sb_save(trader_id, trader_username, trader_name, label, order_id, trader_chat_id)
+        return sb_save(trader_id, trader_username, trader_name, label, order_id, trader_chat_id, team_name)
 
     with get_connection() as conn:
         cursor = conn.execute(
-            """INSERT INTO tickets (trader_id, trader_username, trader_name, label, order_id, created_at, trader_chat_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO tickets (trader_id, trader_username, trader_name, label, order_id, created_at, trader_chat_id, team_name)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (trader_id, trader_username or "", trader_name or "", label, order_id,
-             datetime.now().isoformat(), trader_chat_id)
+             datetime.now().isoformat(), trader_chat_id, team_name)
         )
         conn.commit()
         return cursor.lastrowid

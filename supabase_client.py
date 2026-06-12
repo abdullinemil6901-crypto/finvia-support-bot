@@ -66,7 +66,8 @@ def save_ticket(
     trader_name: str,
     label: str,
     order_id: str = None,
-    trader_chat_id: int = None
+    trader_chat_id: int = None,
+    team_name: str = None
 ) -> int:
     data = {
         "trader_id": trader_id,
@@ -75,6 +76,7 @@ def save_ticket(
         "label": label,
         "order_id": order_id,
         "trader_chat_id": trader_chat_id,
+        "team_name": team_name,
         "status": "open",
         "created_at": datetime.now().isoformat()
     }
@@ -307,3 +309,34 @@ def get_all_tickets_raw(limit: int = 100, offset: int = 0, **filters) -> tuple:
 def get_connection():
     """Stub для совместимости."""
     return None
+
+
+# ============================================
+# CHATS (команды трейдеров)
+# ============================================
+
+def get_all_chats() -> list:
+    """Получить все чаты."""
+    return _get("/chats?is_active=eq.true&order=team_name.asc")
+
+
+def get_chat_by_id(chat_id: int) -> dict:
+    """Найти чат по chat_id."""
+    result = _get(f"/chats?chat_id=eq.{chat_id}")
+    return result[0] if result else None
+
+
+def save_chat(chat_id: int, team_name: str) -> dict:
+    """Сохранить или обновить чат (upsert)."""
+    data = {
+        "chat_id": chat_id,
+        "team_name": team_name,
+        "is_active": True
+    }
+    result = _post("/chats", data)
+    return result
+
+
+def deactivate_chat(chat_id: int):
+    """Отключить чат (бот удалён)."""
+    _patch(f"/chats?chat_id=eq.{chat_id}", {"is_active": False})

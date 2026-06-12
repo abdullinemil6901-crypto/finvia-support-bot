@@ -7,6 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database import init_db
 from handlers import menu, actions
+from handlers.chat_events import router as chat_events_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,6 +32,7 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(menu.router)
     dp.include_router(actions.router)
+    dp.include_router(chat_events_router)
 
     # Запускаем API в отдельном потоке
     api_thread = threading.Thread(target=run_api, daemon=True)

@@ -20,9 +20,33 @@ logger = logging.getLogger(__name__)
 
 router = Router()
 
-# ─────────────────────────────────────────────
+
+# ============================================
+# HELPER: Работа с командами (чатами)
+# ============================================
+
+def get_team_info(chat) -> tuple:
+    """
+    Получает информацию о команде из чата.
+    Returns: (chat_id, team_name)
+    """
+    chat_id = chat.id
+    team_name = getattr(chat, 'title', None) or f"Чат {chat_id}"
+
+    # Если title содержит только цифры — используем как есть
+    # Иначе очищаем от лишних символов
+    if team_name and not team_name.replace(" ", "").replace("-", "").replace("арс", "").isdigit():
+        # Это нормальное название типа "309 арс"
+        pass
+    else:
+        team_name = team_name or str(chat_id)
+
+    return chat_id, team_name
+
+
+# ============================================
 # КОНСТАНТЫ ВАЛИДАЦИИ
-# ─────────────────────────────────────────────
+# ============================================
 MAX_ORDER_ID_LENGTH = 64
 MAX_DESCRIPTION_LENGTH = 1000
 MIN_ORDER_ID_LENGTH = 3
@@ -272,19 +296,24 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
     trader_name_safe = safe_username(trader.full_name) if trader.full_name else ""
     username_safe = safe_username(trader.username) if trader.username else ""
 
+    # Получаем информацию о команде из чата
+    chat_id, team_name = get_team_info(message.chat)
+
     if needs_oid:
         text = (
             f"{escape_html(label)}\n\n"
             f"👤 Трейдер: @{escape_html(username_safe) if username_safe else escape_html(trader_name_safe)}\n"
             f"🆔 ID: {trader.id}\n"
-            f"🔑 Order ID: {escape_html(order_id)}"
+            f"🔑 Order ID: {escape_html(order_id)}\n"
+            f"📢 Команда: {escape_html(team_name)}"
         )
     else:
         text = (
             f"{escape_html(label)}\n\n"
             f"👤 Трейдер: @{escape_html(username_safe) if username_safe else escape_html(trader_name_safe)}\n"
             f"🆔 ID: {trader.id}\n"
-            f"📝 Описание: {escape_html(user_input)}"
+            f"📝 Описание: {escape_html(user_input)}\n"
+            f"📢 Команда: {escape_html(team_name)}"
         )
 
     try:
@@ -293,7 +322,8 @@ async def _send_to_support(message: Message, state: FSMContext, bot: Bot):
             trader_username=username_safe,
             trader_name=trader_name_safe,
             label=escape_html(label),
-            order_id=escape_html(order_id) if order_id else None
+            order_id=escape_html(order_id) if order_id else None,
+            team_name=team_name
         )
         ticket_message = f"#{ticket_id} | {text}"
 

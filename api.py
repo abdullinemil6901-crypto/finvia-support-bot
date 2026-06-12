@@ -97,6 +97,7 @@ class TicketResponse(BaseModel):
     closed_at: Optional[str] = None
     created_at: str
     trader_chat_id: Optional[int] = None
+    team_name: Optional[str] = None
 
 
 class TicketListResponse(BaseModel):
@@ -222,6 +223,17 @@ def get_supports():
                 ORDER BY taken_by
             """).fetchall()
             return [{"username": row[0]} for row in rows]
+
+
+@app.get("/api/chats")
+def get_chats():
+    """Получить список команд (чатов)."""
+    if USE_SUPABASE:
+        from supabase_client import get_all_chats
+        return get_all_chats()
+    else:
+        # Для SQLite возвращаем пустой список (таблица chats не создаётся)
+        return []
 
 
 @app.get("/api/stats", response_model=list[SupportStats])
@@ -453,7 +465,8 @@ def _row_to_ticket(row: dict) -> TicketResponse:
         taken_at=str(row.get("taken_at")) if row.get("taken_at") else None,
         closed_at=str(row.get("closed_at")) if row.get("closed_at") else None,
         created_at=str(row.get("created_at")) if row.get("created_at") else "",
-        trader_chat_id=row.get("trader_chat_id")
+        trader_chat_id=row.get("trader_chat_id"),
+        team_name=row.get("team_name")
     )
 
 

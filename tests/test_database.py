@@ -23,7 +23,7 @@ def create_mock_client():
     """Создать мок Supabase клиент."""
     mock = MagicMock()
 
-    def save_ticket(trader_id, trader_username, trader_name, label, order_id=None, trader_chat_id=None):
+    def save_ticket(trader_id, trader_username, trader_name, label, order_id=None, trader_chat_id=None, team_name=None):
         global _mock_next_id
         ticket = {
             "id": _mock_next_id,
@@ -38,6 +38,7 @@ def create_mock_client():
             "taken_at": None,
             "closed_at": None,
             "trader_chat_id": trader_chat_id,
+            "team_name": team_name,
         }
         _mock_tickets.append(ticket)
         _mock_next_id += 1
@@ -192,6 +193,22 @@ def test_save_ticket_with_chat_id(db):
     ticket = db.get_ticket(ticket_id)
     assert ticket is not None
     assert ticket["trader_chat_id"] == -100123456
+
+
+def test_save_ticket_with_team_name(db):
+    """Тест сохранения тикета с team_name (Фаза 2)."""
+    ticket_id = db.save_ticket(
+        trader_id=123,
+        trader_username="trader",
+        trader_name="Trader",
+        label="Отмена платежа",
+        order_id="ORD-001",
+        team_name="309 арс"
+    )
+
+    ticket = db.get_ticket(ticket_id)
+    assert ticket is not None
+    assert ticket["team_name"] == "309 арс"
 
 
 def test_take_ticket(db):
