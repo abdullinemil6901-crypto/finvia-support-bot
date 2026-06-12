@@ -307,7 +307,7 @@ def get_duty():
 
 
 @app.get("/api/schedule")
-def get_schedule(offset: int = Query(0, description="Смещение недели (0 = текущая)"):
+def get_schedule(offset: int = Query(0, description="Смещение недели (0 = текущая)")):
     week = schedule_manager.get_week_schedule(offset)
     return {"week": week, "today": datetime.now().strftime("%Y-%m-%d"), "offset": offset}
 
