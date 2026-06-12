@@ -1,25 +1,17 @@
 """
 Support Bot — REST API v2
 Эндпоинты для админ-дашборда.
-Работает с SQLite (fallback) и Supabase (если задан DATABASE_URL).
+Работает с SQLite (fallback) и Supabase.
 """
 import os
 
+# Определяем backend
 USE_SUPABASE = bool(os.getenv("SUPABASE_API_KEY") and os.getenv("SUPABASE_PROJECT_REF"))
 
-# Единое определение USE_SUPABASE для всех модулей
-import database
-import db as events_db
+# Авторизация
+API_SECRET_KEY = os.getenv("API_SECRET_KEY", "dev-only-key")
 
-if USE_SUPABASE:
-    from supabase_client import (
-        get_connection, get_all_tickets_raw, get_tickets_summary,
-        get_support_stats, get_label_stats, _get
-    )
-else:
-    from database import get_connection
-
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -29,6 +21,29 @@ import time
 import pytz
 import schedule_manager
 import database
+
+
+def verify_api_key(authorization: Optional[str] = Header(None)):
+    """Проверяет API key из заголовка Authorization: Bearer <key>"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid Authorization format. Use: Bearer <key>")
+
+    token = authorization.replace("Bearer ", "")
+    if token != API_SECRET_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+
+# Supabase импорты
+if USE_SUPABASE:
+    from supabase_client import (
+        get_connection, get_all_tickets_raw, get_tickets_summary,
+        get_support_stats, get_label_stats, _get
+    )
+else:
+    from database import get_connection
 
 CACHE_TTL = 30
 

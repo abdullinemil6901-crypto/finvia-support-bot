@@ -11,4 +11,6 @@ python-dotenv
 # Development
 pytest>=7.0
 pytest-cov>=4.0
+pytest-asyncio>=0.21
+httpx>=0.25
 ruff>=0.1
