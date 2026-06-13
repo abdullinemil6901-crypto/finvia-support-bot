@@ -319,24 +319,29 @@ def get_admins():
 def add_support_endpoint(req: SetRoleRequest):
     """Добавить саппорта (или обновить роль)."""
     if USE_SUPABASE:
-        from supabase_client import _post, _patch, _get
+        from supabase_client import _post, _patch, _get, HEADERS
 
-        # Проверяем существование по username
-        existing = _get(f"/supports?username=eq.{req.username}&limit=1")
+        # Upsert — вставляем или обновляем по username
+        base_url = f"https://{os.getenv('SUPABASE_PROJECT_REF')}.supabase.co/rest/v1"
 
-        if existing:
-            _patch(f"/supports?username=eq.{req.username}", {
-                "role": req.role,
-                "full_name": req.username
-            })
-        else:
-            _post("/supports", {
+        resp = requests.post(
+            f"{base_url}/supports",
+            headers={
+                **HEADERS,
+                "Content-Type": "application/json",
+                "Prefer": "resolution=merge-duplicates"
+            },
+            json=[{
                 "tg_id": 0,
                 "username": req.username,
                 "full_name": req.username,
                 "role": req.role,
                 "added_at": datetime.now().isoformat()
-            })
+            }]
+        )
+
+        if not resp.ok:
+            raise HTTPException(status_code=500, detail=f"Supabase error: {resp.text}")
 
     return {"success": True, "username": req.username, "role": req.role}
 
