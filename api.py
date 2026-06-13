@@ -319,9 +319,11 @@ def get_admins():
 def add_support_endpoint(req: SetRoleRequest):
     """Добавить саппорта (или обновить роль)."""
     if USE_SUPABASE:
-        from supabase_client import _post, _patch, get_support_by_tg_id
-        # Проверяем существование
-        existing = get_support_by_tg_id(0)  # Для API-запросов используем username
+        from supabase_client import _post, _patch, _get
+
+        # Проверяем существование по username
+        existing = _get(f"/supports?username=eq.{req.username}&limit=1")
+
         if existing:
             _patch(f"/supports?username=eq.{req.username}", {
                 "role": req.role,
