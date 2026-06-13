@@ -167,13 +167,24 @@ def get_hourly_stats() -> list:
 # ============================================
 
 def add_support(tg_id: int, username: str, full_name: str):
-    _post("/supports", {
-        "tg_id": tg_id or 0,
-        "username": username,
-        "full_name": full_name or "",
-        "role": "support",
-        "added_at": datetime.now().isoformat()
-    })
+    # Upsert — вставляем или обновляем по username
+    resp = requests.post(
+        f"{BASE_URL}/supports",
+        headers={
+            **HEADERS,
+            "Prefer": "resolution=merge-duplicates"
+        },
+        json=[{
+            "tg_id": tg_id or 0,
+            "username": username,
+            "full_name": full_name or username,
+            "role": "support",
+            "added_at": datetime.now().isoformat()
+        }]
+    )
+    # Игнорируем 409 если уже есть
+    if resp.status_code not in (200, 201, 409):
+        resp.raise_for_status()
 
 
 def get_all_supports() -> list:

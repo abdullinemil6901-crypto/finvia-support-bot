@@ -340,7 +340,7 @@ def add_support_endpoint(req: SetRoleRequest):
             }]
         )
 
-        if not resp.ok:
+        if resp.status_code not in (200, 201, 204, 409):
             raise HTTPException(status_code=500, detail=f"Supabase error: {resp.text}")
 
     return {"success": True, "username": req.username, "role": req.role}
