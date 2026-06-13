@@ -3,263 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Hub — Finavia</title>
+    <title>Finavia Support</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ══════════════════════════════════════════════════════════════
-           DESIGN TOKENS — Уникальная цветовая система
-           ══════════════════════════════════════════════════════════════ */
         :root {
-            /* Основная палитра — глубокий космический чёрный с акцентами */
-            --bg-primary: #08080c;
-            --bg-secondary: #0d0d14;
-            --bg-card: #12121a;
-            --bg-elevated: #181822;
-            --bg-hover: #1e1e2a;
-
-            /* Градиенты акцентов */
-            --accent-primary: #00d4aa;
-            --accent-secondary: #00a8ff;
-            --accent-gradient: linear-gradient(135deg, #00d4aa 0%, #00a8ff 100%);
-
-            /* Нейтральные */
-            --text-primary: #f0f0f5;
-            --text-secondary: #8a8a9a;
-            --text-muted: #5a5a6a;
-
-            /* Статусные */
-            --status-open: #fbbf24;
-            --status-progress: #3b82f6;
-            --status-closed: #10b981;
-
-            /* Границы и разделители */
-            --border-subtle: rgba(255, 255, 255, 0.04);
-            --border-accent: rgba(0, 212, 170, 0.15);
-
-            /* Эффекты */
-            --glow-accent: 0 0 40px rgba(0, 212, 170, 0.15);
-            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
-            --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5);
-
-            /* Скругления */
-            --radius-xs: 6px;
-            --radius-sm: 10px;
-            --radius-md: 14px;
+            --bg: #09090b;
+            --bg-elevated: #0f0f12;
+            --card: #18181b;
+            --card-hover: #1f1f24;
+            --border: rgba(255,255,255,0.05);
+            --border-hover: rgba(255,255,255,0.1);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --accent-dim: #6d28d9;
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --accent-glow-lg: rgba(139, 92, 246, 0.15);
+            --green: #10b981;
+            --green-dim: #059669;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --yellow: #f59e0b;
+            --yellow-dim: #d97706;
+            --yellow-glow: rgba(245, 158, 11, 0.2);
+            --cyan: #06b6d4;
+            --cyan-dim: #0891b2;
+            --cyan-glow: rgba(6, 182, 212, 0.2);
+            --red: #ef4444;
+            --red-dim: #dc2626;
+            --red-glow: rgba(239, 68, 68, 0.2);
+            --orange: #f97316;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
             --radius-lg: 20px;
-            --radius-xl: 28px;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           RESET & BASE
-           ══════════════════════════════════════════════════════════════ */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html {
-            font-size: 14px;
-            scroll-behavior: smooth;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Manrope', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           AMBIENT BACKGROUND — Живые градиентные пятна
-           ══════════════════════════════════════════════════════════════ */
-        .ambient-bg {
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Left Sidebar */
+        .sidebar-left {
+            width: 280px;
+            background: var(--bg-elevated);
+            border-right: 1px solid var(--border);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
             position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        /* Premium Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px var(--accent-glow));
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-tagline {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Navigation */
+        .nav-section {
+            margin-bottom: 28px;
+        }
+
+        .nav-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 0 12px;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 12px;
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
             overflow: hidden;
         }
 
-        .ambient-orb {
+        .nav-item::before {
+            content: '';
             position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.4;
-            animation: float 20s ease-in-out infinite;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent-glow-lg), transparent);
+            transition: width 0.3s ease;
+            border-radius: 0 8px 8px 0;
         }
 
-        .ambient-orb--1 {
-            width: 600px;
-            height: 600px;
-            background: var(--accent-primary);
-            top: -200px;
-            left: -200px;
-            animation-delay: 0s;
+        .nav-item:hover {
+            background: var(--card);
+            color: var(--text);
         }
 
-        .ambient-orb--2 {
-            width: 500px;
-            height: 500px;
-            background: var(--accent-secondary);
-            bottom: -150px;
-            right: -150px;
-            animation-delay: -10s;
+        .nav-item:hover::before {
+            width: 100%;
         }
 
-        .ambient-orb--3 {
-            width: 300px;
-            height: 300px;
-            background: #8b5cf6;
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--accent-glow-lg), transparent);
+            color: var(--text);
+        }
+
+        .nav-item.active::before {
+            width: 100%;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -5s;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -30px) scale(1.05); }
-            50% { transform: translate(-20px, 20px) scale(0.95); }
-            75% { transform: translate(20px, 30px) scale(1.02); }
-        }
-
-        /* ══════════════════════════════════════════════════════════════
-           LAYOUT
-           ══════════════════════════════════════════════════════════════ */
-        .app {
+        .nav-item-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             z-index: 1;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 32px 40px;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           HEADER — Минималистичный с эффектом glass
-           ══════════════════════════════════════════════════════════════ */
+        .nav-item-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            min-width: 22px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .user-card:hover {
+            border-color: var(--border-hover);
+            background: var(--card-hover);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px 40px;
+            min-height: 100vh;
+        }
+
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 48px;
-            padding: 20px 28px;
-            background: rgba(18, 18, 26, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-xl);
+            margin-bottom: 36px;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .brand-logo {
-            width: 52px;
-            height: 52px;
-            background: var(--accent-gradient);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--glow-accent);
-        }
-
-        .brand-logo svg {
-            width: 28px;
-            height: 28px;
-            color: #fff;
-        }
-
-        .brand-text h1 {
-            font-size: 1.35rem;
+        .header-left h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            margin-bottom: 6px;
         }
 
-        .brand-text span {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 400;
+        .header-left p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
-        .header-meta {
+        .header-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        /* Premium Status Pill */
+        .status-pill {
             display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .live-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 100px;
+            gap: 10px;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 30px;
             font-size: 0.8rem;
-            color: #10b981;
-            font-weight: 500;
+            color: var(--text-secondary);
+            backdrop-filter: blur(10px);
         }
 
-        .live-dot {
+        .status-dot {
             width: 8px;
             height: 8px;
-            background: #10b981;
+            background: var(--green);
             border-radius: 50%;
+            position: relative;
             animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--green);
+            opacity: 0.3;
+            animation: pulseRing 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+            50% { opacity: 0.7; transform: scale(1.1); }
         }
 
-        .refresh-btn {
-            width: 44px;
-            height: 44px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
+        @keyframes pulseRing {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* Premium Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow-lg);
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             color: var(--text-secondary);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .refresh-btn:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border-color: var(--border-accent);
+        .btn-icon:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+            transform: rotate(90deg);
         }
 
-        .refresh-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* ══════════════════════════════════════════════════════════════
-           STATS GRID — KPI карточки
-           ══════════════════════════════════════════════════════════════ */
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 36px;
         }
 
         .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
 
         .stat-card::before {
@@ -268,305 +464,597 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: var(--accent-gradient);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--border-accent);
-            transform: translateY(-2px);
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
         }
 
         .stat-card:hover::before {
-            opacity: 1;
+            transform: scaleX(1);
         }
 
-        .stat-card__label {
-            font-size: 0.75rem;
+        .stat-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-hover);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        .stat-card.total::before { background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+        .stat-card.open::before { background: linear-gradient(90deg, var(--yellow), var(--red)); }
+        .stat-card.progress::before { background: linear-gradient(90deg, var(--cyan), var(--green)); }
+        .stat-card.closed::before { background: linear-gradient(90deg, var(--green), var(--accent)); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 8px;
+            letter-spacing: 0.1em;
         }
 
-        .stat-card__value {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 4px;
-        }
-
-        .stat-card__trend {
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .stat-card__trend--up { color: #10b981; }
-        .stat-card__trend--down { color: #ef4444; }
-
-        .stat-card__icon {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 212, 170, 0.1);
-            border-radius: var(--radius-sm);
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--accent-primary);
+            font-size: 1.1rem;
+            position: relative;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           MAIN GRID — Основной контент
-           ══════════════════════════════════════════════════════════════ */
-        .main-grid {
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            opacity: 0.5;
+            filter: blur(8px);
+        }
+
+        .stat-card.total .stat-icon { background: var(--accent-glow); }
+        .stat-card.total .stat-icon::after { background: var(--accent); }
+        .stat-card.open .stat-icon { background: var(--yellow-glow); }
+        .stat-card.open .stat-icon::after { background: var(--yellow); }
+        .stat-card.progress .stat-icon { background: var(--cyan-glow); }
+        .stat-card.progress .stat-icon::after { background: var(--cyan); }
+        .stat-card.closed .stat-icon { background: var(--green-glow); }
+        .stat-card.closed .stat-icon::after { background: var(--green); }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.75rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card.total .stat-value {
+            background: linear-gradient(135deg, var(--accent-light), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card.open .stat-value { color: var(--yellow); }
+        .stat-card.progress .stat-value { color: var(--cyan); }
+        .stat-card.closed .stat-value { color: var(--green); }
+
+        .stat-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+
+        .stat-trend.up {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+
+        .stat-trend.down {
+            background: var(--red-glow);
+            color: var(--red);
+        }
+
+        /* Main Grid */
+        .content-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 360px;
             gap: 28px;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           TICKETS SECTION
-           ══════════════════════════════════════════════════════════════ */
-        .tickets-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
+        /* Tickets Card */
+        .tickets-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
         }
 
-        .section-header {
+        .tickets-header {
+            padding: 22px 26px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-subtle);
+            background: linear-gradient(180deg, var(--card-hover), var(--card));
         }
 
-        .section-title {
+        .tickets-title {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 1rem;
+            gap: 14px;
+        }
+
+        .tickets-title h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .tickets-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 20px;
             font-weight: 600;
         }
 
-        .section-title svg {
-            width: 20px;
-            height: 20px;
-            color: var(--accent-primary);
-        }
-
-        .section-badge {
-            padding: 4px 10px;
-            background: rgba(0, 212, 170, 0.1);
-            border-radius: 100px;
-            font-size: 0.75rem;
-            color: var(--accent-primary);
-            font-weight: 600;
-        }
-
-        .filters {
+        .tickets-filters {
             display: flex;
             gap: 12px;
         }
 
         .filter-select {
-            padding: 8px 14px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-family: inherit;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-xs);
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
         }
 
-        .filter-select:hover {
-            border-color: var(--border-accent);
-            color: var(--text-primary);
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           TICKET CARDS — Премиум карточки тикетов
-           ══════════════════════════════════════════════════════════════ */
-        .tickets-list {
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 16px;
+        .filter-select option {
+            background: var(--card);
         }
 
-        .tickets-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .tickets-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .tickets-list::-webkit-scrollbar-thumb {
-            background: var(--bg-hover);
-            border-radius: 3px;
-        }
-
-        .ticket-card {
-            padding: 20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.25s ease;
+        .search-box {
             position: relative;
         }
 
-        .ticket-card:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border-accent);
-            transform: translateX(4px);
+        .search-input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px 10px 40px;
+            border-radius: var(--radius-xs);
+            font-size: 0.8rem;
+            width: 220px;
+            transition: all 0.25s ease;
+            font-family: 'Manrope', sans-serif;
         }
 
-        .ticket-card:last-child {
-            margin-bottom: 0;
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            width: 280px;
+            box-shadow: 0 0 0 3px var(--accent-glow-lg);
         }
 
-        .ticket-card__header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .ticket-card__id {
-            font-size: 0.75rem;
+        .search-input::placeholder {
             color: var(--text-muted);
-            font-family: 'Outfit', monospace;
         }
 
-        .ticket-card__status {
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 0.7rem;
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        /* Tickets List */
+        .tickets-list {
+            max-height: 580px;
+            overflow-y: auto;
+        }
+
+        .ticket-item {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .ticket-item:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-item:hover {
+            background: linear-gradient(90deg, var(--accent-glow-lg), transparent);
+        }
+
+        .ticket-main {
+            display: flex;
+            align-items: center;
+            padding: 18px 26px;
+            cursor: pointer;
+            gap: 18px;
+        }
+
+        .ticket-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
             font-weight: 600;
+            color: var(--accent-light);
+            min-width: 65px;
+        }
+
+        .ticket-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ticket-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .ticket-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .ticket-team {
+            font-size: 0.6rem;
+            padding: 3px 10px;
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            border-radius: 6px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
-        .ticket-card__status--open {
-            background: rgba(251, 191, 36, 0.15);
-            color: var(--status-open);
-        }
-
-        .ticket-card__status--progress {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--status-progress);
-        }
-
-        .ticket-card__status--closed {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--status-closed);
-        }
-
-        .ticket-card__title {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 8px;
+        .ticket-meta-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 14px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
-        .ticket-card__meta {
+        .ticket-meta-item {
             display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ticket-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .ticket-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* Premium Status Badges */
+        .ticket-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 24px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-status::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.15;
+        }
+
+        .status-open {
+            background: var(--yellow-glow);
+            color: var(--yellow);
+        }
+        .status-open::before { background: var(--yellow); }
+
+        .status-progress {
+            background: var(--cyan-glow);
+            color: var(--cyan);
+        }
+        .status-progress::before { background: var(--cyan); }
+
+        .status-closed {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+        .status-closed::before { background: var(--green); }
+
+        .status-dot-animated {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .ticket-arrow {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            transition: transform 0.25s ease;
+        }
+
+        .ticket-item.expanded .ticket-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Ticket Details */
+        .ticket-details {
+            display: none;
+            padding: 0 26px 22px;
+            background: linear-gradient(180deg, var(--accent-glow-lg), transparent);
+        }
+
+        .ticket-item.expanded .ticket-details {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ticket-details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            padding: 18px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            margin-bottom: 18px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+        }
+
+        .detail-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .detail-value.mono {
+            font-family: 'Space Grotesk', monospace;
             font-size: 0.8rem;
-            color: var(--text-secondary);
         }
 
-        .ticket-card__meta-item {
+        .ticket-actions {
             display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .ticket-card__meta-item svg {
-            width: 14px;
-            height: 14px;
-            opacity: 0.7;
-        }
-
-        .ticket-card__actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-subtle);
+            gap: 12px;
         }
 
         .ticket-action-btn {
             flex: 1;
-            padding: 10px 16px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-weight: 500;
-            font-family: inherit;
+            padding: 14px 18px;
+            border-radius: var(--radius-xs);
+            font-size: 0.8rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .ticket-action-btn--take {
-            background: rgba(0, 212, 170, 0.15);
-            color: var(--accent-primary);
+        .ticket-action-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
 
-        .ticket-action-btn--take:hover {
-            background: rgba(0, 212, 170, 0.25);
+        .ticket-action-btn:hover::before {
+            opacity: 1;
         }
 
-        .ticket-action-btn--close {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
+        .ticket-action-btn.take {
+            background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+            color: #fff;
+            box-shadow: 0 4px 15px var(--cyan-glow);
         }
 
-        .ticket-action-btn--close:hover {
-            background: rgba(239, 68, 68, 0.25);
+        .ticket-action-btn.take:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--cyan-glow);
+        }
+
+        .ticket-action-btn.close {
+            background: linear-gradient(135deg, var(--green), var(--green-dim));
+            color: #fff;
+            box-shadow: 0 4px 15px var(--green-glow);
+        }
+
+        .ticket-action-btn.close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--green-glow);
         }
 
         .ticket-action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           SIDEBAR
-           ══════════════════════════════════════════════════════════════ */
-        .sidebar {
+        /* Pagination */
+        .tickets-pagination {
+            padding: 18px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .page-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .page-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .page-btn {
+            padding: 10px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-xs);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Right Sidebar */
+        .sidebar-right {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 22px;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           DUTY CARD — Карточка дежурного
-           ══════════════════════════════════════════════════════════════ */
+        /* Chart Card */
+        .chart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: -150%;
+            left: -150%;
+            width: 400%;
+            height: 400%;
+            background: radial-gradient(circle at center, var(--accent-glow-lg), transparent 60%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .chart-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .chart-badge {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 170px;
+            position: relative;
+        }
+
+        /* Duty Card - Premium */
         .duty-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
             position: relative;
             overflow: hidden;
         }
@@ -577,9 +1065,8 @@
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 212, 170, 0.05) 0%, transparent 50%);
-            pointer-events: none;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan), var(--green));
         }
 
         .duty-header {
@@ -587,150 +1074,227 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            position: relative;
         }
 
         .duty-label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
         }
 
         .duty-shift {
-            padding: 4px 12px;
-            background: rgba(0, 212, 170, 0.1);
-            border-radius: 100px;
-            font-size: 0.75rem;
-            color: var(--accent-primary);
-            font-weight: 600;
-        }
-
-        .duty-name {
-            font-size: 1.5rem;
+            font-size: 0.7rem;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-weight: 700;
-            margin-bottom: 8px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-        }
-
-        .duty-time {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .shift-day {
+            background: var(--yellow-glow);
+            color: var(--yellow);
+        }
+
+        .shift-night {
+            background: var(--accent-glow);
+            color: var(--accent-light);
+        }
+
+        .duty-current {
+            display: flex;
+            align-items: center;
+            gap: 16px;
             margin-bottom: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent-glow-lg), transparent);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .duty-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .duty-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .duty-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Timeline */
+        .duty-timeline {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+        }
+
+        .timeline-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
             position: relative;
+            margin-bottom: 10px;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .timeline-markers {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .timeline-now {
+            position: absolute;
+            top: -4px;
+            width: 14px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 2px solid var(--card);
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .duty-controls {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 16px;
-            position: relative;
         }
 
         .duty-select {
             width: 100%;
             padding: 12px 14px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-family: inherit;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text);
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
         }
 
         .duty-select:focus {
             outline: none;
-            border-color: var(--accent-primary);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow-lg);
+        }
+
+        .duty-select option {
+            background: var(--card);
         }
 
         .duty-buttons {
             display: flex;
             gap: 10px;
-            position: relative;
         }
 
-        .duty-assign-btn {
+        .duty-btn {
             flex: 1;
             padding: 12px;
-            background: var(--accent-gradient);
+            border-radius: var(--radius-xs);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
-            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .duty-btn-assign {
+            background: linear-gradient(135deg, var(--green), var(--green-dim));
             color: #fff;
-            font-size: 0.9rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px var(--green-glow);
         }
 
-        .duty-assign-btn:hover {
+        .duty-btn-assign:hover {
             transform: translateY(-2px);
-            box-shadow: var(--glow-accent);
+            box-shadow: 0 8px 25px var(--green-glow);
         }
 
-        .duty-switch-btn {
-            flex: 1;
-            padding: 12px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .duty-btn-switch {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
-        .duty-switch-btn:hover {
-            border-color: var(--border-accent);
-            color: var(--text-primary);
+        .duty-btn-switch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           SCHEDULE CARD — Расписание
-           ══════════════════════════════════════════════════════════════ */
+        /* Schedule Card */
         .schedule-card {
-            padding: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
         }
 
         .schedule-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .schedule-title {
-            font-size: 1rem;
-            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
         }
 
         .schedule-nav {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .schedule-nav-btn {
-            width: 36px;
-            height: 36px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-xs);
-            color: var(--text-secondary);
-            font-size: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -739,9 +1303,9 @@
         }
 
         .schedule-nav-btn:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border-accent);
-            color: var(--text-primary);
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
         }
 
         .schedule-grid {
@@ -751,664 +1315,1591 @@
         }
 
         .schedule-day {
-            padding: 12px 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
             text-align: center;
+            padding: 12px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            border: 1px solid transparent;
         }
 
         .schedule-day:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border-accent);
+            background: var(--card-hover);
+            border-color: var(--border);
         }
 
-        .schedule-day--today {
-            border-color: var(--accent-primary);
-            background: rgba(0, 212, 170, 0.05);
+        .schedule-day.today {
+            background: var(--accent-glow-lg);
+            border-color: var(--accent);
         }
 
-        .schedule-day__name {
-            font-size: 0.7rem;
+        .schedule-day-name {
             color: var(--text-muted);
-            margin-bottom: 4px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 0.65rem;
         }
 
-        .schedule-day__date {
-            font-size: 0.8rem;
-            font-weight: 600;
+        .schedule-day.today .schedule-day-name {
+            color: var(--accent);
+        }
+
+        .schedule-day-date {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
             margin-bottom: 8px;
         }
 
-        .schedule-day--today .schedule-day__date {
-            color: var(--accent-primary);
-        }
-
-        .schedule-shifts {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .schedule-day.today .schedule-day-date {
+            color: var(--accent-light);
         }
 
         .schedule-shift {
-            font-size: 0.65rem;
-            padding: 2px 4px;
-            border-radius: 3px;
+            font-size: 0.55rem;
+            padding: 4px 6px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .schedule-shift--day {
-            background: rgba(251, 191, 36, 0.15);
-            color: var(--status-open);
+        .schedule-shift.day {
+            background: var(--yellow-glow);
+            color: var(--yellow);
         }
 
-        .schedule-shift--night {
-            background: rgba(139, 92, 246, 0.15);
-            color: #a78bfa;
+        .schedule-shift.night {
+            background: var(--accent-glow);
+            color: var(--accent-light);
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           CHART CARDS
-           ══════════════════════════════════════════════════════════════ */
-        .chart-card {
-            padding: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
+        .schedule-shift.empty {
+            background: var(--bg);
+            color: var(--text-muted);
         }
 
-        .chart-header {
+        /* Support Stats */
+        .support-stats {
+            display: none;
+            padding: 18px 26px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--accent-glow-lg), transparent);
+        }
+
+        .support-stats.visible {
+            display: block;
+        }
+
+        .support-stats-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
-        .chart-title {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .chart-total {
-            padding: 4px 10px;
-            background: rgba(0, 212, 170, 0.1);
-            border-radius: 100px;
+        .support-stats-title {
             font-size: 0.8rem;
-            color: var(--accent-primary);
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--accent-light);
         }
 
-        .chart-container {
-            height: 200px;
-            position: relative;
-        }
-
-        /* ══════════════════════════════════════════════════════════════
-           TOAST & MODAL
-           ══════════════════════════════════════════════════════════════ */
-        .toast {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            padding: 16px 24px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-accent);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-float);
-            z-index: 1000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast--success {
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        .toast--error {
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        /* ══════════════════════════════════════════════════════════════
-           EMPTY STATE
-           ══════════════════════════════════════════════════════════════ */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
+        .support-stats-close {
+            background: none;
+            border: none;
             color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.4rem;
+            padding: 0;
+            line-height: 1;
         }
 
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+        .support-stats-close:hover {
+            color: var(--text);
         }
 
-        .empty-state p {
-            font-size: 0.95rem;
+        .support-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           LOADING
-           ══════════════════════════════════════════════════════════════ */
+        .support-stat {
+            text-align: center;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .support-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-light);
+        }
+
+        .support-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            max-width: 420px;
+            width: 90%;
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.6rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: var(--radius-xs);
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            transition: all 0.2s ease;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow-lg);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius-xs);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn.cancel:hover {
+            border-color: var(--border-hover);
+        }
+
+        .modal-btn.save {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .modal-btn.save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        /* Loading */
         .loading {
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 40px;
+            align-items: center;
+            height: 200px;
             color: var(--text-muted);
+            font-size: 0.85rem;
         }
 
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--border-subtle);
-            border-top-color: var(--accent-primary);
+        .loading-spinner {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 12px;
+            animation: spin 1s linear infinite;
+            margin-right: 14px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* ══════════════════════════════════════════════════════════════
-           RESPONSIVE
-           ══════════════════════════════════════════════════════════════ */
-        @media (max-width: 1200px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .main-grid { grid-template-columns: 1fr; }
+        /* Error */
+        .error-msg {
+            background: var(--red-glow);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--red);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 768px) {
-            .app { padding: 16px; }
-            .header { flex-direction: column; gap: 16px; }
+        .error-msg.active {
+            display: flex;
+        }
+
+        /* Responsive */
+        @media (max-width: 1500px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content-grid { grid-template-columns: 1fr; }
+            .sidebar-right { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-right > * { flex: 1; min-width: 320px; }
+            .ticket-details-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 1100px) {
+            .sidebar-left { display: none; }
+            .main { margin-left: 0; padding: 24px; }
+            .header { flex-direction: column; gap: 18px; align-items: flex-start; }
+            .tickets-filters { flex-wrap: wrap; }
+            .search-input { width: 100%; }
+            .search-input:focus { width: 100%; }
+        }
+
+        @media (max-width: 700px) {
             .stats-grid { grid-template-columns: 1fr; }
-            .filters { flex-wrap: wrap; }
             .schedule-grid { grid-template-columns: repeat(4, 1fr); }
+            .support-stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .ticket-details-grid { grid-template-columns: 1fr; }
+            .ticket-main { flex-wrap: wrap; }
+            .ticket-right { width: 100%; justify-content: space-between; margin-top: 10px; }
         }
     </style>
 </head>
 <body>
-    <!-- Ambient Background -->
-    <div class="ambient-bg">
-        <div class="ambient-orb ambient-orb--1"></div>
-        <div class="ambient-orb ambient-orb--2"></div>
-        <div class="ambient-orb ambient-orb--3"></div>
+    <div class="error-msg" id="error">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="errorText"></span>
     </div>
 
     <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="brand">
-                <div class="brand-logo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <!-- Left Sidebar -->
+        <aside class="sidebar-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#a78bfa"/>
+                                <stop offset="50%" style="stop-color:#8b5cf6"/>
+                                <stop offset="100%" style="stop-color:#6366f1"/>
+                            </linearGradient>
+                            <linearGradient id="logoGradText" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffffff"/>
+                                <stop offset="100%" style="stop-color:#c4b5fd"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#logoGradMain)"/>
+                        <path d="M14 34V14L24 26L34 14V34" stroke="url(#logoGradText)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="24" cy="16" r="2.5" fill="url(#logoGradText)"/>
                     </svg>
                 </div>
-                <div class="brand-text">
-                    <h1>Support Hub</h1>
-                    <span>Finavia Platform</span>
+                <div class="logo-text">
+                    <span class="logo-name">Finavia</span>
+                    <span class="logo-tagline">Support Platform</span>
                 </div>
             </div>
-            <div class="header-meta">
-                <div class="live-badge">
-                    <span class="live-dot"></span>
-                    <span>Live</span>
-                </div>
-                <button class="refresh-btn" onclick="loadData()" title="Обновить">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M23 4v6h-6M1 20v-6h6"/>
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                    </svg>
-                </button>
-            </div>
-        </header>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card__label">Всего тикетов</div>
-                <div class="stat-card__value" id="statTotal">—</div>
-                <div class="stat-card__trend">
-                    <span id="statTotalTrend">📈 За всё время</span>
-                </div>
-                <div class="stat-card__icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__label">Открытые</div>
-                <div class="stat-card__value" id="statOpen">—</div>
-                <div class="stat-card__trend stat-card__trend--up" id="statOpenTrend">⚡ Требуют внимания</div>
-                <div class="stat-card__icon" style="background: rgba(251, 191, 36, 0.1); color: var(--status-open);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__label">В работе</div>
-                <div class="stat-card__value" id="statProgress">—</div>
-                <div class="stat-card__trend" id="statProgressTrend">🔄 Активные</div>
-                <div class="stat-card__icon" style="background: rgba(59, 130, 246, 0.1); color: var(--status-progress);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23,4 23,10 17,10"/>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__label">Закрытые</div>
-                <div class="stat-card__value" id="statClosed">—</div>
-                <div class="stat-card__trend stat-card__trend--up" id="statClosedTrend">✅ Завершено</div>
-                <div class="stat-card__icon" style="background: rgba(16, 185, 129, 0.1); color: var(--status-closed);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22,4 12,14.01 9,11.01"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Grid -->
-        <div class="main-grid">
-            <!-- Tickets Section -->
-            <div class="tickets-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="9" y1="9" x2="15" y2="15"/>
-                            <line x1="15" y1="9" x2="9" y2="15"/>
+            <nav class="nav-section">
+                <div class="nav-label">Навигация</div>
+                <div class="nav-item active" onclick="filterByStatus('')">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
                         </svg>
-                        <span>Тикеты</span>
-                        <span class="section-badge" id="ticketCount">0</span>
-                    </div>
-                    <div class="filters">
-                        <select class="filter-select" id="statusFilter" onchange="filterTickets()">
-                            <option value="">Все статусы</option>
-                            <option value="open">Открытые</option>
-                            <option value="in_progress">В работе</option>
-                            <option value="closed">Закрытые</option>
-                        </select>
-                        <select class="filter-select" id="supportFilter" onchange="filterBySupport()">
-                            <option value="">Все саппорты</option>
-                        </select>
-                    </div>
+                    </span>
+                    Все тикеты
+                    <span class="nav-item-badge" id="navTotalBadge">0</span>
                 </div>
-                <div class="tickets-list" id="ticketsList">
-                    <div class="loading"><div class="spinner"></div>Загрузка...</div>
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Duty Card -->
-                <div class="duty-card">
-                    <div class="duty-header">
-                        <span class="duty-label">Дежурный сейчас</span>
-                        <span class="duty-shift" id="dutyShiftBadge">—</span>
-                    </div>
-                    <div class="duty-name" id="dutyName">—</div>
-                    <div class="duty-time">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="nav-item" onclick="filterByStatus('open')">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12,6 12,12 16,14"/>
+                            <path d="M12 6v6l4 2"/>
                         </svg>
-                        <span id="dutyTime">— МСК</span>
-                    </div>
-                    <div class="duty-controls">
-                        <select class="duty-select" id="dutySupportSelect">
-                            <option value="">Выберите саппорта...</option>
-                        </select>
-                        <select class="duty-select" id="dutyShiftSelect">
-                            <option value="day">☀️ Дневная (09:00–21:00)</option>
-                            <option value="night">🌙 Ночная (21:00–09:00)</option>
-                        </select>
-                    </div>
-                    <div class="duty-buttons">
-                        <button class="duty-assign-btn" onclick="assignDuty()">✓ Назначить</button>
-                        <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить</button>
+                    </span>
+                    Открытые
+                    <span class="nav-item-badge" id="navOpenBadge" style="background: var(--yellow);">0</span>
+                </div>
+                <div class="nav-item" onclick="filterByStatus('in_progress')">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                    </span>
+                    В работе
+                    <span class="nav-item-badge" id="navProgressBadge" style="background: var(--cyan);">0</span>
+                </div>
+                <div class="nav-item" onclick="filterByStatus('closed')">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </span>
+                    Закрытые
+                    <span class="nav-item-badge" id="navClosedBadge" style="background: var(--green);">0</span>
+                </div>
+            </nav>
+
+            <nav class="nav-section">
+                <div class="nav-label">Инструменты</div>
+                <div class="nav-item">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </span>
+                    Статистика
+                </div>
+                <div class="nav-item">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </span>
+                    Расписание
+                </div>
+                <div class="nav-item">
+                    <span class="nav-item-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 010 7.75"/>
+                        </svg>
+                    </span>
+                    Команды
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="user-name">Admin</div>
+                        <div class="user-role">Администратор</div>
                     </div>
                 </div>
+            </div>
+        </aside>
 
-                <!-- Charts -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">По категориям</span>
-                        <span class="chart-total" id="chartTotal">0</span>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <div class="header-left">
+                    <h1>Панель управления</h1>
+                    <p>Мониторинг тикетов и управление сменами</p>
                 </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">За 7 дней</span>
-                        <span class="chart-total" id="chartWeekTotal">0</span>
+                <div class="header-actions">
+                    <div class="status-pill">
+                        <div class="status-dot"></div>
+                        <span id="lastUpdate">Обновлено только что</span>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="daysChart"></canvas>
-                    </div>
+                    <button class="btn-icon" onclick="resetAndReload()" title="Обновить">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M23 4v6h-6"/>
+                            <path d="M1 20v-6h6"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportCSV()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Экспорт
+                    </button>
+                    <button class="btn btn-primary">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Новый тикет
+                    </button>
                 </div>
+            </header>
 
-                <!-- Schedule -->
-                <div class="schedule-card">
-                    <div class="schedule-header">
-                        <span class="schedule-title">Расписание</span>
-                        <div class="schedule-nav">
-                            <button class="schedule-nav-btn" onclick="changeWeek(-1)">←</button>
-                            <button class="schedule-nav-btn" onclick="changeWeek(1)">→</button>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card total" onclick="filterByStatus('')">
+                    <div class="stat-header">
+                        <span class="stat-label">Всего тикетов</span>
+                        <div class="stat-icon">
+                            <svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                            </svg>
                         </div>
                     </div>
-                    <div class="schedule-grid" id="scheduleGrid">
-                        <div class="loading"><div class="spinner"></div></div>
+                    <div class="stat-value" id="total">—</div>
+                    <div class="stat-meta">
+                        <span>за всё время</span>
                     </div>
                 </div>
+                <div class="stat-card open" onclick="filterByStatus('open')">
+                    <div class="stat-header">
+                        <span class="stat-label">Открытые</span>
+                        <div class="stat-icon">
+                            <svg width="20" height="20" fill="none" stroke="var(--yellow)" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="open">—</div>
+                    <div class="stat-meta">
+                        <span class="stat-trend up">↑ 12%</span>
+                        <span>к вчера</span>
+                    </div>
+                </div>
+                <div class="stat-card progress" onclick="filterByStatus('in_progress')">
+                    <div class="stat-header">
+                        <span class="stat-label">В работе</span>
+                        <div class="stat-icon">
+                            <svg width="20" height="20" fill="none" stroke="var(--cyan)" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="in_progress">—</div>
+                    <div class="stat-meta">
+                        <span>требуют внимания</span>
+                    </div>
+                </div>
+                <div class="stat-card closed" onclick="filterByStatus('closed')">
+                    <div class="stat-header">
+                        <span class="stat-label">Закрытые</span>
+                        <div class="stat-icon">
+                            <svg width="20" height="20" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="closed">—</div>
+                    <div class="stat-meta">
+                        <span class="stat-trend up">↑ 8%</span>
+                        <span>к вчера</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Tickets -->
+                <div class="tickets-card">
+                    <div class="tickets-header">
+                        <div class="tickets-title">
+                            <h2>Тикеты</h2>
+                            <span class="tickets-count" id="ticketCount">0 тикетов</span>
+                        </div>
+                        <div class="tickets-filters">
+                            <div class="search-box">
+                                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                <input type="text" class="search-input" id="searchInput" placeholder="Поиск по ID, имени..." oninput="handleSearch()">
+                            </div>
+                            <select class="filter-select" id="supportFilter" onchange="filterBySupport()">
+                                <option value="">Все саппорты</option>
+                            </select>
+                            <select class="filter-select" id="teamFilter" onchange="filterByTeam()">
+                                <option value="">Все команды</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="support-stats" id="supportStats">
+                        <div class="support-stats-header">
+                            <span class="support-stats-title" id="supportStatsTitle">Статистика саппорта</span>
+                            <button class="support-stats-close" onclick="clearSupportFilter()">×</button>
+                        </div>
+                        <div class="support-stats-grid">
+                            <div class="support-stat">
+                                <div class="support-stat-value" id="supportTotal">—</div>
+                                <div class="support-stat-label">Всего</div>
+                            </div>
+                            <div class="support-stat">
+                                <div class="support-stat-value" id="supportClosed">—</div>
+                                <div class="support-stat-label">Закрыто</div>
+                            </div>
+                            <div class="support-stat">
+                                <div class="support-stat-value" id="supportProgress">—</div>
+                                <div class="support-stat-label">В работе</div>
+                            </div>
+                            <div class="support-stat">
+                                <div class="support-stat-value" id="supportAvgTime">—</div>
+                                <div class="support-stat-label">Ср. время</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tickets-list" id="ticketsList">
+                        <div class="loading"><div class="loading-spinner"></div>Загрузка...</div>
+                    </div>
+
+                    <div class="tickets-pagination">
+                        <span class="page-info" id="pageInfo">Страница 1 из 1</span>
+                        <div class="page-buttons">
+                            <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
+                            <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="sidebar-right">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">По категориям</span>
+                            <span class="chart-badge" id="chartTotal">0</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">За 7 дней</span>
+                            <span class="chart-badge" id="chartWeekTotal">0</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="daysChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="duty-card">
+                        <div class="duty-header">
+                            <span class="duty-label">Дежурный сейчас</span>
+                            <span class="duty-shift" id="dutyShiftBadge">—</span>
+                        </div>
+                        <div class="duty-current">
+                            <div class="duty-avatar" id="dutyAvatar">?</div>
+                            <div class="duty-info">
+                                <h3 id="dutyName">—</h3>
+                                <p>
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                    <span id="dutyTime">— МСК</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="duty-timeline" id="dutyTimeline">
+                            <div class="timeline-track">
+                                <div class="timeline-progress" id="timelineProgress" style="width: 0%"></div>
+                                <div class="timeline-now" id="timelineNow" style="left: 0%"></div>
+                            </div>
+                            <div class="timeline-markers">
+                                <span id="shiftStart">09:00</span>
+                                <span id="shiftEnd">21:00</span>
+                            </div>
+                        </div>
+                        <div class="duty-controls">
+                            <select class="duty-select" id="dutySupportSelect">
+                                <option value="">Выберите саппорта...</option>
+                            </select>
+                            <select class="duty-select" id="dutyShiftSelect">
+                                <option value="day">☀️ Дневная (09:00–21:00)</option>
+                                <option value="night">🌙 Ночная (21:00–09:00)</option>
+                            </select>
+                        </div>
+                        <div class="duty-buttons">
+                            <button class="duty-btn duty-btn-assign" onclick="assignDuty()">✓ Назначить</button>
+                            <button class="duty-btn duty-btn-switch" onclick="switchDuty()">🔄 Сменить</button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <span class="schedule-title">Расписание</span>
+                            <div class="schedule-nav">
+                                <button class="schedule-nav-btn" onclick="changeWeek(-1)">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="15 18 9 12 15 6"/>
+                                    </svg>
+                                </button>
+                                <button class="schedule-nav-btn" onclick="changeWeek(1)">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="schedule-grid" id="scheduleGrid">
+                            <div class="loading"><div class="loading-spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Назначить дежурного</span>
+                <button class="modal-close" onclick="closeScheduleModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="date" class="modal-input" id="modalDate">
+                <select class="modal-input" id="modalShift">
+                    <option value="day">☀️ Дневная смена (09:00–21:00)</option>
+                    <option value="night">🌙 Ночная смена (21:00–09:00)</option>
+                </select>
+                <input type="text" class="modal-input" id="modalName" placeholder="Имя дежурного">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeScheduleModal()">Отмена</button>
+                <button class="modal-btn save" onclick="saveDuty()">Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
-
     <script>
-        const API = 'https://finvia-support-bot-production.up.railway.app';
+        const API = window.location.origin;
+
+        // State
         let tickets = [];
+        let summary = null;
         let supports = [];
-        let weekOffset = 0;
+        let supportStats = {};
+        let currentPage = 1;
+        const perPage = 15;
         let currentStatus = '';
         let currentSupport = '';
+        let currentTeam = '';
+        let searchTimeout = null;
         let categoryChart = null;
         let daysChart = null;
+        let expandedTicketId = null;
+        let weekOffset = 0;
 
-        // ─── API ───────────────────────────────────────────────
-        async function loadData() {
+        function changeWeek(dir) {
+            weekOffset += dir;
+            loadSchedule();
+        }
+
+        async function loadSchedule() {
             try {
-                const [summary, ticketsData, schedule, stats, supportsData] = await Promise.all([
-                    fetch(`${API}/api/summary`).then(r => r.json()),
-                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.json()),
-                    fetch(`${API}/api/schedule?offset=${weekOffset}`).then(r => r.json()),
-                    fetch(`${API}/api/stats`).then(r => r.json()),
-                    fetch(`${API}/api/supports`).then(r => r.json())
+                const response = await fetch(`${API}/api/schedule?offset=${weekOffset}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderSchedule(data);
+                }
+            } catch (e) {
+                console.error('Error loading schedule:', e);
+            }
+        }
+
+        function resetAndReload() {
+            weekOffset = 0;
+            currentPage = 1;
+            expandedTicketId = null;
+            loadData();
+            updateLastUpdate();
+        }
+
+        function updateLastUpdate() {
+            document.getElementById('lastUpdate').textContent = 'Обновлено только что';
+        }
+
+        // Load all data
+        async function loadData() {
+            showError('');
+            try {
+                const [summaryData, ticketsData, scheduleData, statsData, supportsData, chatsData] = await Promise.all([
+                    fetch(`${API}/api/summary`).then(r => r.ok ? r.json() : { total: 0, open: 0, in_progress: 0, closed: 0, by_label: [], by_day: [] }),
+                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.ok ? r.json() : { tickets: [] }),
+                    fetch(`${API}/api/schedule`).then(r => r.ok ? r.json() : { week: [] }),
+                    fetch(`${API}/api/stats`).then(r => r.ok ? r.json() : []),
+                    fetch(`${API}/api/supports`).then(r => r.ok ? r.json() : []),
+                    fetch(`${API}/api/chats`).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
 
+                summary = summaryData;
                 tickets = ticketsData.tickets || [];
                 supports = supportsData || [];
+                supportStats = {};
+                statsData.forEach(s => { supportStats[s.username] = s; });
+                window.allChats = chatsData || [];
 
-                updateStats(summary);
+                renderStats(summary);
+                renderChart(summary);
                 renderTickets();
-                renderSchedule(schedule);
-                renderCharts(summary, stats);
+                updateDuty(summary);
                 renderSupportFilter();
+                renderTeamFilter();
+                loadSchedule();
+
+                // Update nav badges
+                document.getElementById('navTotalBadge').textContent = summary.total || 0;
+                document.getElementById('navOpenBadge').textContent = summary.open || 0;
+                document.getElementById('navProgressBadge').textContent = summary.in_progress || 0;
+                document.getElementById('navClosedBadge').textContent = summary.closed || 0;
+
+                // Auto-refresh every 30 seconds
+                clearTimeout(window.autoRefresh);
+                window.autoRefresh = setTimeout(loadData, 30000);
+                updateLastUpdate();
+
             } catch (e) {
-                showError('Ошибка загрузки данных');
+                showError('Ошибка загрузки: ' + e.message);
             }
         }
 
-        function updateStats(data) {
-            document.getElementById('statTotal').textContent = data.total || 0;
-            document.getElementById('statOpen').textContent = data.open || 0;
-            document.getElementById('statProgress').textContent = data.in_progress || 0;
-            document.getElementById('statClosed').textContent = data.closed || 0;
-
-            // Duty
-            if (data.current_duty) {
-                document.getElementById('dutyName').textContent = data.current_duty;
-            }
-            const hour = new Date().getHours();
-            document.getElementById('dutyShiftBadge').textContent = hour >= 9 && hour < 21 ? '☀️ День' : '🌙 Ночь';
+        // Render stats
+        function renderStats(data) {
+            document.getElementById('total').textContent = data.total || 0;
+            document.getElementById('open').textContent = data.open || 0;
+            document.getElementById('in_progress').textContent = data.in_progress || 0;
+            document.getElementById('closed').textContent = data.closed || 0;
         }
 
-        function renderTickets() {
-            const list = document.getElementById('ticketsList');
-            const filtered = tickets.filter(t => {
-                if (currentStatus && t.status !== currentStatus) return false;
-                if (currentSupport && t.taken_by !== currentSupport) return false;
-                return true;
+        // Charts
+        function renderChart(data) {
+            const labels = (data.by_label || []).map(l => l.label);
+            const values = (data.by_label || []).map(l => l.count);
+            const total = values.reduce((a, b) => a + b, 0);
+
+            document.getElementById('chartTotal').textContent = total;
+
+            const weekTotal = (data.by_day || []).reduce((a, b) => a + b.count, 0);
+            document.getElementById('chartWeekTotal').textContent = weekTotal;
+
+            // Category Chart (Doughnut)
+            const ctx1 = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChart) categoryChart.destroy();
+
+            categoryChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
+                            '#06b6d4', '#f97316', '#ec4899', '#84cc16'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    animation: { duration: 1200, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#a1a1aa',
+                                padding: 12,
+                                font: { size: 11, family: 'Manrope' },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
+                            titleColor: '#fafafa',
+                            bodyColor: '#a1a1aa',
+                            borderColor: 'rgba(139, 92, 246, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
+                            titleFont: { size: 13, weight: '600', family: 'Space Grotesk' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.raw} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
-            document.getElementById('ticketCount').textContent = filtered.length;
+            // Days Chart (Gradient Bar)
+            const ctx2 = document.getElementById('daysChart').getContext('2d');
+            if (daysChart) daysChart.destroy();
 
-            if (!filtered.length) {
-                list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><p>Тикеты не найдены</p></div>';
-                return;
-            }
+            const days = (data.by_day || []).map(d => {
+                const date = new Date(d.day);
+                return date.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+            });
+            const dayValues = (data.by_day || []).map(d => d.count);
 
-            list.innerHTML = filtered.map(t => {
-                const statusClass = t.status === 'open' ? 'ticket-card__status--open' :
-                                   t.status === 'in_progress' ? 'ticket-card__status--progress' :
-                                   'ticket-card__status--closed';
-                const statusText = t.status === 'open' ? 'Открыт' :
-                                  t.status === 'in_progress' ? 'В работе' : 'Закрыт';
-                const created = new Date(t.created_at).toLocaleDateString('ru-RU');
+            const barGradient = ctx2.createLinearGradient(0, 170, 0, 0);
+            barGradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
+            barGradient.addColorStop(1, 'rgba(139, 92, 246, 1)');
 
-                const takeBtn = t.status === 'open' ?
-                    `<button class="ticket-action-btn ticket-action-btn--take" onclick="takeTicket(${t.id}); event.stopPropagation();">✓ Взять</button>` : '';
-                const closeBtn = t.status !== 'closed' ?
-                    `<button class="ticket-action-btn ticket-action-btn--close" onclick="closeTicket(${t.id}); event.stopPropagation();">🏁 Закрыть</button>` : '';
-
-                return `
-                    <div class="ticket-card">
-                        <div class="ticket-card__header">
-                            <span class="ticket-card__id">#${t.id}</span>
-                            <span class="ticket-card__status ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="ticket-card__title">${t.label || 'Обращение'}</div>
-                        <div class="ticket-card__meta">
-                            <span class="ticket-card__meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                @${t.trader_username || 'unknown'}
-                            </span>
-                            <span class="ticket-card__meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                ${created}
-                            </span>
-                            ${t.taken_by ? `<span class="ticket-card__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>@${t.taken_by}</span>` : ''}
-                        </div>
-                        ${(takeBtn || closeBtn) ? `<div class="ticket-card__actions">${takeBtn}${closeBtn}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
+            daysChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        data: dayValues,
+                        backgroundColor: barGradient,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 1400, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
+                            titleColor: '#fafafa',
+                            bodyColor: '#a1a1aa',
+                            borderColor: 'rgba(139, 92, 246, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#52525b', font: { size: 10, family: 'Manrope' } },
+                            border: { display: false }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#52525b', font: { size: 10, family: 'Manrope' } },
+                            border: { display: false },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
+        // Render tickets
+        function renderTickets() {
+            const list = document.getElementById('ticketsList');
+            let filtered = tickets;
+
+            if (currentStatus) {
+                filtered = filtered.filter(t => t.status === currentStatus);
+            }
+
+            if (currentSupport) {
+                filtered = filtered.filter(t => t.taken_by === currentSupport);
+            }
+
+            if (currentTeam) {
+                filtered = filtered.filter(t => t.team_name === currentTeam);
+            }
+
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(t =>
+                    String(t.id).includes(search) ||
+                    (t.trader_username || '').toLowerCase().includes(search) ||
+                    (t.label || '').toLowerCase().includes(search) ||
+                    (t.order_id || '').toLowerCase().includes(search) ||
+                    (t.taken_by || '').toLowerCase().includes(search)
+                );
+            }
+
+            const totalPages = Math.ceil(filtered.length / perPage) || 1;
+            const start = (currentPage - 1) * perPage;
+            const page = filtered.slice(start, start + perPage);
+
+            if (!page.length) {
+                list.innerHTML = '<div class="loading">Тикеты не найдены</div>';
+            } else {
+                list.innerHTML = page.map(t => {
+                    const statusClass = t.status === 'open' ? 'status-open' :
+                                       t.status === 'in_progress' ? 'status-progress' : 'status-closed';
+                    const statusText = t.status === 'open' ? 'Открыт' :
+                                      t.status === 'in_progress' ? 'В работе' : 'Закрыт';
+                    const isExpanded = expandedTicketId === t.id;
+
+                    const createdAt = t.created_at ? formatTimeAgo(t.created_at) : '—';
+
+                    return `<div class="ticket-item ${isExpanded ? 'expanded' : ''}" data-id="${t.id}">
+                        <div class="ticket-main" onclick="toggleTicket(${t.id})">
+                            <span class="ticket-number">#${String(t.id).padStart(4, '0')}</span>
+                            <div class="ticket-content">
+                                <div class="ticket-title-row">
+                                    <span class="ticket-title">${escapeHtml(t.label || 'Без категории')}</span>
+                                    ${t.team_name ? `<span class="ticket-team">${escapeHtml(t.team_name)}</span>` : ''}
+                                </div>
+                                <div class="ticket-meta-row">
+                                    <span class="ticket-meta-item">
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                            <circle cx="12" cy="7" r="4"/>
+                                        </svg>
+                                        @${escapeHtml(t.trader_username || '—')}
+                                    </span>
+                                    ${t.order_id ? `<span class="ticket-meta-item">
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                            <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                                        </svg>
+                                        ${escapeHtml(t.order_id)}
+                                    </span>` : ''}
+                                </div>
+                            </div>
+                            <div class="ticket-right">
+                                <div class="ticket-time">${createdAt}</div>
+                                <span class="ticket-status ${statusClass}">
+                                    ${t.status === 'open' || t.status === 'in_progress' ? '<span class="status-dot-animated"></span>' : ''}
+                                    ${statusText}
+                                </span>
+                                <span class="ticket-arrow">▼</span>
+                            </div>
+                        </div>
+                        <div class="ticket-details">
+                            <div class="ticket-details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Команда</span>
+                                    <span class="detail-value">${t.team_name ? escapeHtml(t.team_name) : '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Трейдер</span>
+                                    <span class="detail-value">@${escapeHtml(t.trader_username || '—')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">ID заказа</span>
+                                    <span class="detail-value mono">${escapeHtml(t.order_id || '—')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Саппорт</span>
+                                    <span class="detail-value">@${escapeHtml(t.taken_by || '—')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Создан</span>
+                                    <span class="detail-value">${t.created_at ? formatDateTime(t.created_at) : '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Взят</span>
+                                    <span class="detail-value">${t.taken_at ? formatDateTime(t.taken_at) : '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Закрыт</span>
+                                    <span class="detail-value">${t.closed_at ? formatDateTime(t.closed_at) : '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Время</span>
+                                    <span class="detail-value">${getProcessingTime(t)}</span>
+                                </div>
+                            </div>
+                            ${t.status !== 'closed' ? `
+                            <div class="ticket-actions">
+                                ${t.status === 'open' ? `<button class="ticket-action-btn take" onclick="event.stopPropagation(); takeTicket(${t.id})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/>
+                                    </svg>
+                                    Взять в работу
+                                </button>` : ''}
+                                <button class="ticket-action-btn close" onclick="event.stopPropagation(); closeTicket(${t.id})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    Завершить
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            document.getElementById('ticketCount').textContent = `${filtered.length} тикетов`;
+            document.getElementById('pageInfo').textContent = `Страница ${currentPage} из ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+
+        function getProcessingTime(ticket) {
+            if (!ticket.taken_at || !ticket.closed_at) return '—';
+            const ms = new Date(ticket.closed_at) - new Date(ticket.taken_at);
+            const minutes = Math.floor(ms / 60000);
+            if (minutes < 60) return `${minutes} мин`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}ч ${mins}м`;
+        }
+
+        function toggleTicket(id) {
+            expandedTicketId = expandedTicketId === id ? null : id;
+            renderTickets();
+        }
+
+        function formatTimeAgo(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return 'только что';
+            if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} ч назад`;
+            return `${Math.floor(diff / 86400)} дн назад`;
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ru', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Update duty with timeline
+        function updateDuty(data) {
+            const duty = data.current_duty;
+            const dutyName = document.getElementById('dutyName');
+            const dutyTime = document.getElementById('dutyTime');
+            const dutyShift = document.getElementById('dutyShiftBadge');
+            const dutyAvatar = document.getElementById('dutyAvatar');
+
+            const hour = new Date().getHours();
+            const isDay = 9 <= hour && hour < 21;
+
+            if (duty) {
+                dutyName.textContent = duty;
+                dutyTime.textContent = `${new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })} МСК`;
+                dutyShift.textContent = isDay ? '☀️ Дневная' : '🌙 Ночная';
+                dutyShift.className = `duty-shift ${isDay ? 'shift-day' : 'shift-night'}`;
+                dutyAvatar.textContent = duty.charAt(0).toUpperCase();
+            } else {
+                dutyName.textContent = 'Не назначен';
+                dutyTime.textContent = '— МСК';
+                dutyShift.textContent = '—';
+                dutyShift.className = 'duty-shift';
+                dutyAvatar.textContent = '?';
+            }
+
+            // Update timeline
+            updateTimeline(isDay);
+        }
+
+        function updateTimeline(isDay) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour + currentMinute / 60;
+
+            let progress, position, start, end;
+
+            if (isDay) {
+                start = 9;
+                end = 21;
+                progress = ((currentTime - start) / (end - start)) * 100;
+                position = progress;
+                document.getElementById('shiftStart').textContent = '09:00';
+                document.getElementById('shiftEnd').textContent = '21:00';
+            } else {
+                if (currentHour >= 21) {
+                    start = 21;
+                    end = 33; // 9 next day
+                    progress = ((currentTime - start) / (end - start)) * 100;
+                } else {
+                    start = 21;
+                    end = 33;
+                    progress = ((currentTime + 24 - start) / (end - start)) * 100;
+                }
+                position = progress;
+                document.getElementById('shiftStart').textContent = '21:00';
+                document.getElementById('shiftEnd').textContent = '09:00';
+            }
+
+            progress = Math.max(0, Math.min(100, progress));
+            position = Math.max(0, Math.min(100, position));
+
+            document.getElementById('timelineProgress').style.width = progress + '%';
+            document.getElementById('timelineNow').style.left = position + '%';
+        }
+
+        // Schedule
         function renderSchedule(data) {
             const grid = document.getElementById('scheduleGrid');
             const week = data.week || [];
+
+            if (!week.length) {
+                grid.innerHTML = '<div class="loading">Нет данных</div>';
+                return;
+            }
+
             const dayNames = { Mon: 'Пн', Tue: 'Вт', Wed: 'Ср', Thu: 'Чт', Fri: 'Пт', Sat: 'Сб', Sun: 'Вс' };
 
             grid.innerHTML = week.map(day => {
-                const isToday = day.is_today ? 'schedule-day--today' : '';
-                return `
-                    <div class="schedule-day ${isToday}">
-                        <div class="schedule-day__name">${dayNames[day.day_name] || day.day_name}</div>
-                        <div class="schedule-day__date">${day.day_label}</div>
-                        <div class="schedule-shifts">
-                            <span class="schedule-shift ${day.day?.length ? 'schedule-shift--day' : ''}">☀️ ${day.day?.[0] || '—'}</span>
-                            <span class="schedule-shift ${day.night?.length ? 'schedule-shift--night' : ''}">🌙 ${day.night?.[0] || '—'}</span>
-                        </div>
-                    </div>
-                `;
+                const isToday = day.is_today;
+                const dayName = dayNames[day.day_name] || day.day_name;
+                const hasDayDuty = day.day && day.day.length;
+                const hasNightDuty = day.night && day.night.length;
+
+                return `<div class="schedule-day ${isToday ? 'today' : ''}" onclick="openScheduleModal('${day.date}')">
+                    <div class="schedule-day-name">${dayName}</div>
+                    <div class="schedule-day-date">${day.day_label}</div>
+                    ${hasDayDuty ? `<div class="schedule-shift day" title="Дневная: ${day.day.join(', ')}">☀️ ${day.day[0]}</div>` : '<div class="schedule-shift empty">☀️</div>'}
+                    ${hasNightDuty ? `<div class="schedule-shift night" title="Ночная: ${day.night.join(', ')}">🌙 ${day.night[0]}</div>` : '<div class="schedule-shift empty">🌙</div>'}
+                </div>`;
             }).join('');
         }
 
-        function renderCharts(summary, stats) {
-            // Category chart
-            const labels = summary.by_label?.map(l => l.label) || [];
-            const counts = summary.by_label?.map(l => l.count) || [];
+        function openScheduleModal(date) {
+            document.getElementById('modalDate').value = date || new Date().toISOString().split('T')[0];
+            document.getElementById('scheduleModal').classList.add('active');
+        }
 
-            if (categoryChart) categoryChart.destroy();
-            categoryChart = new Chart(document.getElementById('categoryChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: labels.length ? labels : ['Нет данных'],
-                    datasets: [{
-                        data: counts.length ? counts : [1],
-                        backgroundColor: ['#00d4aa', '#00a8ff', '#fbbf24', '#ef4444', '#8b5cf6', '#ec4899'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-            document.getElementById('chartTotal').textContent = summary.total || 0;
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
 
-            // Days chart
-            const days = summary.by_day?.map(d => d.day.split('-').pop()) || [];
-            const dayCounts = summary.by_day?.map(d => d.count) || [];
+        async function switchDuty() {
+            if (!confirm('Сменить смену и разослать уведомления?')) return;
 
-            if (daysChart) daysChart.destroy();
-            daysChart = new Chart(document.getElementById('daysChart'), {
-                type: 'bar',
-                data: {
-                    labels: days.length ? days : ['—'],
-                    datasets: [{
-                        data: dayCounts.length ? dayCounts : [0],
-                        backgroundColor: '#00d4aa',
-                        borderRadius: 6
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false } } } }
-            });
-            document.getElementById('chartWeekTotal').textContent = dayCounts.reduce((a, b) => a + b, 0) || 0;
+            try {
+                const response = await fetch(`${API}/api/duty/switch`, { method: 'POST' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`Смена сменена! Оповещено: ${data.chats_notified || 0}`);
+                    loadData();
+                } else {
+                    showError('Ошибка смены смены');
+                }
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+            }
+        }
+
+        async function saveDuty() {
+            const date = document.getElementById('modalDate').value;
+            const shift = document.getElementById('modalShift').value;
+            const name = document.getElementById('modalName').value.trim();
+
+            if (!name) {
+                alert('Введите имя дежурного');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API}/api/duty`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ support_username: name, shift: shift })
+                });
+
+                if (response.ok) {
+                    closeScheduleModal();
+                    loadData();
+                } else {
+                    alert('Ошибка сохранения');
+                }
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        // Filters
+        function filterByStatus(status) {
+            currentStatus = status;
+            currentPage = 1;
+            expandedTicketId = null;
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event?.currentTarget?.classList?.add('active');
+
+            renderTickets();
+        }
+
+        function filterBySupport() {
+            const select = document.getElementById('supportFilter');
+            currentSupport = select.value;
+            currentPage = 1;
+            expandedTicketId = null;
+
+            const statsBlock = document.getElementById('supportStats');
+            if (currentSupport) {
+                statsBlock.classList.add('visible');
+                const stats = supportStats[currentSupport];
+                if (stats) {
+                    document.getElementById('supportStatsTitle').textContent = `@${currentSupport}`;
+                    document.getElementById('supportTotal').textContent = stats.total || 0;
+                    document.getElementById('supportClosed').textContent = stats.closed || 0;
+                    document.getElementById('supportProgress').textContent = stats.in_progress || 0;
+                    const avgTime = stats.avg_seconds;
+                    document.getElementById('supportAvgTime').textContent = avgTime ? `${Math.round(avgTime / 60)} мин` : '—';
+                }
+            } else {
+                statsBlock.classList.remove('visible');
+            }
+
+            renderTickets();
+        }
+
+        function clearSupportFilter() {
+            document.getElementById('supportFilter').value = '';
+            filterBySupport();
         }
 
         function renderSupportFilter() {
             const select = document.getElementById('supportFilter');
             select.innerHTML = '<option value="">Все саппорты</option>';
             supports.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.username;
-                opt.textContent = `@${s.username}`;
-                select.appendChild(opt);
+                select.innerHTML += `<option value="${s.username}">@${s.username}</option>`;
             });
 
             const dutySelect = document.getElementById('dutySupportSelect');
             dutySelect.innerHTML = '<option value="">Выберите саппорта...</option>';
             supports.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.username;
-                opt.textContent = `@${s.username}`;
-                dutySelect.appendChild(opt);
+                dutySelect.innerHTML += `<option value="${s.username}">@${s.username}</option>`;
             });
         }
 
-        // ─── Filters ───────────────────────────────────────────
-        function filterTickets() {
-            currentStatus = document.getElementById('statusFilter').value;
+        function renderTeamFilter() {
+            const select = document.getElementById('teamFilter');
+            select.innerHTML = '<option value="">Все команды</option>';
+            const chats = window.allChats || [];
+            chats.forEach(c => {
+                const name = c.team_name || `Чат ${c.chat_id}`;
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        function filterByTeam() {
+            const select = document.getElementById('teamFilter');
+            currentTeam = select.value;
+            currentPage = 1;
+            expandedTicketId = null;
             renderTickets();
         }
 
-        function filterBySupport() {
-            currentSupport = document.getElementById('supportFilter').value;
-            renderTickets();
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                expandedTicketId = null;
+                renderTickets();
+            }, 300);
         }
 
-        function changeWeek(delta) {
-            weekOffset += delta;
-            fetch(`${API}/api/schedule?offset=${weekOffset}`)
-                .then(r => r.json())
-                .then(renderSchedule);
+        function changePage(dir) {
+            let filtered = tickets;
+            if (currentStatus) filtered = filtered.filter(t => t.status === currentStatus);
+            if (currentSupport) filtered = filtered.filter(t => t.taken_by === currentSupport);
+            if (currentTeam) filtered = filtered.filter(t => t.team_name === currentTeam);
+
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(t =>
+                    String(t.id).includes(search) ||
+                    (t.trader_username || '').toLowerCase().includes(search) ||
+                    (t.label || '').toLowerCase().includes(search) ||
+                    (t.order_id || '').toLowerCase().includes(search) ||
+                    (t.taken_by || '').toLowerCase().includes(search)
+                );
+            }
+
+            const totalPages = Math.ceil(filtered.length / perPage) || 1;
+            const newPage = currentPage + dir;
+
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                expandedTicketId = null;
+                renderTickets();
+            }
         }
 
-        // ─── Actions ────────────────────────────────────────────
+        // Actions
         async function takeTicket(id) {
-            const btn = event.target;
+            const btn = event.target.closest('.ticket-action-btn');
+            const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '⏳';
+            btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⟳</span>';
+
             try {
-                const r = await fetch(`${API}/api/tickets/${id}/take`, { method: 'POST' });
-                if (r.ok) {
-                    showToast(`Тикет #${id} взят`);
-                    loadData();
+                const response = await fetch(`${API}/api/tickets/${id}/take`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const ticket = tickets.find(t => t.id === id);
+                    if (ticket) {
+                        ticket.status = 'in_progress';
+                        ticket.taken_at = new Date().toISOString();
+                    }
+                    expandedTicketId = null;
+                    renderTickets();
+                    showToast(`Тикет #${id} взят в работу`);
                 } else {
-                    showError('Ошибка');
+                    const data = await response.json().catch(() => ({}));
+                    showError(data.error || 'Ошибка');
                     btn.disabled = false;
+                    btn.innerHTML = originalHtml;
                 }
             } catch (e) {
-                showError(e.message);
+                showError('Ошибка сети: ' + e.message);
                 btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         }
 
         async function closeTicket(id) {
-            const btn = event.target;
+            const btn = event.target.closest('.ticket-action-btn');
+            const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '⏳';
+            btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⟳</span>';
+
             try {
-                const r = await fetch(`${API}/api/tickets/${id}/close`, { method: 'POST' });
-                if (r.ok) {
+                const response = await fetch(`${API}/api/tickets/${id}/close`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const ticket = tickets.find(t => t.id === id);
+                    if (ticket) {
+                        ticket.status = 'closed';
+                        ticket.closed_at = new Date().toISOString();
+                    }
+                    expandedTicketId = null;
+                    renderTickets();
                     showToast(`Тикет #${id} закрыт`);
-                    loadData();
                 } else {
-                    showError('Ошибка');
+                    const data = await response.json().catch(() => ({}));
+                    showError(data.error || 'Ошибка');
                     btn.disabled = false;
+                    btn.innerHTML = originalHtml;
                 }
             } catch (e) {
-                showError(e.message);
+                showError('Ошибка сети: ' + e.message);
                 btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         }
 
         async function assignDuty() {
             const username = document.getElementById('dutySupportSelect').value;
             const shift = document.getElementById('dutyShiftSelect').value;
-            if (!username) { showError('Выберите саппорта'); return; }
+
+            if (!username) {
+                showError('Выберите саппорта');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
             try {
-                const r = await fetch(`${API}/api/duty`, {
+                const response = await fetch(`${API}/api/duty`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ support_username: username, shift })
+                    body: JSON.stringify({ support_username: username, shift: shift, date: today })
                 });
-                if (r.ok) {
-                    showToast(`@${username} назначен`);
+
+                if (response.ok) {
+                    showToast(`@${username} назначен дежурным`);
                     loadData();
+                } else {
+                    showError('Ошибка назначения');
                 }
-            } catch (e) { showError(e.message); }
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+            }
         }
 
-        async function switchDuty() {
-            if (!confirm('Сменить смену?')) return;
-            try {
-                const r = await fetch(`${API}/api/duty/switch`, { method: 'POST' });
-                const d = await r.json();
-                showToast(`Персменка! Оповещено: ${d.chats_notified || 0}`);
-                loadData();
-            } catch (e) { showError(e.message); }
-        }
-
-        // ─── Toast ──────────────────────────────────────────────
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = 'toast toast--success show';
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
+        // Error & Toast
         function showError(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = 'toast toast--error show';
-            setTimeout(() => t.classList.remove('show'), 3000);
+            const el = document.getElementById('error');
+            document.getElementById('errorText').textContent = msg;
+            el.classList.toggle('active', !!msg);
         }
 
-        // ─── Init ───────────────────────────────────────────────
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.innerHTML = `<span>✓</span> ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 28px;
+                right: 28px;
+                background: linear-gradient(135deg, var(--green), var(--green-dim));
+                color: #fff;
+                padding: 16px 28px;
+                border-radius: 14px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+                z-index: 9999;
+                animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                setTimeout(() => toast.remove(), 350);
+            }, 2800);
+        }
+
+        const toastStyle = document.createElement('style');
+        toastStyle.textContent = `
+            @keyframes toastIn {
+                from { opacity: 0; transform: translateY(25px) scale(0.95); }
+                to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes toastOut {
+                from { opacity: 1; transform: translateY(0) scale(1); }
+                to { opacity: 0; transform: translateY(25px) scale(0.95); }
+            }
+        `;
+        document.head.appendChild(toastStyle);
+
+        // CSV Export
+        function exportCSV() {
+            const headers = ['ID', 'Команда', 'Категория', 'Трейдер', 'Username', 'Order ID', 'Статус', 'Саппорт', 'Создан', 'Взят', 'Закрыт'];
+            const rows = tickets.map(t => [
+                t.id,
+                t.team_name || '',
+                t.label || '',
+                t.trader_name || '',
+                t.trader_username || '',
+                t.order_id || '',
+                t.status,
+                t.taken_by || '',
+                t.created_at ? new Date(t.created_at).toLocaleString('ru') : '',
+                t.taken_at ? new Date(t.taken_at).toLocaleString('ru') : '',
+                t.closed_at ? new Date(t.closed_at).toLocaleString('ru') : ''
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => {
+                    const str = String(cell);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                }).join(','))
+                .join('\n');
+
+            const BOM = '﻿';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `finavia_tickets_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Экспорт завершён');
+        }
+
+        // Modal close on outside click
+        document.getElementById('scheduleModal').addEventListener('click', function(e) {
+            if (e.target === this) closeScheduleModal();
+        });
+
+        // Init
         loadData();
-        setInterval(loadData, 30000);
     </script>
 </body>
 </html>
