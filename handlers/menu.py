@@ -54,6 +54,31 @@ async def cmd_my_tickets(message: Message):
     await message.answer(text, parse_mode="HTML")
 
 
+@router.message(Command("duty"))
+async def cmd_duty(message: Message):
+    """Показать кто сейчас дежурит."""
+    import schedule_manager
+
+    duty_info = schedule_manager.get_duty_info()
+    duty_names = duty_info.get("names") or []
+    shift_label = duty_info.get("shift_label") or "Неизвестно"
+    start_time = duty_info.get("start_time") or "—"
+    end_time = duty_info.get("end_time") or "—"
+
+    if duty_names:
+        names_text = ", ".join([f"@{n}" for n in duty_names])
+        text = (
+            f"🌟 <b>Сейчас дежурит:</b>\n\n"
+            f"{names_text}\n\n"
+            f"{shift_label} смена\n"
+            f"⏰ {start_time} – {end_time} МСК"
+        )
+    else:
+        text = "👤 <b>Дежурный не назначен</b>"
+
+    await message.answer(text, parse_mode="HTML")
+
+
 @router.message(Command("stats"))
 async def cmd_stats(message: Message):
     """Показать саппорту его статистику."""

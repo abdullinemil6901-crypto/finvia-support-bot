@@ -60,7 +60,7 @@ def verify_api_key(authorization: Optional[str] = Header(None)):
 if USE_SUPABASE:
     from supabase_client import (
         get_connection, get_all_tickets_raw, get_tickets_summary,
-        get_support_stats, get_label_stats, _get
+        get_support_stats, get_label_stats, _get, _patch
     )
 else:
     from database import get_connection
@@ -379,6 +379,56 @@ def set_duty_endpoint(req: SetDutyRequest):
     return {"success": True, "support_username": req.support_username, "shift": shift}
 
 
+@app.post("/api/duty/switch")
+def switch_duty():
+    """Смена дежурных + рассылка во все чаты."""
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+    hour = now.hour
+
+    # Определяем новую смену
+    new_shift = "day" if 9 <= hour < 21 else "night"
+    shift_label = "☀️ Дневная" if new_shift == "day" else "🌙 Ночная"
+
+    # Получаем дежурных на эту смену
+    if USE_SUPABASE:
+        from supabase_client import get_all_chats
+        duty = schedule_manager.get_current_duty()
+    else:
+        duty = schedule_manager.get_current_duty()
+
+    duty_names = ", ".join([f"@{d}" for d in duty]) if duty else "никто"
+
+    # Получаем все чаты для рассылки
+    if USE_SUPABASE:
+        from supabase_client import get_all_chats
+        chats = get_all_chats()
+    else:
+        chats = []
+
+    # Формируем сообщение
+    message = (
+        f"🔔 <b>Коллега, персменка!</b>\n\n"
+        f"Сейчас на посту {duty_names}\n"
+        f"{shift_label} смена"
+    )
+
+    # Рассылаем во все чаты
+    sent = 0
+    for chat in chats:
+        chat_id = chat.get("chat_id")
+        if chat_id:
+            if send_telegram_message(chat_id, message):
+                sent += 1
+
+    return {
+        "success": True,
+        "shift": new_shift,
+        "duty": duty,
+        "chats_notified": sent
+    }
+
+
 # ─────────────────────────────────────────────
 # Эндпоинты — Сводка
 # ─────────────────────────────────────────────
@@ -457,6 +507,61 @@ def get_summary():
 # ─────────────────────────────────────────────
 # Мониторинг
 # ─────────────────────────────────────────────
+
+@app.get("/api/check_alerts")
+def check_stale_tickets():
+    """Проверяет тикеты старше 12 минут и отправляет алерты."""
+    if not BOT_TOKEN:
+        return {"success": False, "error": "BOT_TOKEN not configured"}
+
+    from supabase_client import _get, _patch
+
+    # Находим тикеты старше 12 минут
+    stale_tickets = _get(
+        "/tickets?status=eq.open&alert_sent=eq.false&"
+        "created_at=lt.now()%20-%20interval%20%2712%20minutes%27"
+        "&select=id,label,trader_username,created_at,trader_chat_id"
+    )
+
+    sent_count = 0
+    for ticket in stale_tickets:
+        ticket_id = ticket.get("id")
+        label = ticket.get("label") or "Обращение"
+        trader_username = ticket.get("trader_username") or "unknown"
+        trader_chat_id = ticket.get("trader_chat_id")
+
+        # Считаем минуты
+        try:
+            created = datetime.fromisoformat(ticket.get("created_at", "").replace("Z", "+00:00"))
+            minutes_ago = int((datetime.now() - created).total_seconds() / 60)
+        except:
+            minutes_ago = 12
+
+        # Отправляем в саппорт-чат
+        support_message = (
+            f"⚠️ <b>Тикет #{ticket_id} не взят!</b>\n\n"
+            f"📋 {label}\n"
+            f"👤 @{trader_username}\n"
+            f"⏱️ {minutes_ago} мин"
+        )
+        send_telegram_message(SUPPORT_CHAT_ID, support_message)
+
+        # Уведомляем трейдера
+        if trader_chat_id:
+            trader_message = (
+                f"⏰ <b>Напоминание по заявке #{ticket_id}</b>\n\n"
+                f"Ваша заявка \"{label}\" ещё не взята в работу.\n"
+                f"Пожалуйста, ожидайте — саппорт скоро ответит."
+            )
+            send_telegram_message(trader_chat_id, trader_message)
+
+        # Отмечаем что алерт отправлен
+        _patch(f"/tickets?id=eq.{ticket_id}", {"alert_sent": True})
+        sent_count += 1
+        logger.info(f"Alert sent for ticket #{ticket_id}")
+
+    return {"success": True, "alerts_sent": sent_count}
+
 
 @app.get("/health")
 def health_check():

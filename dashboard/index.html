@@ -852,6 +852,29 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .duty-switch-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .duty-switch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .duty-switch-btn:active {
+            transform: translateY(0);
         }
 
         .duty-time svg {
@@ -1321,6 +1344,7 @@
                     </svg>
                     <span>— МСК</span>
                 </div>
+                <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить смену</button>
             </div>
             <div class="schedule-card">
                 <div class="schedule-header">
@@ -1853,6 +1877,26 @@
 
         function closeScheduleModal() {
             document.getElementById('scheduleModal').classList.remove('active');
+        }
+
+        async function switchDuty() {
+            if (!confirm('Сменить смену и разослать уведомления?')) return;
+
+            try {
+                const response = await fetch(`${API}/api/duty/switch`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`Персменка! Оповещено чатов: ${data.chats_notified || 0}`);
+                    loadData();
+                } else {
+                    showError('Ошибка смены смены');
+                }
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+            }
         }
 
         async function saveDuty() {
