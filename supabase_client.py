@@ -168,9 +168,10 @@ def get_hourly_stats() -> list:
 
 def add_support(tg_id: int, username: str, full_name: str):
     _post("/supports", {
-        "tg_id": tg_id,
+        "tg_id": tg_id or 0,
         "username": username,
-        "full_name": full_name,
+        "full_name": full_name or "",
+        "role": "support",
         "added_at": datetime.now().isoformat()
     })
 

@@ -130,10 +130,13 @@ async def cmd_list_supports(message: Message):
 
     lines = ["📋 <b>Саппорты:</b>\n"]
     for s in supports:
-        s_id, tg_id, username, full_name, added_at = s[:5]
+        username = s.get("username") or ""
+        full_name = s.get("full_name") or ""
+        tg_id = s.get("tg_id") or ""
         name = f"@{username}" if username else full_name or str(tg_id)
-        lines.append(f"• {name} (ID: {tg_id})")
-        lines.append(f"  Добавлен: {added_at[:10] if added_at else '?'}\n")
+        role = s.get("role") or "support"
+        lines.append(f"• {name} [{role}]")
+        lines.append(f"  ID: {tg_id}\n")
 
     await message.answer("".join(lines), parse_mode="HTML")
 
@@ -151,9 +154,8 @@ async def cmd_add_support(message: Message):
         return
 
     username = args[1].lstrip("@")
-    user_id = message.from_user.id
-
-    add_support(user_id, username, "")
+    # Добавляем с role=support по умолчанию
+    add_support(0, username, "")
     await message.answer(f"✅ Саппорт @{username} добавлен.")
 
 
