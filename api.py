@@ -387,18 +387,18 @@ def switch_duty():
     date_str = now.strftime("%Y-%m-%d")
     hour = now.hour
 
-    # Определяем новую смену
-    new_shift = "day" if 9 <= hour < 21 else "night"
-    shift_label = "☀️ Дневная" if new_shift == "day" else "🌙 Ночная"
+    # Определяем текущую смену
+    current_shift = "day" if 9 <= hour < 21 else "night"
+    shift_label = "☀️ Дневная" if current_shift == "day" else "🌙 Ночная"
 
-    # Получаем дежурных на эту смену
+    # Получаем дежурных на текущую смену
     if USE_SUPABASE:
         from supabase_client import get_all_chats
         duty = schedule_manager.get_current_duty()
     else:
         duty = schedule_manager.get_current_duty()
 
-    duty_names = ", ".join([f"@{d}" for d in duty]) if duty else "никто"
+    duty_names = ", ".join([f"@{d}" for d in duty]) if duty else None
 
     # Получаем все чаты для рассылки
     if USE_SUPABASE:
@@ -408,21 +408,34 @@ def switch_duty():
         chats = []
 
     # Формируем сообщение
-    message = f"🔔 <b>Коллега, персменка, сейчас на посту {duty_names}!</b>"
+    if duty_names:
+        message = f"🔔 <b>Коллега, персменка, сейчас на посту {duty_names}!</b>"
+    else:
+        message = f"🔔 <b>Коллега, персменка! Дежурный не назначен.</b>"
 
     # Рассылаем во все чаты
     sent = 0
+    failed = 0
     for chat in chats:
         chat_id = chat.get("chat_id")
         if chat_id:
-            if send_telegram_message(chat_id, message):
+            success = send_telegram_message(chat_id, message)
+            if success:
                 sent += 1
+            else:
+                failed += 1
+
+    logger.info(f"Персменка: отправлено={sent}, не удалось={failed}, chats={len(chats)}, duty={duty}")
 
     return {
         "success": True,
-        "shift": new_shift,
+        "shift": current_shift,
+        "shift_label": shift_label,
         "duty": duty,
-        "chats_notified": sent
+        "duty_names": duty_names,
+        "chats_total": len(chats),
+        "chats_notified": sent,
+        "chats_failed": failed
     }
 
 
