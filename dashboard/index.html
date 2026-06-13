@@ -3,108 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Dashboard</title>
+    <title>Support Hub — Finavia</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ══════════════════════════════════════════════════════════════
+           DESIGN TOKENS — Уникальная цветовая система
+           ══════════════════════════════════════════════════════════════ */
         :root {
-            --bg: #0a0a0f;
-            --card: #13131d;
-            --card-hover: #1a1a28;
-            --border: rgba(255,255,255,0.08);
-            --border-glow: rgba(99, 102, 241, 0.3);
-            --text: #fff;
-            --text-muted: #6b7280;
-            --text-dim: #4b5563;
-            --accent: #6366f1;
-            --accent-light: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.25);
-            --green: #22c55e;
-            --green-glow: rgba(34, 197, 94, 0.2);
-            --yellow: #eab308;
-            --yellow-glow: rgba(234, 179, 8, 0.2);
-            --cyan: #06b6d4;
-            --cyan-glow: rgba(6, 182, 212, 0.2);
-            --red: #ef4444;
-            --radius: 16px;
+            /* Основная палитра — глубокий космический чёрный с акцентами */
+            --bg-primary: #08080c;
+            --bg-secondary: #0d0d14;
+            --bg-card: #12121a;
+            --bg-elevated: #181822;
+            --bg-hover: #1e1e2a;
+
+            /* Градиенты акцентов */
+            --accent-primary: #00d4aa;
+            --accent-secondary: #00a8ff;
+            --accent-gradient: linear-gradient(135deg, #00d4aa 0%, #00a8ff 100%);
+
+            /* Нейтральные */
+            --text-primary: #f0f0f5;
+            --text-secondary: #8a8a9a;
+            --text-muted: #5a5a6a;
+
+            /* Статусные */
+            --status-open: #fbbf24;
+            --status-progress: #3b82f6;
+            --status-closed: #10b981;
+
+            /* Границы и разделители */
+            --border-subtle: rgba(255, 255, 255, 0.04);
+            --border-accent: rgba(0, 212, 170, 0.15);
+
+            /* Эффекты */
+            --glow-accent: 0 0 40px rgba(0, 212, 170, 0.15);
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+            /* Скругления */
+            --radius-xs: 6px;
             --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
         }
 
+        /* ══════════════════════════════════════════════════════════════
+           RESET & BASE
+           ══════════════════════════════════════════════════════════════ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 32px;
-            background-image:
-                radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
+        html {
+            font-size: 14px;
+            scroll-behavior: smooth;
         }
 
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           AMBIENT BACKGROUND — Живые градиентные пятна
+           ══════════════════════════════════════════════════════════════ */
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .ambient-orb--1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent-primary);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .ambient-orb--2 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-secondary);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -10s;
+        }
+
+        .ambient-orb--3 {
+            width: 300px;
+            height: 300px;
+            background: #8b5cf6;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 30px) scale(1.02); }
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           LAYOUT
+           ══════════════════════════════════════════════════════════════ */
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 40px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           HEADER — Минималистичный с эффектом glass
+           ══════════════════════════════════════════════════════════════ */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
+            padding: 20px 28px;
+            background: rgba(18, 18, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
         }
 
-        .logo {
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-accent);
+        }
+
+        .brand-logo svg {
+            width: 28px;
+            height: 28px;
+            color: #fff;
+        }
+
+        .brand-text h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-meta {
             display: flex;
             align-items: center;
             gap: 16px;
         }
 
-        .logo-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 8px 32px var(--accent-glow);
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo span {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .live-indicator {
+        .live-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 14px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 100px;
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: #10b981;
+            font-weight: 500;
         }
 
         .live-dot {
             width: 8px;
             height: 8px;
-            background: var(--green);
+            background: #10b981;
             border-radius: 50%;
-            animation: pulse 2s infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
@@ -113,63 +218,34 @@
         }
 
         .refresh-btn {
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            border: none;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 20px var(--accent-glow);
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
         .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px var(--accent-glow);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-accent);
         }
 
-        .refresh-btn:active {
-            transform: translateY(0);
+        .refresh-btn svg {
+            width: 20px;
+            height: 20px;
         }
 
-        .refresh-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .export-btn {
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 12px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .export-btn:hover {
-            border-color: var(--green);
-            color: var(--green);
-            transform: translateY(-2px);
-        }
-
-        .export-btn:active {
-            transform: translateY(0);
-        }
-
-        /* Stats Grid */
-        .stats {
+        /* ══════════════════════════════════════════════════════════════
+           STATS GRID — KPI карточки
+           ══════════════════════════════════════════════════════════════ */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
@@ -177,14 +253,13 @@
         }
 
         .stat-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            cursor: pointer;
-            transition: all 0.3s;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .stat-card::before {
@@ -193,227 +268,139 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            height: 2px;
+            background: var(--accent-gradient);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-glow);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
         }
 
         .stat-card:hover::before {
             opacity: 1;
         }
 
-        .stat-card.active {
-            border-color: var(--accent);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
-        }
-
-        .stat-card.active::before {
-            opacity: 1;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
+        .stat-card__label {
+            font-size: 0.75rem;
             color: var(--text-muted);
-            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 800;
-            line-height: 1;
+        .stat-card__value {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
         }
 
-        .stat-card.total .stat-value {
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stat-card.open .stat-value {
-            background: linear-gradient(135deg, var(--yellow), #fbbf24);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stat-card.progress .stat-value {
-            background: linear-gradient(135deg, var(--cyan), #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stat-card.closed .stat-value {
-            background: linear-gradient(135deg, var(--green), #4ade80);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .stat-card__trend {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .stat-icon {
+        .stat-card__trend--up { color: #10b981; }
+        .stat-card__trend--down { color: #ef4444; }
+
+        .stat-card__icon {
             position: absolute;
             top: 20px;
             right: 20px;
-            font-size: 1.5rem;
-            opacity: 0.3;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
         }
 
-        /* Main Layout */
-        .main {
+        /* ══════════════════════════════════════════════════════════════
+           MAIN GRID — Основной контент
+           ══════════════════════════════════════════════════════════════ */
+        .main-grid {
             display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 24px;
+            grid-template-columns: 1fr 380px;
+            gap: 28px;
         }
 
-        /* Tickets Section */
+        /* ══════════════════════════════════════════════════════════════
+           TICKETS SECTION
+           ══════════════════════════════════════════════════════════════ */
         .tickets-section {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
             overflow: hidden;
         }
 
         .section-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.03), transparent);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
-        .ticket-count {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            padding: 6px 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
+        .section-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-primary);
         }
 
-        /* Search */
-        .search-bar {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
+        .section-badge {
+            padding: 4px 10px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .filters {
             display: flex;
             gap: 12px;
-            align-items: center;
-        }
-
-        .search-input {
-            flex: 1;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-dim);
         }
 
         .filter-select {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 14px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            outline: none;
+            padding: 8px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-family: inherit;
             cursor: pointer;
-            min-width: 160px;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .filter-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+        .filter-select:hover {
+            border-color: var(--border-accent);
+            color: var(--text-primary);
         }
 
-        .filter-select option {
-            background: var(--card);
-        }
-
-        /* Support Stats */
-        .support-stats {
-            display: none;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
-        }
-
-        .support-stats.visible {
-            display: block;
-        }
-
-        .support-stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .support-stats-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--accent-light);
-        }
-
-        .support-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 4px;
-        }
-
-        .support-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
-
-        .support-stat {
-            text-align: center;
-            padding: 12px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-
-        .support-stat-value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--accent-light);
-        }
-
-        .support-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Tickets List */
+        /* ══════════════════════════════════════════════════════════════
+           TICKET CARDS — Премиум карточки тикетов
+           ══════════════════════════════════════════════════════════════ */
         .tickets-list {
-            max-height: 520px;
+            max-height: 600px;
             overflow-y: auto;
+            padding: 16px;
         }
 
         .tickets-list::-webkit-scrollbar {
@@ -425,372 +412,161 @@
         }
 
         .tickets-list::-webkit-scrollbar-thumb {
-            background: var(--border);
+            background: var(--bg-hover);
             border-radius: 3px;
         }
 
-        .ticket-item {
-            border-bottom: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ticket-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .ticket-item:hover::before {
-            opacity: 0.7;
-        }
-
-        .ticket-item:last-child {
-            border-bottom: none;
-        }
-
-        .ticket-header {
-            padding: 18px 24px;
+        .ticket-card {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .ticket-card:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-accent);
+            transform: translateX(4px);
+        }
+
+        .ticket-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .ticket-card__header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
-        .ticket-header:hover {
-            background: rgba(255,255,255,0.02);
+        .ticket-card__id {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Outfit', monospace;
         }
 
-        .ticket-header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .ticket-number {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent);
-            min-width: 60px;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
-        .ticket-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        .ticket-team {
+        .ticket-card__status {
+            padding: 4px 10px;
+            border-radius: 100px;
             font-size: 0.7rem;
-            padding: 3px 8px;
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--accent-light);
-            border-radius: 6px;
-            margin-left: 8px;
-            display: inline-block;
-        }
-
-        .ticket-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .ticket-status {
-            font-size: 0.7rem;
-            padding: 5px 12px;
-            border-radius: 20px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            position: relative;
         }
 
-        .status-open {
-            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(251, 191, 36, 0.15));
-            color: #fbbf24;
-            border: 1px solid rgba(234, 179, 8, 0.4);
-            box-shadow: 0 2px 12px rgba(234, 179, 8, 0.2);
+        .ticket-card__status--open {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--status-open);
         }
 
-        .status-progress {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(34, 211, 238, 0.15));
-            color: #22d3ee;
-            border: 1px solid rgba(6, 182, 212, 0.4);
-            box-shadow: 0 2px 12px rgba(6, 182, 212, 0.2);
+        .ticket-card__status--progress {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--status-progress);
         }
 
-        .status-closed {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(52, 211, 153, 0.15));
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+        .ticket-card__status--closed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--status-closed);
         }
 
-        .status-open .status-dot,
-        .status-progress .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            display: inline-block;
-            margin-right: 4px;
-            animation: statusPulse 2s ease-in-out infinite;
+        .ticket-card__title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        @keyframes statusPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-
-        .ticket-arrow {
-            color: var(--text-dim);
+        .ticket-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
             font-size: 0.8rem;
-            transition: transform 0.2s;
+            color: var(--text-secondary);
         }
 
-        .ticket-item.expanded .ticket-arrow {
-            transform: rotate(180deg);
-        }
-
-        /* Ticket Details */
-        .ticket-details {
-            display: none;
-            padding: 0 24px 20px 24px;
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.03), transparent);
-            animation: slideDown 0.3s ease;
-        }
-
-        .ticket-item.expanded .ticket-details {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .ticket-details-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 16px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
-            border-radius: 12px;
-            margin-top: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.15);
-        }
-
-        .detail-item {
+        .ticket-card__meta-item {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            transition: all 0.2s;
+            align-items: center;
+            gap: 6px;
         }
 
-        .detail-item:hover {
-            background: rgba(0,0,0,0.3);
+        .ticket-card__meta-item svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
         }
 
-        .detail-label {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .detail-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text);
-            word-break: break-all;
-        }
-
-        .detail-value.mono {
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 0.85rem;
-        }
-
-        .ticket-actions {
+        .ticket-card__actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             margin-top: 16px;
             padding-top: 16px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-subtle);
         }
 
         .ticket-action-btn {
-            padding: 10px 18px;
-            border-radius: 10px;
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 500;
+            font-family: inherit;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: none;
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
         }
 
-        .ticket-action-btn:hover {
-            transform: translateY(-2px);
+        .ticket-action-btn--take {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--accent-primary);
         }
 
-        .ticket-action-btn:active {
-            transform: translateY(0);
+        .ticket-action-btn--take:hover {
+            background: rgba(0, 212, 170, 0.25);
         }
 
-        .ticket-action-btn.take {
-            background: linear-gradient(135deg, #06b6d4, #22d3ee);
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
+        .ticket-action-btn--close {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
         }
 
-        .ticket-action-btn.take:hover {
-            background: linear-gradient(135deg, #0891b2, #06b6d4);
-            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
-        }
-
-        .ticket-action-btn.close {
-            background: linear-gradient(135deg, #22c55e, #4ade80);
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35);
-        }
-
-        .ticket-action-btn.close:hover {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+        .ticket-action-btn--close:hover {
+            background: rgba(239, 68, 68, 0.25);
         }
 
         .ticket-action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
         }
 
-        /* Pagination */
-        .pagination {
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            background: rgba(0,0,0,0.1);
-        }
-
-        .page-info {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .page-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .page-btn {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .page-btn:hover:not(:disabled) {
-            border-color: var(--accent);
-            background: var(--accent-glow);
-        }
-
-        .page-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        /* Sidebar */
+        /* ══════════════════════════════════════════════════════════════
+           SIDEBAR
+           ══════════════════════════════════════════════════════════════ */
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
-        /* Premium Charts */
-        .chart-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chart-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, var(--accent-glow), transparent 50%);
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .chart-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .chart-total {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            padding: 4px 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-        }
-
-        .chart-container {
-            height: 220px;
-            position: relative;
-        }
-
-        /* Duty Card */
+        /* ══════════════════════════════════════════════════════════════
+           DUTY CARD — Карточка дежурного
+           ══════════════════════════════════════════════════════════════ */
         .duty-card {
-            background: linear-gradient(135deg, var(--card), rgba(99, 102, 241, 0.05));
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
             padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
             position: relative;
             overflow: hidden;
         }
@@ -801,15 +577,17 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .duty-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .duty-label {
@@ -817,128 +595,115 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.1em;
+        }
+
+        .duty-shift {
+            padding: 4px 12px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
             font-weight: 600;
-        }
-
-        .duty-shift-badge {
-            font-size: 0.7rem;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .shift-day {
-            background: var(--yellow-glow);
-            color: var(--yellow);
-        }
-
-        .shift-night {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a78bfa;
         }
 
         .duty-name {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, #fff, #a5b4fc);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            position: relative;
         }
 
         .duty-time {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .duty-controls {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 16px;
+            position: relative;
         }
 
         .duty-select {
             width: 100%;
-            padding: 10px 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
             font-size: 0.9rem;
+            font-family: inherit;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .duty-select:focus {
-            border-color: var(--accent);
             outline: none;
-        }
-
-        .duty-select option {
-            background: var(--card);
+            border-color: var(--accent-primary);
         }
 
         .duty-buttons {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
         }
 
         .duty-assign-btn {
             flex: 1;
-            padding: 10px;
-            background: linear-gradient(135deg, #22c55e, #4ade80);
+            padding: 12px;
+            background: var(--accent-gradient);
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             color: #fff;
+            font-size: 0.9rem;
             font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            transition: all 0.2s ease;
         }
 
         .duty-assign-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+            box-shadow: var(--glow-accent);
         }
 
         .duty-switch-btn {
             flex: 1;
-            padding: 10px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
+            padding: 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: inherit;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px var(--accent-glow);
+            transition: all 0.2s ease;
         }
 
         .duty-switch-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px var(--accent-glow);
+            border-color: var(--border-accent);
+            color: var(--text-primary);
         }
 
-        .duty-switch-btn:active {
-            transform: translateY(0);
-        }
-
-        .duty-time svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--text-muted);
-        }
-
-        /* Schedule Card */
+        /* ══════════════════════════════════════════════════════════════
+           SCHEDULE CARD — Расписание
+           ══════════════════════════════════════════════════════════════ */
         .schedule-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
             padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
         }
 
         .schedule-header {
@@ -949,8 +714,8 @@
         }
 
         .schedule-title {
-            font-size: 0.9rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .schedule-nav {
@@ -959,22 +724,24 @@
         }
 
         .schedule-nav-btn {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .schedule-nav-btn:hover {
-            border-color: var(--accent);
-            background: var(--accent-glow);
+            background: var(--bg-elevated);
+            border-color: var(--border-accent);
+            color: var(--text-primary);
         }
 
         .schedule-grid {
@@ -984,44 +751,39 @@
         }
 
         .schedule-day {
+            padding: 12px 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
             text-align: center;
-            padding: 12px 4px;
-            border-radius: 12px;
-            font-size: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .schedule-day:hover {
-            background: rgba(99, 102, 241, 0.1);
-            border-color: var(--border);
+            background: var(--bg-elevated);
+            border-color: var(--border-accent);
         }
 
-        .schedule-day.today {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1));
-            border: 1px solid var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
+        .schedule-day--today {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.05);
         }
 
-        .schedule-day-name {
+        .schedule-day__name {
+            font-size: 0.7rem;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
+        }
+
+        .schedule-day__date {
+            font-size: 0.8rem;
             font-weight: 600;
-        }
-
-        .schedule-day.today .schedule-day-name {
-            color: var(--accent);
-        }
-
-        .schedule-day-date {
-            font-weight: 700;
             margin-bottom: 8px;
-            font-size: 0.9rem;
         }
 
-        .schedule-day.today .schedule-day-date {
-            color: var(--accent-light);
+        .schedule-day--today .schedule-day__date {
+            color: var(--accent-primary);
         }
 
         .schedule-shifts {
@@ -1032,177 +794,125 @@
 
         .schedule-shift {
             font-size: 0.65rem;
-            padding: 3px 6px;
-            border-radius: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
-        .schedule-shift.day {
-            background: var(--yellow-glow);
-            color: var(--yellow);
+        .schedule-shift--day {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--status-open);
         }
 
-        .schedule-shift.night {
+        .schedule-shift--night {
             background: rgba(139, 92, 246, 0.15);
             color: #a78bfa;
         }
 
-        .schedule-shift.empty {
-            background: rgba(255,255,255,0.03);
-            color: var(--text-dim);
+        /* ══════════════════════════════════════════════════════════════
+           CHART CARDS
+           ══════════════════════════════════════════════════════════════ */
+        .chart-card {
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
         }
 
-        /* Schedule Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            -webkit-backdrop-filter: blur(4px);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.2s;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            max-width: 400px;
-            width: 90%;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
+        .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
 
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 4px;
-            line-height: 1;
-        }
-
-        .modal-close:hover {
-            color: var(--text);
-        }
-
-        .modal-body {
-            margin-bottom: 20px;
-        }
-
-        .modal-input {
-            width: 100%;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 14px 16px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            outline: none;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-
-        .modal-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 0.9rem;
+        .chart-title {
+            font-size: 1rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
         }
 
-        .modal-btn.cancel {
-            background: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--border);
+        .chart-total {
+            padding: 4px 10px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            font-weight: 600;
         }
 
-        .modal-btn.cancel:hover {
-            border-color: var(--text-muted);
+        .chart-container {
+            height: 200px;
+            position: relative;
         }
 
-        .modal-btn.save {
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            color: #fff;
-            box-shadow: 0 4px 15px var(--accent-glow);
+        /* ══════════════════════════════════════════════════════════════
+           TOAST & MODAL
+           ══════════════════════════════════════════════════════════════ */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            padding: 16px 24px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-float);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
-        .modal-btn.save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--accent-glow);
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
-        /* Loading */
+        .toast--success {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .toast--error {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           EMPTY STATE
+           ══════════════════════════════════════════════════════════════ */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           LOADING
+           ══════════════════════════════════════════════════════════════ */
         .loading {
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 200px;
+            justify-content: center;
+            padding: 40px;
             color: var(--text-muted);
-            font-size: 0.9rem;
         }
 
-        .loading-spinner {
+        .spinner {
             width: 24px;
             height: 24px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
+            border: 2px solid var(--border-subtle);
+            border-top-color: var(--accent-primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             margin-right: 12px;
         }
 
@@ -1210,1130 +920,495 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Error */
-        .error-msg {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--red);
-            padding: 16px 20px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 24px;
-            display: none;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .error-msg.active {
-            display: flex;
-        }
-
-        .error-msg svg {
-            flex-shrink: 0;
-        }
-
-        /* Responsive */
+        /* ══════════════════════════════════════════════════════════════
+           RESPONSIVE
+           ══════════════════════════════════════════════════════════════ */
         @media (max-width: 1200px) {
-            .stats { grid-template-columns: repeat(2, 1fr); }
-            .main { grid-template-columns: 1fr; }
-            .sidebar { flex-direction: row; flex-wrap: wrap; }
-            .sidebar > * { flex: 1; min-width: 300px; }
-            .ticket-details-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
-            body { padding: 16px; }
-            .stats { grid-template-columns: 1fr; }
-            .header { flex-direction: column; gap: 16px; align-items: flex-start; }
-            .search-bar { flex-direction: column; }
-            .filter-select { width: 100%; }
-            .ticket-details-grid { grid-template-columns: 1fr; }
+            .app { padding: 16px; }
+            .header { flex-direction: column; gap: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .filters { flex-wrap: wrap; }
             .schedule-grid { grid-template-columns: repeat(4, 1fr); }
-            .support-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
-    <div class="error-msg" id="error">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span id="errorText"></span>
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="ambient-orb ambient-orb--1"></div>
+        <div class="ambient-orb ambient-orb--2"></div>
+        <div class="ambient-orb ambient-orb--3"></div>
     </div>
 
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">📋</div>
-            <div>
-                <h1>Support Dashboard</h1>
-                <span>Управление тикетами</span>
-            </div>
-        </div>
-        <div class="header-actions">
-            <div class="live-indicator">
-                <div class="live-dot"></div>
-                <span>Обновляется автоматически</span>
-            </div>
-            <button class="refresh-btn" id="refreshBtn" onclick="resetAndReload()">
-                <span>↻</span> Обновить
-            </button>
-            <button class="export-btn" onclick="exportCSV()">
-                📥 CSV
-            </button>
-        </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="stats">
-        <div class="stat-card total" onclick="filterByStatus('')">
-            <span class="stat-icon">📊</span>
-            <div class="stat-label">Всего тикетов</div>
-            <div class="stat-value" id="total">—</div>
-        </div>
-        <div class="stat-card open" onclick="filterByStatus('open')">
-            <span class="stat-icon">📬</span>
-            <div class="stat-label">Открытые</div>
-            <div class="stat-value" id="open">—</div>
-        </div>
-        <div class="stat-card progress" onclick="filterByStatus('in_progress')">
-            <span class="stat-icon">⚡</span>
-            <div class="stat-label">В работе</div>
-            <div class="stat-value" id="in_progress">—</div>
-        </div>
-        <div class="stat-card closed" onclick="filterByStatus('closed')">
-            <span class="stat-icon">✅</span>
-            <div class="stat-label">Закрытые</div>
-            <div class="stat-value" id="closed">—</div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main">
-        <!-- Tickets -->
-        <div class="tickets-section">
-            <div class="section-header">
-                <span class="section-title">Тикеты</span>
-                <span class="ticket-count" id="ticketCount">0 тикетов</span>
-            </div>
-            <div class="search-bar">
-                <input type="text" class="search-input" id="searchInput" placeholder="Поиск по ID, трейдеру, заказу..." oninput="handleSearch()">
-                <select class="filter-select" id="supportFilter" onchange="filterBySupport()">
-                    <option value="">Все саппорты</option>
-                </select>
-                <select class="filter-select" id="teamFilter" onchange="filterByTeam()">
-                    <option value="">Все команды</option>
-                </select>
-            </div>
-            <div class="support-stats" id="supportStats">
-                <div class="support-stats-header">
-                    <span class="support-stats-title" id="supportStatsTitle">Статистика саппорта</span>
-                    <button class="support-close" onclick="clearSupportFilter()">×</button>
-                </div>
-                <div class="support-stats-grid">
-                    <div class="support-stat">
-                        <div class="support-stat-value" id="supportTotal">—</div>
-                        <div class="support-stat-label">Всего</div>
-                    </div>
-                    <div class="support-stat">
-                        <div class="support-stat-value" id="supportClosed">—</div>
-                        <div class="support-stat-label">Закрыто</div>
-                    </div>
-                    <div class="support-stat">
-                        <div class="support-stat-value" id="supportProgress">—</div>
-                        <div class="support-stat-label">В работе</div>
-                    </div>
-                    <div class="support-stat">
-                        <div class="support-stat-value" id="supportAvgTime">—</div>
-                        <div class="support-stat-label">Ср. время</div>
-                    </div>
-                </div>
-            </div>
-            <div class="tickets-list" id="ticketsList">
-                <div class="loading"><div class="loading-spinner"></div>Загрузка...</div>
-            </div>
-            <div class="pagination">
-                <span class="page-info" id="pageInfo">Страница 1 из 1</span>
-                <div class="page-buttons">
-                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Назад</button>
-                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперёд →</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <span class="chart-title">По категориям</span>
-                    <span class="chart-total" id="chartTotal">0</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <span class="chart-title">За 7 дней</span>
-                    <span class="chart-total" id="chartWeekTotal">0</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="daysChart"></canvas>
-                </div>
-            </div>
-            <div class="duty-card">
-                <div class="duty-header">
-                    <span class="duty-label">Дежурный сейчас</span>
-                    <span class="duty-shift-badge" id="dutyShiftBadge">—</span>
-                </div>
-                <div class="duty-name" id="dutyName">—</div>
-                <div class="duty-time" id="dutyTime">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
-                    <span>— МСК</span>
                 </div>
-                <div class="duty-controls">
-                    <select class="duty-select" id="dutySupportSelect">
-                        <option value="">Выберите саппорта...</option>
-                    </select>
-                    <select class="duty-select" id="dutyShiftSelect">
-                        <option value="day">☀️ Дневная (09:00–21:00)</option>
-                        <option value="night">🌙 Ночная (21:00–09:00)</option>
-                    </select>
-                </div>
-                <div class="duty-buttons">
-                    <button class="duty-assign-btn" onclick="assignDuty()">✓ Назначить</button>
-                    <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить смену</button>
+                <div class="brand-text">
+                    <h1>Support Hub</h1>
+                    <span>Finavia Platform</span>
                 </div>
             </div>
-            <div class="schedule-card">
-                <div class="schedule-header">
-                    <span class="schedule-title">Расписание на неделю</span>
-                    <div class="schedule-nav">
-                        <button class="schedule-nav-btn" onclick="changeWeek(-1)">←</button>
-                        <button class="schedule-nav-btn" onclick="changeWeek(1)">→</button>
+            <div class="header-meta">
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    <span>Live</span>
+                </div>
+                <button class="refresh-btn" onclick="loadData()" title="Обновить">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__label">Всего тикетов</div>
+                <div class="stat-card__value" id="statTotal">—</div>
+                <div class="stat-card__trend">
+                    <span id="statTotalTrend">📈 За всё время</span>
+                </div>
+                <div class="stat-card__icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Открытые</div>
+                <div class="stat-card__value" id="statOpen">—</div>
+                <div class="stat-card__trend stat-card__trend--up" id="statOpenTrend">⚡ Требуют внимания</div>
+                <div class="stat-card__icon" style="background: rgba(251, 191, 36, 0.1); color: var(--status-open);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">В работе</div>
+                <div class="stat-card__value" id="statProgress">—</div>
+                <div class="stat-card__trend" id="statProgressTrend">🔄 Активные</div>
+                <div class="stat-card__icon" style="background: rgba(59, 130, 246, 0.1); color: var(--status-progress);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23,4 23,10 17,10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Закрытые</div>
+                <div class="stat-card__value" id="statClosed">—</div>
+                <div class="stat-card__trend stat-card__trend--up" id="statClosedTrend">✅ Завершено</div>
+                <div class="stat-card__icon" style="background: rgba(16, 185, 129, 0.1); color: var(--status-closed);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Tickets Section -->
+            <div class="tickets-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                        <span>Тикеты</span>
+                        <span class="section-badge" id="ticketCount">0</span>
+                    </div>
+                    <div class="filters">
+                        <select class="filter-select" id="statusFilter" onchange="filterTickets()">
+                            <option value="">Все статусы</option>
+                            <option value="open">Открытые</option>
+                            <option value="in_progress">В работе</option>
+                            <option value="closed">Закрытые</option>
+                        </select>
+                        <select class="filter-select" id="supportFilter" onchange="filterBySupport()">
+                            <option value="">Все саппорты</option>
+                        </select>
                     </div>
                 </div>
-                <div class="schedule-grid" id="scheduleGrid">
-                    <div class="loading"><div class="loading-spinner"></div></div>
+                <div class="tickets-list" id="ticketsList">
+                    <div class="loading"><div class="spinner"></div>Загрузка...</div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Duty Card -->
+                <div class="duty-card">
+                    <div class="duty-header">
+                        <span class="duty-label">Дежурный сейчас</span>
+                        <span class="duty-shift" id="dutyShiftBadge">—</span>
+                    </div>
+                    <div class="duty-name" id="dutyName">—</div>
+                    <div class="duty-time">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                        </svg>
+                        <span id="dutyTime">— МСК</span>
+                    </div>
+                    <div class="duty-controls">
+                        <select class="duty-select" id="dutySupportSelect">
+                            <option value="">Выберите саппорта...</option>
+                        </select>
+                        <select class="duty-select" id="dutyShiftSelect">
+                            <option value="day">☀️ Дневная (09:00–21:00)</option>
+                            <option value="night">🌙 Ночная (21:00–09:00)</option>
+                        </select>
+                    </div>
+                    <div class="duty-buttons">
+                        <button class="duty-assign-btn" onclick="assignDuty()">✓ Назначить</button>
+                        <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить</button>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">По категориям</span>
+                        <span class="chart-total" id="chartTotal">0</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">За 7 дней</span>
+                        <span class="chart-total" id="chartWeekTotal">0</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="daysChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Schedule -->
+                <div class="schedule-card">
+                    <div class="schedule-header">
+                        <span class="schedule-title">Расписание</span>
+                        <div class="schedule-nav">
+                            <button class="schedule-nav-btn" onclick="changeWeek(-1)">←</button>
+                            <button class="schedule-nav-btn" onclick="changeWeek(1)">→</button>
+                        </div>
+                    </div>
+                    <div class="schedule-grid" id="scheduleGrid">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Schedule Modal -->
-    <div class="modal-overlay" id="scheduleModal">
-        <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title" id="modalTitle">Назначить дежурного</span>
-                <button class="modal-close" onclick="closeScheduleModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <input type="date" class="modal-input" id="modalDate">
-                <select class="modal-input" id="modalShift">
-                    <option value="day">☀️ Дневная смена (09:00–21:00)</option>
-                    <option value="night">🌙 Ночная смена (21:00–09:00)</option>
-                </select>
-                <input type="text" class="modal-input" id="modalName" placeholder="Имя дежурного">
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="closeScheduleModal()">Отмена</button>
-                <button class="modal-btn save" onclick="saveDuty()">Сохранить</button>
-            </div>
-        </div>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script>
-        const API = window.location.origin;
-
-        // State
+        const API = 'https://finvia-support-bot-production.up.railway.app';
         let tickets = [];
-        let summary = null;
         let supports = [];
-        let supportStats = {};
-        let currentPage = 1;
-        const perPage = 15;
+        let weekOffset = 0;
         let currentStatus = '';
         let currentSupport = '';
-        let currentTeam = '';
-        let searchTimeout = null;
         let categoryChart = null;
         let daysChart = null;
-        let expandedTicketId = null;
-        let weekOffset = 0;
 
-        function changeWeek(dir) {
-            weekOffset += dir;
-            loadSchedule();
-        }
-
-        async function loadSchedule() {
-            try {
-                const response = await fetch(`${API}/api/schedule?offset=${weekOffset}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    renderSchedule(data);
-
-                    // Update week label
-                    const weekLabel = weekOffset === 0 ? 'Расписание на неделю' :
-                                     weekOffset === 1 ? 'Следующая неделя' :
-                                     weekOffset === -1 ? 'Прошлая неделя' :
-                                     `Неделя ${weekOffset > 0 ? '+' : ''}${weekOffset}`;
-                    document.querySelector('.schedule-title').textContent = weekLabel;
-                }
-            } catch (e) {
-                console.error('Error loading schedule:', e);
-            }
-        }
-
-        function resetAndReload() {
-            weekOffset = 0;
-            currentPage = 1;
-            expandedTicketId = null;
-            loadData();
-        }
-
-        // Load all data
+        // ─── API ───────────────────────────────────────────────
         async function loadData() {
-            const btn = document.getElementById('refreshBtn');
-            btn.disabled = true;
-            showError('');
-
             try {
-                const [summaryData, ticketsData, scheduleData, statsData, supportsData, chatsData] = await Promise.all([
-                    fetch(`${API}/api/summary`).then(r => r.ok ? r.json() : Promise.reject(new Error('Summary failed'))),
-                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.ok ? r.json() : Promise.reject(new Error('Tickets failed'))),
-                    fetch(`${API}/api/schedule`).then(r => r.ok ? r.json() : Promise.reject(new Error('Schedule failed'))),
-                    fetch(`${API}/api/stats`).then(r => r.ok ? r.json() : Promise.reject(new Error('Stats failed'))),
-                    fetch(`${API}/api/supports`).then(r => r.ok ? r.json() : Promise.reject(new Error('Supports failed'))),
-                    fetch(`${API}/api/chats`).then(r => r.ok ? r.json() : Promise.reject(new Error('Chats failed'))).catch(() => [])
+                const [summary, ticketsData, schedule, stats, supportsData] = await Promise.all([
+                    fetch(`${API}/api/summary`).then(r => r.json()),
+                    fetch(`${API}/api/tickets?page=1&per_page=100`).then(r => r.json()),
+                    fetch(`${API}/api/schedule?offset=${weekOffset}`).then(r => r.json()),
+                    fetch(`${API}/api/stats`).then(r => r.json()),
+                    fetch(`${API}/api/supports`).then(r => r.json())
                 ]);
 
-                summary = summaryData;
                 tickets = ticketsData.tickets || [];
                 supports = supportsData || [];
-                supportStats = {};
-                statsData.forEach(s => { supportStats[s.username] = s; });
-                window.allChats = chatsData || [];
 
-                renderStats(summary);
-                renderChart(summary);
+                updateStats(summary);
                 renderTickets();
-                updateDuty(summary);
-                await loadSchedule(); // Листание недель
+                renderSchedule(schedule);
+                renderCharts(summary, stats);
                 renderSupportFilter();
-                renderTeamFilter();
-
-                // Auto-refresh every 30 seconds
-                clearTimeout(window.autoRefresh);
-                window.autoRefresh = setTimeout(loadData, 30000);
-
             } catch (e) {
-                showError('Ошибка загрузки: ' + e.message);
-                btn.disabled = false;
+                showError('Ошибка загрузки данных');
             }
         }
 
-        // Render stats
-        function renderStats(data) {
-            document.getElementById('total').textContent = data.total || 0;
-            document.getElementById('open').textContent = data.open || 0;
-            document.getElementById('in_progress').textContent = data.in_progress || 0;
-            document.getElementById('closed').textContent = data.closed || 0;
+        function updateStats(data) {
+            document.getElementById('statTotal').textContent = data.total || 0;
+            document.getElementById('statOpen').textContent = data.open || 0;
+            document.getElementById('statProgress').textContent = data.in_progress || 0;
+            document.getElementById('statClosed').textContent = data.closed || 0;
+
+            // Duty
+            if (data.current_duty) {
+                document.getElementById('dutyName').textContent = data.current_duty;
+            }
+            const hour = new Date().getHours();
+            document.getElementById('dutyShiftBadge').textContent = hour >= 9 && hour < 21 ? '☀️ День' : '🌙 Ночь';
         }
 
-        // Premium Charts
-        function renderChart(data) {
-            const labels = (data.by_label || []).map(l => l.label);
-            const values = (data.by_label || []).map(l => l.count);
-            const total = values.reduce((a, b) => a + b, 0);
-
-            document.getElementById('chartTotal').textContent = total;
-
-            const weekTotal = (data.by_day || []).reduce((a, b) => a + b.count, 0);
-            document.getElementById('chartWeekTotal').textContent = weekTotal;
-
-            // Premium Category Chart (Doughnut)
-            const ctx1 = document.getElementById('categoryChart').getContext('2d');
-            if (categoryChart) categoryChart.destroy();
-
-            const gradient1 = ctx1.createLinearGradient(0, 0, 300, 300);
-            gradient1.addColorStop(0, 'rgba(99, 102, 241, 1)');
-            gradient1.addColorStop(1, 'rgba(139, 92, 246, 1)');
-
-            categoryChart = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: [
-                            '#6366f1', '#22c55e', '#eab308', '#ef4444',
-                            '#a855f7', '#06b6d4', '#f97316', '#84cc16'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 8,
-                        hoverBorderWidth: 2,
-                        hoverBorderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    animation: {
-                        animateRotate: true,
-                        animateScale: true,
-                        duration: 1000,
-                        easing: 'easeOutQuart'
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                color: '#9ca3af',
-                                padding: 12,
-                                font: { size: 11, family: 'Inter' },
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(19, 19, 29, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#9ca3af',
-                            borderColor: 'rgba(99, 102, 241, 0.3)',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
-                            titleFont: { size: 13, weight: '600' },
-                            bodyFont: { size: 12 },
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return ` ${context.label}: ${value} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Premium Days Chart (Gradient Bar)
-            const ctx2 = document.getElementById('daysChart').getContext('2d');
-            if (daysChart) daysChart.destroy();
-
-            const days = (data.by_day || []).map(d => {
-                const date = new Date(d.day);
-                return date.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
-            });
-            const dayValues = (data.by_day || []).map(d => d.count);
-
-            // Create gradient
-            const barGradient = ctx2.createLinearGradient(0, 200, 0, 0);
-            barGradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
-            barGradient.addColorStop(1, 'rgba(99, 102, 241, 0.9)');
-
-            daysChart = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        data: dayValues,
-                        backgroundColor: barGradient,
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        barThickness: 24,
-                        hoverBackgroundColor: 'rgba(129, 140, 248, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1200,
-                        easing: 'easeOutQuart'
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(19, 19, 29, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#9ca3af',
-                            borderColor: 'rgba(99, 102, 241, 0.3)',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
-                            displayColors: false,
-                            callbacks: {
-                                title: function(context) {
-                                    return context[0].label;
-                                },
-                                label: function(context) {
-                                    return ` ${context.raw} тикетов`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#6b7280',
-                                font: { size: 11 }
-                            },
-                            border: { display: false }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(255,255,255,0.03)',
-                            },
-                            ticks: {
-                                color: '#6b7280',
-                                font: { size: 11 }
-                            },
-                            border: { display: false },
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render tickets with expandable details
         function renderTickets() {
             const list = document.getElementById('ticketsList');
-            let filtered = tickets;
-
-            if (currentStatus) {
-                filtered = filtered.filter(t => t.status === currentStatus);
-            }
-
-            if (currentSupport) {
-                filtered = filtered.filter(t => t.taken_by === currentSupport);
-            }
-
-            if (currentTeam) {
-                filtered = filtered.filter(t => t.team_name === currentTeam);
-            }
-
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (search) {
-                filtered = filtered.filter(t =>
-                    String(t.id).includes(search) ||
-                    (t.trader_username || '').toLowerCase().includes(search) ||
-                    (t.trader_name || '').toLowerCase().includes(search) ||
-                    (t.label || '').toLowerCase().includes(search) ||
-                    (t.order_id || '').toLowerCase().includes(search) ||
-                    (t.taken_by || '').toLowerCase().includes(search)
-                );
-            }
-
-            const totalPages = Math.ceil(filtered.length / perPage) || 1;
-            const start = (currentPage - 1) * perPage;
-            const page = filtered.slice(start, start + perPage);
-
-            if (!page.length) {
-                list.innerHTML = '<div class="loading">Тикеты не найдены</div>';
-            } else {
-                list.innerHTML = page.map(t => {
-                    const statusClass = t.status === 'open' ? 'status-open' :
-                                       t.status === 'in_progress' ? 'status-progress' : 'status-closed';
-                    const statusText = t.status === 'open' ? 'Открыт' :
-                                      t.status === 'in_progress' ? 'В работе' : 'Закрыт';
-                    const isExpanded = expandedTicketId === t.id;
-
-                    const createdAt = t.created_at ? formatDateTime(t.created_at) : '—';
-                    const takenAt = t.taken_at ? formatDateTime(t.taken_at) : '—';
-                    const closedAt = t.closed_at ? formatDateTime(t.closed_at) : '—';
-                    const processingTime = t.taken_at && t.closed_at ?
-                        formatDuration(new Date(t.closed_at) - new Date(t.taken_at)) : '—';
-
-                    return `<div class="ticket-item ${isExpanded ? 'expanded' : ''}" data-id="${t.id}">
-                        <div class="ticket-header" onclick="toggleTicket(${t.id})">
-                            <div class="ticket-header-left">
-                                <span class="ticket-number">#${String(t.id).padStart(4, '0')}</span>
-                                <span class="ticket-title">${escapeHtml(t.label || 'Без категории')}</span>
-                                ${t.team_name ? `<span class="ticket-team">📢 ${escapeHtml(t.team_name)}</span>` : ''}
-                            </div>
-                            <div class="ticket-meta">
-                                <span class="ticket-status ${statusClass}">${t.status === 'open' || t.status === 'in_progress' ? '<span class="status-dot"></span>' : ''}${statusText}</span>
-                                <span class="ticket-arrow">▼</span>
-                            </div>
-                        </div>
-                        <div class="ticket-details">
-                            <div class="ticket-details-grid">
-                                <div class="detail-item">
-                                    <span class="detail-label">Команда</span>
-                                    <span class="detail-value">${t.team_name ? escapeHtml(t.team_name) : '—'}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Трейдер</span>
-                                    <span class="detail-value">@${escapeHtml(t.trader_username || '—')}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">ID трейдера</span>
-                                    <span class="detail-value mono">${t.trader_id || '—'}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">ID чата</span>
-                                    <span class="detail-value mono">${t.trader_chat_id || '—'}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">ID заказа</span>
-                                    <span class="detail-value mono">${escapeHtml(t.order_id || '—')}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Саппорт</span>
-                                    <span class="detail-value">@${escapeHtml(t.taken_by || '—')}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Время обработки</span>
-                                    <span class="detail-value">${processingTime}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Создан</span>
-                                    <span class="detail-value">${createdAt}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Взят</span>
-                                    <span class="detail-value">${takenAt}</span>
-                                </div>
-                            </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Закрыт</span>
-                                    <span class="detail-value">${closedAt}</span>
-                                </div>
-                            </div>
-                            ${t.status !== 'closed' ? `
-                            <div class="ticket-actions">
-                                ${t.status === 'open' ? `<button class="ticket-action-btn take" onclick="event.stopPropagation(); takeTicket(${t.id})">🔧 Взять в работу</button>` : ''}
-                                <button class="ticket-action-btn close" onclick="event.stopPropagation(); closeTicket(${t.id})">✅ Завершить</button>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-
-            document.getElementById('ticketCount').textContent = `${filtered.length} тикетов`;
-            document.getElementById('pageInfo').textContent = `Страница ${currentPage} из ${totalPages}`;
-            document.getElementById('prevBtn').disabled = currentPage <= 1;
-            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-        }
-
-        // Toggle ticket details
-        function toggleTicket(id) {
-            expandedTicketId = expandedTicketId === id ? null : id;
-            renderTickets();
-        }
-
-        // Format date/time
-        function formatDateTime(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ru', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit'
+            const filtered = tickets.filter(t => {
+                if (currentStatus && t.status !== currentStatus) return false;
+                if (currentSupport && t.taken_by !== currentSupport) return false;
+                return true;
             });
-        }
 
-        // Format duration
-        function formatDuration(ms) {
-            const minutes = Math.floor(ms / 60000);
-            if (minutes < 60) return `${minutes} мин`;
-            const hours = Math.floor(minutes / 60);
-            const mins = minutes % 60;
-            return `${hours}ч ${mins}м`;
-        }
+            document.getElementById('ticketCount').textContent = filtered.length;
 
-        // Escape HTML
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Update duty
-        function updateDuty(data) {
-            const duty = data.current_duty;
-            const dutyName = document.getElementById('dutyName');
-            const dutyTime = document.getElementById('dutyTime');
-            const dutyShift = document.getElementById('dutyShiftBadge');
-
-            const hour = new Date().getHours();
-            const isDay = 9 <= hour && hour < 21;
-
-            if (duty) {
-                dutyName.textContent = duty;
-                dutyTime.innerHTML = `
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
-                    </svg>
-                    <span>${new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })} МСК</span>
-                `;
-                dutyShift.textContent = isDay ? '☀️ Дневная' : '🌙 Ночная';
-                dutyShift.className = `duty-shift-badge ${isDay ? 'shift-day' : 'shift-night'}`;
-            } else {
-                dutyName.textContent = 'Не назначен';
-                dutyTime.innerHTML = `
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
-                    </svg>
-                    <span>— МСК</span>
-                `;
-                dutyShift.textContent = 'Нет';
-                dutyShift.className = 'duty-shift-badge';
-            }
-        }
-
-        // Render schedule with clickable days
-        function renderSchedule(data) {
-            const grid = document.getElementById('scheduleGrid');
-            const week = data.week || [];
-            const today = data.today;
-
-            if (!week.length) {
-                grid.innerHTML = '<div class="loading">Нет данных</div>';
+            if (!filtered.length) {
+                list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><p>Тикеты не найдены</p></div>';
                 return;
             }
 
-            const dayNames = { Mon: 'Пн', Tue: 'Вт', Wed: 'Ср', Thu: 'Чт', Fri: 'Пт', Sat: 'Сб', Sun: 'Вс' };
+            list.innerHTML = filtered.map(t => {
+                const statusClass = t.status === 'open' ? 'ticket-card__status--open' :
+                                   t.status === 'in_progress' ? 'ticket-card__status--progress' :
+                                   'ticket-card__status--closed';
+                const statusText = t.status === 'open' ? 'Открыт' :
+                                  t.status === 'in_progress' ? 'В работе' : 'Закрыт';
+                const created = new Date(t.created_at).toLocaleDateString('ru-RU');
 
-            grid.innerHTML = week.map(day => {
-                const isToday = day.is_today;
-                const dayName = dayNames[day.day_name] || day.day_name;
-                const hasDayDuty = day.day && day.day.length;
-                const hasNightDuty = day.night && day.night.length;
+                const takeBtn = t.status === 'open' ?
+                    `<button class="ticket-action-btn ticket-action-btn--take" onclick="takeTicket(${t.id}); event.stopPropagation();">✓ Взять</button>` : '';
+                const closeBtn = t.status !== 'closed' ?
+                    `<button class="ticket-action-btn ticket-action-btn--close" onclick="closeTicket(${t.id}); event.stopPropagation();">🏁 Закрыть</button>` : '';
 
-                return `<div class="schedule-day ${isToday ? 'today' : ''}" onclick="openScheduleModal('${day.date}')">
-                    <div class="schedule-day-name">${dayName}</div>
-                    <div class="schedule-day-date">${day.day_label}</div>
-                    <div class="schedule-shifts">
-                        ${hasDayDuty ?
-                            `<span class="schedule-shift day" title="Дневная: ${day.day.join(', ')}">☀️ ${day.day[0]}</span>` :
-                            `<span class="schedule-shift empty">☀️ —</span>`
-                        }
-                        ${hasNightDuty ?
-                            `<span class="schedule-shift night" title="Ночная: ${day.night.join(', ')}">🌙 ${day.night[0]}</span>` :
-                            `<span class="schedule-shift empty">🌙 —</span>`
-                        }
+                return `
+                    <div class="ticket-card">
+                        <div class="ticket-card__header">
+                            <span class="ticket-card__id">#${t.id}</span>
+                            <span class="ticket-card__status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="ticket-card__title">${t.label || 'Обращение'}</div>
+                        <div class="ticket-card__meta">
+                            <span class="ticket-card__meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                @${t.trader_username || 'unknown'}
+                            </span>
+                            <span class="ticket-card__meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                ${created}
+                            </span>
+                            ${t.taken_by ? `<span class="ticket-card__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>@${t.taken_by}</span>` : ''}
+                        </div>
+                        ${(takeBtn || closeBtn) ? `<div class="ticket-card__actions">${takeBtn}${closeBtn}</div>` : ''}
                     </div>
-                </div>`;
+                `;
             }).join('');
         }
 
-        // Schedule Modal
-        function openScheduleModal(date) {
-            document.getElementById('modalDate').value = date || new Date().toISOString().split('T')[0];
-            document.getElementById('scheduleModal').classList.add('active');
+        function renderSchedule(data) {
+            const grid = document.getElementById('scheduleGrid');
+            const week = data.week || [];
+            const dayNames = { Mon: 'Пн', Tue: 'Вт', Wed: 'Ср', Thu: 'Чт', Fri: 'Пт', Sat: 'Сб', Sun: 'Вс' };
+
+            grid.innerHTML = week.map(day => {
+                const isToday = day.is_today ? 'schedule-day--today' : '';
+                return `
+                    <div class="schedule-day ${isToday}">
+                        <div class="schedule-day__name">${dayNames[day.day_name] || day.day_name}</div>
+                        <div class="schedule-day__date">${day.day_label}</div>
+                        <div class="schedule-shifts">
+                            <span class="schedule-shift ${day.day?.length ? 'schedule-shift--day' : ''}">☀️ ${day.day?.[0] || '—'}</span>
+                            <span class="schedule-shift ${day.night?.length ? 'schedule-shift--night' : ''}">🌙 ${day.night?.[0] || '—'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function closeScheduleModal() {
-            document.getElementById('scheduleModal').classList.remove('active');
+        function renderCharts(summary, stats) {
+            // Category chart
+            const labels = summary.by_label?.map(l => l.label) || [];
+            const counts = summary.by_label?.map(l => l.count) || [];
+
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels.length ? labels : ['Нет данных'],
+                    datasets: [{
+                        data: counts.length ? counts : [1],
+                        backgroundColor: ['#00d4aa', '#00a8ff', '#fbbf24', '#ef4444', '#8b5cf6', '#ec4899'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+            document.getElementById('chartTotal').textContent = summary.total || 0;
+
+            // Days chart
+            const days = summary.by_day?.map(d => d.day.split('-').pop()) || [];
+            const dayCounts = summary.by_day?.map(d => d.count) || [];
+
+            if (daysChart) daysChart.destroy();
+            daysChart = new Chart(document.getElementById('daysChart'), {
+                type: 'bar',
+                data: {
+                    labels: days.length ? days : ['—'],
+                    datasets: [{
+                        data: dayCounts.length ? dayCounts : [0],
+                        backgroundColor: '#00d4aa',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false } } } }
+            });
+            document.getElementById('chartWeekTotal').textContent = dayCounts.reduce((a, b) => a + b, 0) || 0;
         }
 
-        async function switchDuty() {
-            if (!confirm('Сменить смену и разослать уведомления?')) return;
-
-            try {
-                const response = await fetch(`${API}/api/duty/switch`, {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    showToast(`Персменка! Оповещено чатов: ${data.chats_notified || 0}`);
-                    loadData();
-                } else {
-                    showError('Ошибка смены смены');
-                }
-            } catch (e) {
-                showError('Ошибка: ' + e.message);
-            }
-        }
-
-        async function saveDuty() {
-            const date = document.getElementById('modalDate').value;
-            const shift = document.getElementById('modalShift').value;
-            const name = document.getElementById('modalName').value.trim();
-
-            if (!name) {
-                alert('Введите имя дежурного');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API}/api/duty`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ support_username: name, shift: shift })
-                });
-
-                if (response.ok) {
-                    closeScheduleModal();
-                    loadData();
-                } else {
-                    alert('Ошибка сохранения');
-                }
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
-        }
-
-        function resetAndReload() {
-            weekOffset = 0;
-            currentPage = 1;
-            expandedTicketId = null;
-            loadData();
-        }
-
-        // Filter by status
-        function filterByStatus(status) {
-            currentStatus = status;
-            currentPage = 1;
-            expandedTicketId = null;
-
-            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
-            if (status) {
-                event.currentTarget.classList.add('active');
-            }
-
-            renderTickets();
-        }
-
-        // Filter by support
-        function filterBySupport() {
-            const select = document.getElementById('supportFilter');
-            currentSupport = select.value;
-            currentPage = 1;
-            expandedTicketId = null;
-
-            const statsBlock = document.getElementById('supportStats');
-            if (currentSupport) {
-                statsBlock.classList.add('visible');
-                const stats = supportStats[currentSupport];
-                if (stats) {
-                    document.getElementById('supportStatsTitle').textContent = `📊 @${currentSupport}`;
-                    document.getElementById('supportTotal').textContent = stats.total || 0;
-                    document.getElementById('supportClosed').textContent = stats.closed || 0;
-                    document.getElementById('supportProgress').textContent = stats.in_progress || 0;
-                    const avgTime = stats.avg_seconds;
-                    document.getElementById('supportAvgTime').textContent = avgTime ? `${Math.round(avgTime / 60)} мин` : '—';
-                }
-            } else {
-                statsBlock.classList.remove('visible');
-            }
-
-            renderTickets();
-        }
-
-        function clearSupportFilter() {
-            document.getElementById('supportFilter').value = '';
-            filterBySupport();
-        }
-
-        // Render support filter
         function renderSupportFilter() {
             const select = document.getElementById('supportFilter');
             select.innerHTML = '<option value="">Все саппорты</option>';
             supports.forEach(s => {
-                const option = document.createElement('option');
-                option.value = s.username;
-                option.textContent = `@${s.username}`;
-                select.appendChild(option);
+                const opt = document.createElement('option');
+                opt.value = s.username;
+                opt.textContent = `@${s.username}`;
+                select.appendChild(opt);
             });
 
-            // Также заполняем dropdown для назначения дежурного
             const dutySelect = document.getElementById('dutySupportSelect');
-            if (dutySelect) {
-                dutySelect.innerHTML = '<option value="">Выберите саппорта...</option>';
-                supports.forEach(s => {
-                    const option = document.createElement('option');
-                    option.value = s.username;
-                    option.textContent = `@${s.username}`;
-                    dutySelect.appendChild(option);
-                });
+            dutySelect.innerHTML = '<option value="">Выберите саппорта...</option>';
+            supports.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.username;
+                opt.textContent = `@${s.username}`;
+                dutySelect.appendChild(opt);
+            });
+        }
+
+        // ─── Filters ───────────────────────────────────────────
+        function filterTickets() {
+            currentStatus = document.getElementById('statusFilter').value;
+            renderTickets();
+        }
+
+        function filterBySupport() {
+            currentSupport = document.getElementById('supportFilter').value;
+            renderTickets();
+        }
+
+        function changeWeek(delta) {
+            weekOffset += delta;
+            fetch(`${API}/api/schedule?offset=${weekOffset}`)
+                .then(r => r.json())
+                .then(renderSchedule);
+        }
+
+        // ─── Actions ────────────────────────────────────────────
+        async function takeTicket(id) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '⏳';
+            try {
+                const r = await fetch(`${API}/api/tickets/${id}/take`, { method: 'POST' });
+                if (r.ok) {
+                    showToast(`Тикет #${id} взят`);
+                    loadData();
+                } else {
+                    showError('Ошибка');
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                showError(e.message);
+                btn.disabled = false;
+            }
+        }
+
+        async function closeTicket(id) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '⏳';
+            try {
+                const r = await fetch(`${API}/api/tickets/${id}/close`, { method: 'POST' });
+                if (r.ok) {
+                    showToast(`Тикет #${id} закрыт`);
+                    loadData();
+                } else {
+                    showError('Ошибка');
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                showError(e.message);
+                btn.disabled = false;
             }
         }
 
         async function assignDuty() {
             const username = document.getElementById('dutySupportSelect').value;
             const shift = document.getElementById('dutyShiftSelect').value;
-
-            if (!username) {
-                showError('Выберите саппорта');
-                return;
-            }
-
-            const today = new Date().toISOString().split('T')[0];
-
+            if (!username) { showError('Выберите саппорта'); return; }
             try {
-                const response = await fetch(`${API}/api/duty`, {
+                const r = await fetch(`${API}/api/duty`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        support_username: username,
-                        shift: shift,
-                        date: today
-                    })
+                    body: JSON.stringify({ support_username: username, shift })
                 });
-
-                if (response.ok) {
-                    showToast(`✅ @${username} назначен дежурным`);
+                if (r.ok) {
+                    showToast(`@${username} назначен`);
                     loadData();
-                } else {
-                    showError('Ошибка назначения');
                 }
-            } catch (e) {
-                showError('Ошибка: ' + e.message);
-            }
+            } catch (e) { showError(e.message); }
         }
 
-        // Render team filter
-        function renderTeamFilter() {
-            const select = document.getElementById('teamFilter');
-            select.innerHTML = '<option value="">Все команды</option>';
-            const chats = window.allChats || [];
-            chats.forEach(c => {
-                const option = document.createElement('option');
-                option.value = c.team_name || c.chat_id;
-                option.textContent = c.team_name || `Чат ${c.chat_id}`;
-                select.appendChild(option);
-            });
+        async function switchDuty() {
+            if (!confirm('Сменить смену?')) return;
+            try {
+                const r = await fetch(`${API}/api/duty/switch`, { method: 'POST' });
+                const d = await r.json();
+                showToast(`Персменка! Оповещено: ${d.chats_notified || 0}`);
+                loadData();
+            } catch (e) { showError(e.message); }
         }
 
-        // Filter by team
-        function filterByTeam() {
-            const select = document.getElementById('teamFilter');
-            currentTeam = select.value;
-            currentPage = 1;
-            expandedTicketId = null;
-            renderTickets();
+        // ─── Toast ──────────────────────────────────────────────
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast toast--success show';
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Search
-        function handleSearch() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                currentPage = 1;
-                expandedTicketId = null;
-                renderTickets();
-            }, 300);
-        }
-
-        // Pagination
-        function changePage(dir) {
-            let filtered = tickets;
-            if (currentStatus) filtered = filtered.filter(t => t.status === currentStatus);
-            if (currentSupport) filtered = filtered.filter(t => t.taken_by === currentSupport);
-            if (currentTeam) filtered = filtered.filter(t => t.team_name === currentTeam);
-
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (search) {
-                filtered = filtered.filter(t =>
-                    String(t.id).includes(search) ||
-                    (t.trader_username || '').toLowerCase().includes(search) ||
-                    (t.label || '').toLowerCase().includes(search) ||
-                    (t.order_id || '').toLowerCase().includes(search) ||
-                    (t.taken_by || '').toLowerCase().includes(search)
-                );
-            }
-
-            const totalPages = Math.ceil(filtered.length / perPage) || 1;
-            const newPage = currentPage + dir;
-
-            if (newPage >= 1 && newPage <= totalPages) {
-                currentPage = newPage;
-                expandedTicketId = null;
-                renderTickets();
-            }
-        }
-
-        // Error
         function showError(msg) {
-            const el = document.getElementById('error');
-            document.getElementById('errorText').textContent = msg;
-            el.classList.toggle('active', !!msg);
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast toast--error show';
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Actions
-        async function takeTicket(id) {
-            const btn = event.target.closest('.ticket-action-btn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '⏳';
-
-            try {
-                const response = await fetch(`${API}/api/tickets/${id}/take`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (response.ok) {
-                    // Update local state
-                    const ticket = tickets.find(t => t.id === id);
-                    if (ticket) {
-                        ticket.status = 'in_progress';
-                        ticket.taken_at = new Date().toISOString();
-                    }
-                    expandedTicketId = null;
-                    renderTickets();
-                    showToast(`Тикет #${id} взят в работу`);
-                } else {
-                    const data = await response.json().catch(() => ({}));
-                    showError(data.error || 'Ошибка взятия тикета');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            } catch (e) {
-                showError('Ошибка сети: ' + e.message);
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        }
-
-        async function closeTicket(id) {
-            const btn = event.target.closest('.ticket-action-btn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '⏳';
-
-            try {
-                const response = await fetch(`${API}/api/tickets/${id}/close`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (response.ok) {
-                    // Update local state
-                    const ticket = tickets.find(t => t.id === id);
-                    if (ticket) {
-                        ticket.status = 'closed';
-                        ticket.closed_at = new Date().toISOString();
-                    }
-                    expandedTicketId = null;
-                    renderTickets();
-                    showToast(`Тикет #${id} закрыт`);
-                } else {
-                    const data = await response.json().catch(() => ({}));
-                    showError(data.error || 'Ошибка закрытия тикета');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            } catch (e) {
-                showError('Ошибка сети: ' + e.message);
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        }
-
-        // Toast notification
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<span>✓</span> ${message}`;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                background: linear-gradient(135deg, #22c55e, #4ade80);
-                color: #fff;
-                padding: 14px 24px;
-                border-radius: 12px;
-                font-weight: 600;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
-                z-index: 9999;
-                animation: toastIn 0.3s ease;
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        }
-
-        // Add toast animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes toastIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes toastOut {
-                from { opacity: 1; transform: translateY(0); }
-                to { opacity: 0; transform: translateY(20px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // CSV Export
-        function exportCSV() {
-            const headers = ['ID', 'Команда', 'Категория', 'Трейдер', 'Username', 'Order ID', 'Статус', 'Саппорт', 'Создан', 'Взят', 'Закрыт', 'Время обработки'];
-            const rows = tickets.map(t => {
-                const createdAt = t.created_at ? new Date(t.created_at).toLocaleString('ru') : '';
-                const takenAt = t.taken_at ? new Date(t.taken_at).toLocaleString('ru') : '';
-                const closedAt = t.closed_at ? new Date(t.closed_at).toLocaleString('ru') : '';
-                const processingTime = t.taken_at && t.closed_at ?
-                    Math.round((new Date(t.closed_at) - new Date(t.taken_at)) / 60000) + ' мин' : '';
-
-                return [
-                    t.id,
-                    t.team_name || '',
-                    t.label || '',
-                    t.trader_name || '',
-                    t.trader_username || '',
-                    t.order_id || '',
-                    t.status,
-                    t.taken_by || '',
-                    createdAt,
-                    takenAt,
-                    closedAt,
-                    processingTime
-                ];
-            });
-
-            const csvContent = [headers, ...rows]
-                .map(row => row.map(cell => {
-                    const str = String(cell);
-                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-                        return `"${str.replace(/"/g, '""')}"`;
-                    }
-                    return str;
-                }).join(','))
-                .join('\n');
-
-            const BOM = '﻿';
-            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `tickets_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-            URL.revokeObjectURL(url);
-
-            showToast('Экспорт завершён');
-        }
-
-        // Close modal on outside click
-        document.getElementById('scheduleModal').addEventListener('click', function(e) {
-            if (e.target === this) closeScheduleModal();
-        });
-
-        // Init
+        // ─── Init ───────────────────────────────────────────────
         loadData();
+        setInterval(loadData, 30000);
     </script>
 </body>
 </html>
