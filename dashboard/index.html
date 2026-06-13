@@ -855,22 +855,72 @@
             margin-bottom: 16px;
         }
 
-        .duty-switch-btn {
+        .duty-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .duty-select {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .duty-select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        .duty-select option {
+            background: var(--card);
+        }
+
+        .duty-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .duty-assign-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #22c55e, #4ade80);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #fff;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px var(--accent-glow);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .duty-assign-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+        }
+
+        .duty-switch-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .duty-switch-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--accent-glow);
+            box-shadow: 0 6px 16px var(--accent-glow);
         }
 
         .duty-switch-btn:active {
@@ -1344,7 +1394,19 @@
                     </svg>
                     <span>— МСК</span>
                 </div>
-                <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить смену</button>
+                <div class="duty-controls">
+                    <select class="duty-select" id="dutySupportSelect">
+                        <option value="">Выберите саппорта...</option>
+                    </select>
+                    <select class="duty-select" id="dutyShiftSelect">
+                        <option value="day">☀️ Дневная (09:00–21:00)</option>
+                        <option value="night">🌙 Ночная (21:00–09:00)</option>
+                    </select>
+                </div>
+                <div class="duty-buttons">
+                    <button class="duty-assign-btn" onclick="assignDuty()">✓ Назначить</button>
+                    <button class="duty-switch-btn" onclick="switchDuty()">🔄 Сменить смену</button>
+                </div>
             </div>
             <div class="schedule-card">
                 <div class="schedule-header">
@@ -1989,6 +2051,51 @@
                 option.textContent = `@${s.username}`;
                 select.appendChild(option);
             });
+
+            // Также заполняем dropdown для назначения дежурного
+            const dutySelect = document.getElementById('dutySupportSelect');
+            if (dutySelect) {
+                dutySelect.innerHTML = '<option value="">Выберите саппорта...</option>';
+                supports.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.username;
+                    option.textContent = `@${s.username}`;
+                    dutySelect.appendChild(option);
+                });
+            }
+        }
+
+        async function assignDuty() {
+            const username = document.getElementById('dutySupportSelect').value;
+            const shift = document.getElementById('dutyShiftSelect').value;
+
+            if (!username) {
+                showError('Выберите саппорта');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            try {
+                const response = await fetch(`${API}/api/duty`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        support_username: username,
+                        shift: shift,
+                        date: today
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`✅ @${username} назначен дежурным`);
+                    loadData();
+                } else {
+                    showError('Ошибка назначения');
+                }
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+            }
         }
 
         // Render team filter

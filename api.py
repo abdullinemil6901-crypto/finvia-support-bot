@@ -151,6 +151,7 @@ class DutyResponse(BaseModel):
 class SetDutyRequest(BaseModel):
     support_username: str
     shift: Optional[str] = None
+    date: Optional[str] = None  # YYYY-MM-DD, по умолчанию сегодня
 
 
 # ─────────────────────────────────────────────
@@ -367,7 +368,7 @@ def get_schedule(offset: int = Query(0, description="Смещение недел
 @app.post("/api/duty")
 def set_duty_endpoint(req: SetDutyRequest):
     now = datetime.now()
-    date_str = now.strftime("%Y-%m-%d")
+    date_str = req.date or now.strftime("%Y-%m-%d")
     shift = req.shift or ("day" if 9 <= now.hour < 21 else "night")
 
     if USE_SUPABASE:
@@ -376,7 +377,7 @@ def set_duty_endpoint(req: SetDutyRequest):
     else:
         schedule_manager.set_duty(date_str, shift, [req.support_username])
 
-    return {"success": True, "support_username": req.support_username, "shift": shift}
+    return {"success": True, "support_username": req.support_username, "shift": shift, "date": date_str}
 
 
 @app.post("/api/duty/switch")
