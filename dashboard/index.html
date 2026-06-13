@@ -1357,13 +1357,45 @@
         }
 
         .schedule-shift {
-            font-size: 0.55rem;
-            padding: 4px 6px;
+            font-size: 0.7rem;
+            padding: 5px 8px;
             border-radius: 6px;
             margin-bottom: 4px;
             white-space: nowrap;
-            overflow: hidden;
+            overflow: visible;
             text-overflow: ellipsis;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .schedule-shift:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .schedule-shift .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+
+        .schedule-shift:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
         }
 
         .schedule-shift.day {
@@ -1720,7 +1752,7 @@
 
             <nav class="nav-section">
                 <div class="nav-label">Инструменты</div>
-                <div class="nav-item">
+                <a class="nav-item" href="/dashboard/stats.html">
                     <span class="nav-item-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <line x1="18" y1="20" x2="18" y2="10"/>
@@ -1729,8 +1761,8 @@
                         </svg>
                     </span>
                     Статистика
-                </div>
-                <div class="nav-item">
+                </a>
+                <a class="nav-item" href="/dashboard/schedule.html">
                     <span class="nav-item-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -1740,8 +1772,8 @@
                         </svg>
                     </span>
                     Расписание
-                </div>
-                <div class="nav-item">
+                </a>
+                <a class="nav-item" href="/dashboard/teams.html">
                     <span class="nav-item-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -1751,7 +1783,7 @@
                         </svg>
                     </span>
                     Команды
-                </div>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -2153,9 +2185,21 @@
             const weekTotal = (data.by_day || []).reduce((a, b) => a + b.count, 0);
             document.getElementById('chartWeekTotal').textContent = weekTotal;
 
-            // Category Chart (Doughnut)
+            // Category Chart (Doughnut) - Premium
             const ctx1 = document.getElementById('categoryChart').getContext('2d');
             if (categoryChart) categoryChart.destroy();
+
+            // Create gradients for each segment
+            const chartColors = [
+                ['#a78bfa', '#8b5cf6'],
+                ['#4ade80', '#22c55e'],
+                ['#fbbf24', '#f59e0b'],
+                ['#f87171', '#ef4444'],
+                ['#22d3ee', '#06b6d4'],
+                ['#fb923c', '#f97316'],
+                ['#f472b6', '#ec4899'],
+                ['#a3e635', '#84cc16']
+            ];
 
             categoryChart = new Chart(ctx1, {
                 type: 'doughnut',
@@ -2163,44 +2207,49 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: [
-                            '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
-                            '#06b6d4', '#f97316', '#ec4899', '#84cc16'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 10
+                        backgroundColor: chartColors.slice(0, labels.length).map(c => {
+                            const grad = ctx1.createLinearGradient(0, 0, 100, 100);
+                            grad.addColorStop(0, c[0]);
+                            grad.addColorStop(1, c[1]);
+                            return grad;
+                        }),
+                        borderColor: '#18181b',
+                        borderWidth: 3,
+                        hoverOffset: 15,
+                        hoverBorderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '68%',
+                    cutout: '72%',
                     animation: { duration: 1200, easing: 'easeOutQuart' },
                     plugins: {
                         legend: {
                             position: 'right',
                             labels: {
                                 color: '#a1a1aa',
-                                padding: 12,
-                                font: { size: 11, family: 'Manrope' },
+                                padding: 14,
+                                font: { size: 11, family: 'Manrope', weight: '500' },
                                 usePointStyle: true,
                                 pointStyle: 'circle'
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
+                            backgroundColor: 'rgba(24, 24, 27, 0.98)',
                             titleColor: '#fafafa',
                             bodyColor: '#a1a1aa',
-                            borderColor: 'rgba(139, 92, 246, 0.3)',
+                            borderColor: 'rgba(139, 92, 246, 0.4)',
                             borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
+                            padding: 14,
+                            cornerRadius: 12,
                             titleFont: { size: 13, weight: '600', family: 'Space Grotesk' },
                             bodyFont: { size: 12 },
+                            displayColor: '#8b5cf6',
                             callbacks: {
                                 label: function(context) {
                                     const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
-                                    return ` ${context.raw} (${percentage}%)`;
+                                    return ` ${context.raw} тикетов (${percentage}%)`;
                                 }
                             }
                         }
@@ -2208,7 +2257,7 @@
                 }
             });
 
-            // Days Chart (Gradient Bar)
+            // Days Chart (Gradient Bar) - Premium
             const ctx2 = document.getElementById('daysChart').getContext('2d');
             if (daysChart) daysChart.destroy();
 
@@ -2218,9 +2267,11 @@
             });
             const dayValues = (data.by_day || []).map(d => d.count);
 
+            // Premium gradient with glow effect
             const barGradient = ctx2.createLinearGradient(0, 170, 0, 0);
-            barGradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
-            barGradient.addColorStop(1, 'rgba(139, 92, 246, 1)');
+            barGradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)');
+            barGradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.6)');
+            barGradient.addColorStop(1, 'rgba(167, 139, 250, 1)');
 
             daysChart = new Chart(ctx2, {
                 type: 'bar',
@@ -2229,9 +2280,11 @@
                     datasets: [{
                         data: dayValues,
                         backgroundColor: barGradient,
-                        borderRadius: 8,
+                        borderRadius: 10,
                         borderSkipped: false,
-                        barThickness: 24
+                        barThickness: 28,
+                        borderColor: 'rgba(139, 92, 246, 0.5)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -2241,25 +2294,34 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
+                            backgroundColor: 'rgba(24, 24, 27, 0.98)',
                             titleColor: '#fafafa',
                             bodyColor: '#a1a1aa',
-                            borderColor: 'rgba(139, 92, 246, 0.3)',
+                            borderColor: 'rgba(139, 92, 246, 0.4)',
                             borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
-                            displayColors: false
+                            padding: 14,
+                            cornerRadius: 12,
+                            displayColors: false,
+                            titleFont: { size: 12, weight: '600', family: 'Space Grotesk' },
+                            callbacks: {
+                                title: function(context) {
+                                    return days[context[0].dataIndex];
+                                },
+                                label: function(context) {
+                                    return `${context.raw} тикетов`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#52525b', font: { size: 10, family: 'Manrope' } },
+                            ticks: { color: '#71717a', font: { size: 11, family: 'Manrope', weight: '500' } },
                             border: { display: false }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#52525b', font: { size: 10, family: 'Manrope' } },
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: { color: '#71717a', font: { size: 10, family: 'Manrope' } },
                             border: { display: false },
                             beginAtZero: true
                         }
@@ -2535,11 +2597,20 @@
                 const hasDayDuty = day.day && day.day.length;
                 const hasNightDuty = day.night && day.night.length;
 
+                const dayNamesList = hasDayDuty ? day.day.join(', ') : '';
+                const nightNamesList = hasNightDuty ? day.night.join(', ') : '';
+
                 return `<div class="schedule-day ${isToday ? 'today' : ''}" onclick="openScheduleModal('${day.date}')">
                     <div class="schedule-day-name">${dayName}</div>
                     <div class="schedule-day-date">${day.day_label}</div>
-                    ${hasDayDuty ? `<div class="schedule-shift day" title="Дневная: ${day.day.join(', ')}">☀️ ${day.day[0]}</div>` : '<div class="schedule-shift empty">☀️</div>'}
-                    ${hasNightDuty ? `<div class="schedule-shift night" title="Ночная: ${day.night.join(', ')}">🌙 ${day.night[0]}</div>` : '<div class="schedule-shift empty">🌙</div>'}
+                    ${hasDayDuty ? `<div class="schedule-shift day" onclick="event.stopPropagation(); openScheduleModal('${day.date}')">
+                        <span class="tooltip">☀️ ${dayNamesList}</span>
+                        ☀️ ${day.day[0]}${day.day.length > 1 ? ` +${day.day.length - 1}` : ''}
+                    </div>` : '<div class="schedule-shift empty">☀️</div>'}
+                    ${hasNightDuty ? `<div class="schedule-shift night" onclick="event.stopPropagation(); openScheduleModal('${day.date}')">
+                        <span class="tooltip">🌙 ${nightNamesList}</span>
+                        🌙 ${day.night[0]}${day.night.length > 1 ? ` +${day.night.length - 1}` : ''}
+                    </div>` : '<div class="schedule-shift empty">🌙</div>'}
                 </div>`;
             }).join('');
         }

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команды — Finavia Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-elevated: #0f0f12;
+            --card: #18181b;
+            --card-hover: #1f1f24;
+            --border: rgba(255,255,255,0.05);
+            --border-hover: rgba(255,255,255,0.1);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --accent-glow-lg: rgba(139, 92, 246, 0.15);
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --cyan: #06b6d4;
+            --red: #ef4444;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 32px 40px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+        .page-header {
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .team-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            transition: all 0.3s ease;
+        }
+        .team-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .team-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .team-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .team-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .team-status.active {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+        .team-status.inactive {
+            background: var(--red-glow);
+            color: var(--red);
+        }
+        .team-id {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .team-stats {
+            display: flex;
+            gap: 16px;
+        }
+        .team-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .team-stat-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-muted);
+        }
+        .green-glow { background: rgba(16, 185, 129, 0.2); }
+        .red-glow { background: rgba(239, 68, 68, 0.2); }
+    </style>
+</head>
+<body>
+    <a href="/dashboard" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Назад к дашборду
+    </a>
+
+    <div class="page-header">
+        <h1>Команды</h1>
+        <p>Все команды и чаты саппорт-системы</p>
+    </div>
+
+    <div class="teams-grid" id="teamsGrid">
+        <div class="loading">Загрузка...</div>
+    </div>
+
+    <script>
+        async function loadTeams() {
+            try {
+                const response = await fetch('/api/chats');
+                const chats = await response.json();
+
+                const grid = document.getElementById('teamsGrid');
+
+                if (!chats.length) {
+                    grid.innerHTML = '<div class="loading">Нет данных</div>';
+                    return;
+                }
+
+                grid.innerHTML = chats.map(c => {
+                    const isActive = c.is_active !== false;
+                    return `<div class="team-card">
+                        <div class="team-header">
+                            <span class="team-name">${c.team_name || 'Без названия'}</span>
+                            <span class="team-status ${isActive ? 'active' : 'inactive'}">
+                                ${isActive ? '●' : '○'} ${isActive ? 'Активен' : 'Неактивен'}
+                            </span>
+                        </div>
+                        <div class="team-id">ID: ${c.chat_id}</div>
+                        <div class="team-stats">
+                            <div class="team-stat">
+                                <span class="team-stat-value">${c.created_at ? new Date(c.created_at).toLocaleDateString('ru') : '—'}</span>
+                                <span>добавлен</span>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+            } catch (e) {
+                document.getElementById('teamsGrid').innerHTML = '<div class="loading">Ошибка загрузки</div>';
+            }
+        }
+
+        loadTeams();
+    </script>
+</body>
+</html>

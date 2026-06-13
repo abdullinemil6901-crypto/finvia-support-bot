@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание — Finavia Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-elevated: #0f0f12;
+            --card: #18181b;
+            --card-hover: #1f1f24;
+            --border: rgba(255,255,255,0.05);
+            --border-hover: rgba(255,255,255,0.1);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --accent-dim: #6d28d9;
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --accent-glow-lg: rgba(139, 92, 246, 0.15);
+            --green: #10b981;
+            --green-dim: #059669;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --yellow: #f59e0b;
+            --yellow-glow: rgba(245, 158, 11, 0.2);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 32px 40px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .week-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .week-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-xs);
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .week-nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+        .week-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 200px;
+            text-align: center;
+        }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .schedule-day-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .schedule-day-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .schedule-day-card.today {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, var(--accent-glow-lg), transparent);
+        }
+        .day-header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .day-name {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+        .today .day-name {
+            color: var(--accent);
+        }
+        .day-date {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .today .day-date {
+            color: var(--accent-light);
+        }
+        .shift-block {
+            margin-bottom: 12px;
+        }
+        .shift-block:last-child {
+            margin-bottom: 0;
+        }
+        .shift-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+        .shift-label .icon {
+            font-size: 0.9rem;
+        }
+        .shift-content {
+            padding: 12px;
+            background: var(--bg);
+            border-radius: var(--radius-xs);
+            min-height: 60px;
+        }
+        .shift-empty {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 8px 0;
+        }
+        .duty-person {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .duty-person:last-child {
+            border-bottom: none;
+        }
+        .duty-person:hover {
+            color: var(--accent-light);
+        }
+        .duty-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .shift-day .duty-avatar {
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-glow));
+        }
+        .shift-night .duty-avatar {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        }
+        .duty-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .add-duty-btn {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+        .add-duty-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+        .legend {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            padding: 20px;
+            background: var(--card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+        .legend-dot.day {
+            background: var(--yellow);
+        }
+        .legend-dot.night {
+            background: var(--accent);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-muted);
+        }
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 400px;
+            width: 90%;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.6rem;
+            padding: 0;
+            line-height: 1;
+        }
+        .modal-close:hover { color: var(--text); }
+        .modal-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: var(--radius-xs);
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            font-family: 'Manrope', sans-serif;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .modal-select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: var(--radius-xs);
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            font-family: 'Manrope', sans-serif;
+        }
+        .modal-select option {
+            background: var(--card);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius-xs);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+        .modal-btn.cancel {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .modal-btn.save {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .modal-btn.save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+    </style>
+</head>
+<body>
+    <a href="/dashboard" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Назад к дашборду
+    </a>
+
+    <div class="page-header">
+        <h1>Расписание дежурств</h1>
+        <div class="week-nav">
+            <button class="week-nav-btn" onclick="changeWeek(-1)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <span class="week-label" id="weekLabel">Эта неделя</span>
+            <button class="week-nav-btn" onclick="changeWeek(1)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="schedule-grid" id="scheduleGrid">
+        <div class="loading">Загрузка...</div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot day"></div>
+            <span>☀️ Дневная смена (09:00–21:00)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot night"></div>
+            <span>🌙 Ночная смена (21:00–09:00)</span>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Назначить дежурного</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <input type="date" class="modal-input" id="modalDate">
+            <select class="modal-select" id="modalShift">
+                <option value="day">☀️ Дневная смена (09:00–21:00)</option>
+                <option value="night">🌙 Ночная смена (21:00–09:00)</option>
+            </select>
+            <input type="text" class="modal-input" id="modalName" placeholder="Имя дежурного">
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal()">Отмена</button>
+                <button class="modal-btn save" onclick="saveDuty()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let weekOffset = 0;
+        let currentSchedule = null;
+
+        function changeWeek(dir) {
+            weekOffset += dir;
+            loadSchedule();
+        }
+
+        async function loadSchedule() {
+            try {
+                const response = await fetch(`/api/schedule?offset=${weekOffset}`);
+                const data = await response.json();
+                currentSchedule = data;
+
+                // Update week label
+                if (weekOffset === 0) {
+                    document.getElementById('weekLabel').textContent = 'Эта неделя';
+                } else if (weekOffset === 1) {
+                    document.getElementById('weekLabel').textContent = 'Следующая неделя';
+                } else if (weekOffset === -1) {
+                    document.getElementById('weekLabel').textContent = 'Прошлая неделя';
+                } else {
+                    document.getElementById('weekLabel').textContent = `${weekOffset > 0 ? '+' : ''}${weekOffset} недели`;
+                }
+
+                renderSchedule(data);
+            } catch (e) {
+                document.getElementById('scheduleGrid').innerHTML = '<div class="loading">Ошибка загрузки</div>';
+            }
+        }
+
+        function renderSchedule(data) {
+            const grid = document.getElementById('scheduleGrid');
+            const week = data.week || [];
+
+            if (!week.length) {
+                grid.innerHTML = '<div class="loading">Нет данных</div>';
+                return;
+            }
+
+            const dayNames = { Mon: 'Понедельник', Tue: 'Вторник', Wed: 'Среда', Thu: 'Четверг', Fri: 'Пятница', Sat: 'Суббота', Sun: 'Воскресенье' };
+
+            grid.innerHTML = week.map(day => {
+                const isToday = day.is_today;
+                const dayName = dayNames[day.day_name] || day.day_name;
+                const hasDayDuty = day.day && day.day.length;
+                const hasNightDuty = day.night && day.night.length;
+
+                return `<div class="schedule-day-card ${isToday ? 'today' : ''}" onclick="openModal('${day.date}', 'day')">
+                    <div class="day-header">
+                        <div class="day-name">${dayName}</div>
+                        <div class="day-date">${day.day_label}</div>
+                    </div>
+                    <div class="shift-block">
+                        <div class="shift-label">
+                            <span class="icon">☀️</span>
+                            <span>Дневная</span>
+                        </div>
+                        <div class="shift-content">
+                            ${hasDayDuty ? day.day.map(name => `
+                                <div class="duty-person">
+                                    <div class="duty-avatar">${name.charAt(0).toUpperCase()}</div>
+                                    <span class="duty-name">${name}</span>
+                                </div>
+                            `).join('') : '<div class="shift-empty">—</div>'}
+                        </div>
+                    </div>
+                    <div class="shift-block">
+                        <div class="shift-label">
+                            <span class="icon">🌙</span>
+                            <span>Ночная</span>
+                        </div>
+                        <div class="shift-content">
+                            ${hasNightDuty ? day.night.map(name => `
+                                <div class="duty-person">
+                                    <div class="duty-avatar">${name.charAt(0).toUpperCase()}</div>
+                                    <span class="duty-name">${name}</span>
+                                </div>
+                            `).join('') : '<div class="shift-empty">—</div>'}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        let modalDate = null;
+        let modalShift = null;
+
+        function openModal(date, shift) {
+            modalDate = date;
+            modalShift = shift || 'day';
+            document.getElementById('modalDate').value = date;
+            document.getElementById('modalShift').value = shift || 'day';
+            document.getElementById('modalName').value = '';
+            document.getElementById('scheduleModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+
+        async function saveDuty() {
+            const date = document.getElementById('modalDate').value;
+            const shift = document.getElementById('modalShift').value;
+            const name = document.getElementById('modalName').value.trim();
+
+            if (!name) {
+                alert('Введите имя дежурного');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/duty', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ support_username: name, shift: shift, date: date })
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadSchedule();
+                } else {
+                    alert('Ошибка сохранения');
+                }
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('scheduleModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Init
+        loadSchedule();
+    </script>
+</body>
+</html>
