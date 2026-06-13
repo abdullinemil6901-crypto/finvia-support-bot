@@ -440,6 +440,82 @@ def switch_duty():
 
 
 # ─────────────────────────────────────────────
+# Эндпоинты — Рассылки
+# ─────────────────────────────────────────────
+
+class BroadcastRequest(BaseModel):
+    message: str
+    chat_ids: Optional[list[int]] = None  # None = все чаты
+
+
+@app.post("/api/broadcast")
+def broadcast_message(req: BroadcastRequest):
+    """Рассылка сообщения во все чаты или выбранные."""
+    if not req.message.strip():
+        raise HTTPException(status_code=400, detail="Сообщение не может быть пустым")
+
+    # Получаем чаты
+    if USE_SUPABASE:
+        from supabase_client import get_all_chats
+        all_chats = get_all_chats()
+    else:
+        all_chats = []
+
+    if req.chat_ids:
+        chats = [c for c in all_chats if c.get("chat_id") in req.chat_ids]
+    else:
+        chats = all_chats
+
+    # Рассылаем
+    sent = 0
+    failed = 0
+    errors = []
+
+    for chat in chats:
+        chat_id = chat.get("chat_id")
+        if chat_id:
+            success = send_telegram_message(chat_id, req.message)
+            if success:
+                sent += 1
+            else:
+                failed += 1
+                errors.append(chat_id)
+
+    logger.info(f"Рассылка: отправлено={sent}, не удалось={failed}")
+
+    return {
+        "success": True,
+        "message": req.message[:50] + "..." if len(req.message) > 50 else req.message,
+        "chats_total": len(chats),
+        "chats_notified": sent,
+        "chats_failed": failed,
+        "failed_chat_ids": errors[:10]  # максимум 10 ID в ответе
+    }
+
+
+@app.get("/api/broadcast/preview")
+def broadcast_preview():
+    """Превью получателей рассылки."""
+    if USE_SUPABASE:
+        from supabase_client import get_all_chats
+        chats = get_all_chats()
+    else:
+        chats = []
+
+    return {
+        "total": len(chats),
+        "chats": [
+            {
+                "chat_id": c.get("chat_id"),
+                "team_name": c.get("team_name") or f"Чат {c.get('chat_id')}",
+                "is_active": c.get("is_active", True)
+            }
+            for c in chats
+        ]
+    }
+
+
+# ─────────────────────────────────────────────
 # Эндпоинты — Сводка
 # ─────────────────────────────────────────────
 

@@ -439,6 +439,82 @@
             transform: rotate(90deg);
         }
 
+        .btn-broadcast {
+            background: linear-gradient(135deg, var(--orange), var(--red));
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-broadcast:hover {
+            box-shadow: 0 8px 30px rgba(249, 115, 22, 0.4);
+        }
+
+        /* Broadcast Modal */
+        .broadcast-preview {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+        }
+
+        .broadcast-chat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .broadcast-chat:last-child {
+            border-bottom: none;
+        }
+
+        .broadcast-chat input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        .broadcast-chat-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .broadcast-chat-status {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .broadcast-chat-status.active {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+
+        .broadcast-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--accent-glow-lg);
+            border-radius: var(--radius-xs);
+            margin-bottom: 16px;
+        }
+
+        .broadcast-summary-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .broadcast-summary-count {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--accent-light);
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -1831,6 +1907,12 @@
                         </svg>
                         Новый тикет
                     </button>
+                    <button class="btn btn-primary" onclick="openBroadcastModal()" style="background: linear-gradient(135deg, var(--orange), var(--red));">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Рассылка
+                    </button>
                 </div>
             </header>
 
@@ -2050,6 +2132,52 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div class="modal-overlay" id="broadcastModal">
+        <div class="modal" style="max-width: 520px;">
+            <div class="modal-header">
+                <span class="modal-title">📢 Рассылка</span>
+                <button class="modal-close" onclick="closeBroadcastModal()">×</button>
+            </div>
+
+            <div class="broadcast-summary" id="broadcastSummary">
+                <span class="broadcast-summary-text">Получатели:</span>
+                <span class="broadcast-summary-count" id="broadcastRecipientCount">—</span>
+            </div>
+
+            <div class="broadcast-preview" id="broadcastPreview">
+                <div class="loading">Загрузка получателей...</div>
+            </div>
+
+            <textarea
+                class="modal-input"
+                id="broadcastMessage"
+                placeholder="Введите сообщение для рассылки..."
+                rows="4"
+                style="resize: vertical; min-height: 100px;"
+            ></textarea>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+                <button class="modal-btn cancel" onclick="insertTemplate('duty')" style="flex: 1; padding: 10px; font-size: 0.75rem;">
+                    🔔 Смена
+                </button>
+                <button class="modal-btn cancel" onclick="insertTemplate('urgent')" style="flex: 1; padding: 10px; font-size: 0.75rem;">
+                    ⚠️ Срочное
+                </button>
+                <button class="modal-btn cancel" onclick="insertTemplate('info')" style="flex: 1; padding: 10px; font-size: 0.75rem;">
+                    ℹ️ Информация
+                </button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeBroadcastModal()">Отмена</button>
+                <button class="modal-btn save" onclick="sendBroadcast()" style="background: linear-gradient(135deg, var(--orange), var(--red));">
+                    <span id="broadcastBtnText">Отправить</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Schedule Modal -->
@@ -2964,7 +3092,105 @@
             showToast('Экспорт завершён');
         }
 
+        // ─── Broadcast Modal ───
+        let broadcastChats = [];
+
+        function openBroadcastModal() {
+            document.getElementById('broadcastModal').classList.add('active');
+            document.getElementById('broadcastMessage').value = '';
+            loadBroadcastPreview();
+        }
+
+        function closeBroadcastModal() {
+            document.getElementById('broadcastModal').classList.remove('active');
+        }
+
+        async function loadBroadcastPreview() {
+            const preview = document.getElementById('broadcastPreview');
+            preview.innerHTML = '<div class="loading">Загрузка...</div>';
+
+            try {
+                const response = await fetch('/api/broadcast/preview');
+                const data = await response.json();
+                broadcastChats = data.chats || [];
+
+                if (!broadcastChats.length) {
+                    preview.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">Нет чатов</div>';
+                    document.getElementById('broadcastRecipientCount').textContent = '0';
+                    return;
+                }
+
+                preview.innerHTML = broadcastChats.map(c => `
+                    <div class="broadcast-chat">
+                        <input type="checkbox" checked data-chat-id="${c.chat_id}" onchange="updateBroadcastCount()">
+                        <span class="broadcast-chat-name">${escapeHtml(c.team_name)}</span>
+                        <span class="broadcast-chat-status ${c.is_active ? 'active' : ''}">${c.is_active ? 'Активен' : 'Неактивен'}</span>
+                    </div>
+                `).join('');
+
+                updateBroadcastCount();
+            } catch (e) {
+                preview.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red)">Ошибка загрузки</div>';
+            }
+        }
+
+        function updateBroadcastCount() {
+            const checked = document.querySelectorAll('#broadcastPreview input:checked').length;
+            document.getElementById('broadcastRecipientCount').textContent = `${checked} из ${broadcastChats.length}`;
+        }
+
+        function insertTemplate(type) {
+            const templates = {
+                duty: '🔔 <b>Коллега, внимание!</b>\n\nСейчас на смене @username.\n\nОбращайтесь!',
+                urgent: '⚠️ <b>Срочное уведомление!</b>\n\nПросьба всем быть на связи.',
+                info: 'ℹ️ <b>Информация</b>\n\n'
+            };
+            document.getElementById('broadcastMessage').value = templates[type] || '';
+        }
+
+        async function sendBroadcast() {
+            const message = document.getElementById('broadcastMessage').value.trim();
+            if (!message) {
+                showError('Введите сообщение');
+                return;
+            }
+
+            const checkedChats = Array.from(document.querySelectorAll('#broadcastPreview input:checked'))
+                .map(cb => parseInt(cb.dataset.chatId));
+
+            const btn = document.getElementById('broadcastBtnText');
+            btn.textContent = 'Отправка...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/broadcast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        chat_ids: checkedChats.length < broadcastChats.length ? checkedChats : null
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    closeBroadcastModal();
+                    showToast(`Рассылка отправлена! Получено: ${data.chats_notified}`);
+                } else {
+                    showError('Ошибка отправки рассылки');
+                }
+            } catch (e) {
+                showError('Ошибка: ' + e.message);
+            } finally {
+                btn.textContent = 'Отправить';
+                btn.disabled = false;
+            }
+        }
+
         // Modal close on outside click
+        document.getElementById('broadcastModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBroadcastModal();
+        });
         document.getElementById('scheduleModal').addEventListener('click', function(e) {
             if (e.target === this) closeScheduleModal();
         });
