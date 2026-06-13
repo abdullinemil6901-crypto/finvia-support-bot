@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команда — Finavia Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-elevated: #0f0f12;
+            --card: #18181b;
+            --card-hover: #1f1f24;
+            --border: rgba(255,255,255,0.05);
+            --border-hover: rgba(255,255,255,0.1);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --accent-dim: #6d28d9;
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --accent-glow-lg: rgba(139, 92, 246, 0.15);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --yellow: #f59e0b;
+            --yellow-glow: rgba(245, 158, 11, 0.2);
+            --red: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.2);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 32px 40px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow-lg);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .add-form {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+        .add-form h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .add-form-row {
+            display: flex;
+            gap: 12px;
+        }
+        .add-form input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'Manrope', sans-serif;
+        }
+        .add-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .add-form select {
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'Manrope', sans-serif;
+            min-width: 140px;
+        }
+        .add-form select option {
+            background: var(--card);
+        }
+        .add-form button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            border: none;
+            border-radius: var(--radius-xs);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .add-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+        .section-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .section-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .section-tab.active {
+            background: var(--accent-glow-lg);
+            border-color: var(--accent);
+            color: var(--accent-light);
+        }
+        .section-tab:hover:not(.active) {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+        .supports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .support-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .support-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        .support-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .support-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .support-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .support-avatar.admin {
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .support-avatar.support {
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            box-shadow: 0 4px 15px var(--green-glow);
+        }
+        .support-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .support-username {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .role-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .role-badge.admin {
+            background: var(--accent-glow);
+            color: var(--accent-light);
+        }
+        .role-badge.support {
+            background: var(--green-glow);
+            color: var(--green);
+        }
+        .support-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--radius-xs);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-align: center;
+        }
+        .action-btn.promote {
+            background: var(--accent-glow-lg);
+            color: var(--accent-light);
+            border: 1px solid var(--accent);
+        }
+        .action-btn.promote:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+        .action-btn.demote {
+            background: var(--yellow-glow);
+            color: var(--yellow);
+            border: 1px solid var(--yellow);
+        }
+        .action-btn.demote:hover {
+            background: var(--yellow);
+            color: #000;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-muted);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <a href="/dashboard" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Назад к дашборду
+    </a>
+
+    <div class="page-header">
+        <div>
+            <h1>Управление командой</h1>
+            <p>Добавление саппортов и изменение ролей</p>
+        </div>
+    </div>
+
+    <div class="add-form">
+        <h3>➕ Добавить саппорта</h3>
+        <div class="add-form-row">
+            <input type="text" id="newUsername" placeholder="Username (например: john)">
+            <select id="newRole">
+                <option value="support">Саппорт</option>
+                <option value="admin">Админ</option>
+            </select>
+            <button onclick="addSupport()">Добавить</button>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <button class="section-tab active" onclick="showSection('all', this)">
+            Все (<span id="countAll">0</span>)
+        </button>
+        <button class="section-tab" onclick="showSection('admin', this)">
+            👑 Админы (<span id="countAdmin">0</span>)
+        </button>
+        <button class="section-tab" onclick="showSection('support', this)">
+            💬 Саппорты (<span id="countSupport">0</span>)
+        </button>
+    </div>
+
+    <div class="supports-grid" id="supportsGrid">
+        <div class="loading">Загрузка...</div>
+    </div>
+
+    <script>
+        let allSupports = [];
+
+        async function loadSupports() {
+            try {
+                const response = await fetch('/api/supports');
+                allSupports = await response.json();
+                renderSupports('all');
+
+                document.getElementById('countAll').textContent = allSupports.length;
+                document.getElementById('countAdmin').textContent = allSupports.filter(s => s.role === 'admin').length;
+                document.getElementById('countSupport').textContent = allSupports.filter(s => s.role === 'support').length;
+            } catch (e) {
+                document.getElementById('supportsGrid').innerHTML = '<div class="loading">Ошибка загрузки</div>';
+            }
+        }
+
+        function showSection(role, btn) {
+            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            renderSupports(role);
+        }
+
+        function renderSupports(role) {
+            const grid = document.getElementById('supportsGrid');
+            let filtered = allSupports;
+
+            if (role !== 'all') {
+                filtered = allSupports.filter(s => s.role === role);
+            }
+
+            if (!filtered.length) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Ничего не найдено</h3>
+                        <p>Добавьте саппортов выше</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(s => `
+                <div class="support-card">
+                    <div class="support-header">
+                        <div class="support-info">
+                            <div class="support-avatar ${s.role}">${(s.username || '?').charAt(0).toUpperCase()}</div>
+                            <div>
+                                <div class="support-name">${s.full_name || s.username}</div>
+                                <div class="support-username">@${s.username}</div>
+                            </div>
+                        </div>
+                        <span class="role-badge ${s.role}">${s.role === 'admin' ? '👑 Админ' : '💬 Саппорт'}</span>
+                    </div>
+                    <div class="support-actions">
+                        ${s.role === 'support' ? `
+                            <button class="action-btn promote" onclick="changeRole('${s.username}', 'admin')">
+                                ⬆️ Сделать админом
+                            </button>
+                        ` : `
+                            <button class="action-btn demote" onclick="changeRole('${s.username}', 'support')">
+                                ⬇️ Сделать саппортом
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addSupport() {
+            const username = document.getElementById('newUsername').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (!username) {
+                alert('Введите username');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/supports', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, role })
+                });
+
+                if (response.ok) {
+                    document.getElementById('newUsername').value = '';
+                    loadSupports();
+                } else {
+                    alert('Ошибка добавления');
+                }
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        async function changeRole(username, role) {
+            if (!confirm(`Изменить роль @${username} на ${role === 'admin' ? 'админа' : 'саппорта'}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/supports/role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, role })
+                });
+
+                if (response.ok) {
+                    loadSupports();
+                } else {
+                    alert('Ошибка изменения роли');
+                }
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        loadSupports();
+    </script>
+</body>
+</html>

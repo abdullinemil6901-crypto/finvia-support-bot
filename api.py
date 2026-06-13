@@ -264,10 +264,19 @@ def close_ticket_api(ticket_id: int, support_username: str = "dashboard_user"):
 
 @app.get("/api/supports")
 def get_supports():
+    """Получить список саппортов с ролями."""
     if USE_SUPABASE:
         from supabase_client import get_all_supports
         supports = get_all_supports()
-        return [{"username": s.get("username", "")} for s in supports]
+        return [
+            {
+                "username": s.get("username", ""),
+                "full_name": s.get("full_name", ""),
+                "role": s.get("role", "support"),
+                "added_at": s.get("added_at", "")
+            }
+            for s in supports
+        ]
     else:
         with get_connection() as conn:
             rows = conn.execute("""
@@ -275,7 +284,59 @@ def get_supports():
                 WHERE taken_by IS NOT NULL AND taken_by != ''
                 ORDER BY taken_by
             """).fetchall()
-            return [{"username": row[0]} for row in rows]
+            return [{"username": row[0], "role": "support"} for row in rows]
+
+
+class SetRoleRequest(BaseModel):
+    username: str
+    role: str  # "admin" или "support"
+
+
+@app.post("/api/supports/role")
+def set_support_role(req: SetRoleRequest):
+    """Изменить роль саппорта (только admin)."""
+    if req.role not in ("admin", "support"):
+        raise HTTPException(status_code=400, detail="Роль должна быть admin или support")
+
+    if USE_SUPABASE:
+        from supabase_client import _patch
+        _patch(f"/supports?username=eq.{req.username}", {"role": req.role})
+
+    return {"success": True, "username": req.username, "role": req.role}
+
+
+@app.get("/api/admins")
+def get_admins():
+    """Получить список админов."""
+    if USE_SUPABASE:
+        from supabase_client import get_all_supports
+        supports = get_all_supports()
+        return [s.get("username", "") for s in supports if s.get("role") == "admin"]
+    return []
+
+
+@app.post("/api/supports")
+def add_support_endpoint(req: SetRoleRequest):
+    """Добавить саппорта (или обновить роль)."""
+    if USE_SUPABASE:
+        from supabase_client import _post, _patch, get_support_by_tg_id
+        # Проверяем существование
+        existing = get_support_by_tg_id(0)  # Для API-запросов используем username
+        if existing:
+            _patch(f"/supports?username=eq.{req.username}", {
+                "role": req.role,
+                "full_name": req.username
+            })
+        else:
+            _post("/supports", {
+                "tg_id": 0,
+                "username": req.username,
+                "full_name": req.username,
+                "role": req.role,
+                "added_at": datetime.now().isoformat()
+            })
+
+    return {"success": True, "username": req.username, "role": req.role}
 
 
 @app.get("/api/chats")
